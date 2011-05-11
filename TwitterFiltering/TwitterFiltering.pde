@@ -4,6 +4,7 @@ import processing.opengl.*;
 
 import de.bezier.data.sql.*;
 import controlP5.*;
+import java.util.ArrayList;
 
 String[] keywordList;
 
@@ -26,7 +27,7 @@ int tweetSelectionMax = 100;
 
 PVector tweet_loc = new PVector(42.2838, 93.47745);
 
-Tweet[] tweets = new Tweet[200000];
+ArrayList<Tweet> tweets = new ArrayList<Tweet>();
 
 void setup()
 {
@@ -55,7 +56,7 @@ void setup()
   scrapeTweets();
   
   // add horizontal range slider
-  range = controlP5.addRange("rangeController", 0, tweetCount, 0, 100, 50, imgY - 50, imgX - 100, 30);
+  range = controlP5.addRange("rangeController", 0, tweets.size(), 0, 100, 50, imgY - 50, imgX - 100, 30);
     
 }
 
@@ -74,7 +75,7 @@ void draw() {
 }
 
 
-int tweetCount = 0;
+//int tweetCount = 0;
    
 void scrapeTweets()
 {
@@ -101,29 +102,30 @@ void scrapeTweets()
     {
         // list table names
         db.query(sqlQuery);
+        Tweet newTweetToAdd;
         
        while (db.next())
         {
 
             //we have a new record, create tweet object
-            tweets[tweetCount] = new Tweet();
+            newTweetToAdd = new Tweet();
             
             //set the text of this tweet            
-            tweets[tweetCount].setText(db.getString("message"));
+            newTweetToAdd.setText(db.getString("message"));
             
             //get and set the location of this tweet
             PVector tweetLocation = new PVector(0,0);
-            tweetLocation.x = db.getFloat("lat");
-            tweetLocation.y = db.getFloat("lon");
+            tweetLocation.x = db.getFloat("lon");
+            tweetLocation.y = db.getFloat("lat");
             
             //convert to pixels and set
-            tweets[tweetCount].setLocation(mapCoordinates(tweetLocation));
-            
+            newTweetToAdd.setLocation(mapCoordinates(tweetLocation));
+            tweets.add(newTweetToAdd);
             //ready for next tweet record
-            tweetCount++;
+            //tweetCount++;
         }
         
-        println("Created " + tweetCount + " tweet records"); 
+        println("Created " + tweets.size() + " tweet records"); 
     }   
 }
 
@@ -131,8 +133,8 @@ void scrapeTweets()
 PVector mapCoordinates(PVector coords)
 {
    PVector result = new PVector(0.0f,0.0f);
-   result.x = map(coords.y, topleft_lon, bottomright_lon, 0, imgX);
-   result.y = map(coords.x, topleft_lat, bottomright_lat, 0, imgY);
+   result.x = map(coords.x, topleft_lon, bottomright_lon, 0, imgX);
+   result.y = map(coords.y, topleft_lat, bottomright_lat, 0, imgY);
  
  return result;
 }
@@ -143,11 +145,11 @@ PVector mapCoordinates(PVector coords)
 void drawMouseOver(int mini, int maxi)
 {
   for(int i=mini; i<maxi; i++) {
-    PVector loc = tweets[i].getLocation();
+    PVector loc = tweets.get(i).getLocation();
  
     if(dist(mouseX, mouseY, loc.x, loc.y) < 7)
         {
-          String s =  tweets[i].getText();
+          String s =  tweets.get(i).getText();
           int sLength = s.length();
           float gap = 20;
           
@@ -191,7 +193,7 @@ void drawTweetsOnce(int mini, int maxi)
     fill(0,255,0, 20 + (235 * colourPerc));
     stroke(0,0,0,20 + (235 * colourPerc));
     
-    PVector loc = tweets[i].getLocation();
+    PVector loc = tweets.get(i).getLocation();
         
     ellipse(loc.x, loc.y, 10, 10);
   }
