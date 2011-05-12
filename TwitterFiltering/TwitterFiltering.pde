@@ -60,25 +60,22 @@ void setup()
   dateSelection = new Interval(minDate, maxDate);
   // add horizontal range slider
   range = controlP5.addRange("Date", 0, Hours.hoursIn(dateSelection).getHours(), 0, 24, 50, imgY + 10, imgX - 100, 30);
+  //range = controlP5.addRange("Date", 0, Days.daysIn(dateSelection).getDays()+1, 0, 1, 50, imgY + 10, imgX - 100, 30);
 
-  println("Duration is " + Hours.hoursIn(dateSelection).getHours() + " hours");
+  //println("Duration is " + Hours.hoursIn(dateSelection).getHours() + " hours");
+  println("Duration is " + Days.daysIn(dateSelection).getDays() + " days");
   dateSelection=new Interval(minDate, minDate.plus(Period.hours(24)));
 }
 
 void draw() {
-  background(0);
-  fill(0);
+  background(0); //blank to start with
+  image(imgMap, 0, 0, imgX, imgY);
 
-
-  drawTweetsOnce();//tweetSelectionMin, tweetSelectionMax);
   controlP5.draw();
-
+  drawTweetsOnce();//tweetSelectionMin, tweetSelectionMax);
   //this has to happen every frame
   //drawMouseOver();//tweetSelectionMin, tweetSelectionMax);
 }
-
-
-//int tweetCount = 0;
 
 void scrapeTweets()
 {
@@ -199,19 +196,25 @@ void drawTweetsOnce()//int mini, int maxi)
 {
 
 
-
-  background(0); //blank to start with
-  image(imgMap, 0, 0, imgX, imgY);
-
   //Draw all the ellipses
   strokeWeight(2);
   Tweet forMouseOver = null;
   //for (int i=mini; i<maxi; i++) {
+  int hoursInInterval = Hours.hoursIn(dateSelection).getHours();
+  float oneOverHoursInInterval = 1.0/hoursInInterval;
+  float colourPerc;
+  MutableInterval toDate = new MutableInterval(dateSelection);
   for (Tweet a: tweets) {
     if (dateSelection.contains(a.mDate)) {
+      toDate.setEnd(a.mDate);
+      colourPerc = Hours.hoursIn(toDate).getHours() * oneOverHoursInInterval;
+      //println(colourPerc);
+      //colorMode(HSB, 360, 100, 100);
       //float colourPerc = float(i-mini) / float(maxi-mini);
-      fill(0, 255, 0);//, 20);// + (235 * colourPerc));
-      stroke(0, 0, 0);//, 20);// + (235 * colourPerc));
+      fill(0, 255, 0, 20 + (235 * colourPerc));
+      stroke(0, 0, 0, 20 + (235 * colourPerc));
+      //fill(117, 100, colourPerc*100);//, colourPerc);
+      //stroke(0, 0, 0);
 
       PVector loc = a.getLocation();
       strokeWeight(2);
@@ -222,6 +225,7 @@ void drawTweetsOnce()//int mini, int maxi)
       //drawMouseOver(a);
     }
   }
+  colorMode(RGB, 255);
   if (forMouseOver != null)
     drawMouseOver(forMouseOver);
   //}
@@ -238,6 +242,9 @@ void controlEvent(ControlEvent theControlEvent) {
     // min is at index 0, max is at index 1.
     dateSelection = new Interval(minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[0]))), 
     minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[1]))));
+
+    //dateSelection = new Interval(minDate.plus(Period.days(int(theControlEvent.controller().arrayValue()[0]))), 
+    //minDate.plus(Period.days(int(theControlEvent.controller().arrayValue()[1]))));
     println("Selection is " + dateSelection);
     //tweetSelectionMin = int(theControlEvent.controller().arrayValue()[0]);
     //tweetSelectionMax = int(theControlEvent.controller().arrayValue()[1]);
