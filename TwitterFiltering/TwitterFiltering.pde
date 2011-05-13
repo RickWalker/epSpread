@@ -8,8 +8,21 @@ import java.util.ArrayList;
 
 String[] keywordList;
 
+
+
+
+//ControlP5 objects
+//-----------------
+
 ControlP5 controlP5;
 Range range;
+ListBox twitterSetList;
+Textfield filterTextField;
+
+//-----------------
+
+
+
 SQLite db;
 PImage imgMap;
 
@@ -27,20 +40,29 @@ int tweetSelectionMax = 100;
 PVector tweet_loc = new PVector(42.2838, 93.47745);
 
 ArrayList<Tweet> tweets = new ArrayList<Tweet>();
-DateTime minDate;
-DateTime maxDate;
+ArrayList<TweetSet> tweetSets = new ArrayList<TweetSet>();
+
+ArrayList<Integer> colours = new ArrayList<Integer>();
+
+//Note : are intervals inclusive or exclusive?
+DateTime minDate = (new DateTime(2011, 4, 30, 0, 0, 0, 0)).minus(Period.hours(1));
+DateTime maxDate = (new DateTime(2011, 5, 20, 23, 59, 0, 0)).plus(Period.hours(1));
 
 Interval dateSelection;
 
 void setup()
 {
-  size( imgX, imgY + 100, OPENGL);
+  size( imgX+250, imgY + 100, OPENGL);
   smooth();
+
+  //setup database
+  db = new SQLite( this, "VAST2011_MC1.sqlite" );  // open database file
 
   //Load font 
   PFont font;
   font = createFont("FFScala", 18);
   textFont(font); 
+
 
   //Load an image
   imgMap = loadImage("Vastopolis_Map_B&W_2.png");
@@ -56,99 +78,96 @@ void setup()
   for (int i=0; i<keywordList.length; i++)
     println(keywordList[i]);
 
-  scrapeTweets();
+  //scrapeTweets();
   dateSelection = new Interval(minDate, maxDate);
   // add horizontal range slider
   range = controlP5.addRange("Date", 0, Hours.hoursIn(dateSelection).getHours(), 0, 24, 50, imgY + 10, imgX - 100, 30);
 
   println("Duration is " + Hours.hoursIn(dateSelection).getHours() + " hours");
   dateSelection=new Interval(minDate, minDate.plus(Period.hours(24)));
+
+  setupColours();
+  setupGUI();
 }
 
+
+
+
 void draw() {
-  background(0);
-  fill(0);
+  background(130); //blank to start with
+  image(imgMap, 0, 0, imgX, imgY);
 
-
-  drawTweetsOnce();//tweetSelectionMin, tweetSelectionMax);
   controlP5.draw();
+  drawTweetsOnce();//tweetSelectionMin, tweetSelectionMax);
+
 
   //this has to happen every frame
   //drawMouseOver();//tweetSelectionMin, tweetSelectionMax);
 }
 
 
-//int tweetCount = 0;
 
-void scrapeTweets()
+int colourTracker = 0;
+
+void setupColours()
 {
-  db = new SQLite( this, "VAST2011_MC1.sqlite" );  // open database file
-
-  //Build the query
-  String query_part1 = "SELECT * FROM micro2 WHERE ";
-  String query_part2 = "";
-  String query_part3 = " ORDER BY Date ASC";
-
-  //append all the keywords to search for
-  for (int i=0; i<keywordList.length; i++)
-  {
-    if (i!=0)
-      query_part2 += " OR ";
-    query_part2 += "message like '%" + keywordList[i] + "%'";
-  } 
-
-  String sqlQuery =  query_part1 + query_part2 + query_part3;
-
-  println("Query being performed is : " + sqlQuery);
-  boolean firstRecord = true;
-
-  if ( db.connect() )
-  {
-    // list table names
-    db.query(sqlQuery);
-    Tweet newTweetToAdd;
-    DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
-    DateTime thisDate;
-    //reset max and min dates!
-    while (db.next ())
-    {
-
-      //we have a new record, create tweet object
-      newTweetToAdd = new Tweet();
-
-      //set the text of this tweet            
-      newTweetToAdd.setText(db.getString("message"));
-
-      //get and set the location of this tweet
-      PVector tweetLocation = new PVector(0, 0);
-      tweetLocation.x = db.getFloat("lon");
-      tweetLocation.y = db.getFloat("lat");
-      thisDate =fmt.parseDateTime(db.getString("date"));
-
-      newTweetToAdd.setDate(thisDate);
-      if (firstRecord) {
-        minDate = new DateTime(thisDate);
-        maxDate = new DateTime(thisDate);
-        firstRecord = false;
-      }
-      else if (thisDate.isAfter(maxDate)) {
-        maxDate = new DateTime(thisDate);
-      }
-      else if (thisDate.isBefore(maxDate)) {
-        minDate = new DateTime(thisDate);
-      }
-
-      //convert to pixels and set
-      newTweetToAdd.setLocation(mapCoordinates(tweetLocation));
-      tweets.add(newTweetToAdd);
-      //ready for next tweet record
-      //tweetCount++;
-    }
-
-    println("Created " + tweets.size() + " tweet records");
-    println("Date min is " + minDate + " and max is " + maxDate);
-  }
+  colours.add(color( 77, 175, 74  ));
+  colours.add(color( 55, 126, 184   ));
+  colours.add(color( 228, 26, 28 ));
+  colours.add(color( 152, 78, 163  ));
+  colours.add(color( 255, 127, 0  ));
+  colours.add(color( 255, 255, 51  ));
+  colours.add(color( 166, 86, 40  ));
+  colours.add(color( 247, 129, 191  ));
 }
+
+
+
+
+void setupGUI()
+{
+  setupTwitterSetList();
+}
+
+
+void setupTwitterSetList()
+{
+
+  int twitterSetList_x = width-210;
+  int twitterSetList_y = 90;
+  int twitterSetList_width = 180;
+  int twitterSetList_height = 180;
+
+  int filterTextField_x = twitterSetList_x;
+  int filterTextField_y = twitterSetList_y - 60;
+  int filterTextField_width = 180;
+  int filterTextField_height = 20;
+
+
+  twitterSetList = controlP5.addListBox("TwitterSetList", twitterSetList_x, twitterSetList_y, twitterSetList_width, twitterSetList_height);
+  twitterSetList.setItemHeight(30);
+  twitterSetList.setBarHeight(20);
+  twitterSetList.setId(1);
+
+  twitterSetList.captionLabel().toUpperCase(false);
+  twitterSetList.captionLabel().set("TwitterSet List");
+  twitterSetList.captionLabel().style().marginTop = 10;
+
+  filterTextField = controlP5.addTextfield("Filters", filterTextField_x, filterTextField_y, filterTextField_width, filterTextField_height);
+  filterTextField.setFocus(true);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 PVector mapCoordinates(PVector coords)
@@ -200,28 +219,32 @@ void drawTweetsOnce()//int mini, int maxi)
 
 
 
-  background(0); //blank to start with
-  image(imgMap, 0, 0, imgX, imgY);
-
   //Draw all the ellipses
   strokeWeight(2);
   Tweet forMouseOver = null;
   //for (int i=mini; i<maxi; i++) {
-  for (Tweet a: tweets) {
-    if (dateSelection.contains(a.mDate)) {
-      //float colourPerc = float(i-mini) / float(maxi-mini);
-      fill(0, 255, 0);//, 20);// + (235 * colourPerc));
-      stroke(0, 0, 0);//, 20);// + (235 * colourPerc));
 
-      PVector loc = a.getLocation();
-      strokeWeight(2);
-      ellipse(loc.x, loc.y, 10, 10);
-      if (dist(mouseX, mouseY, loc.x, loc.y) < 7) {
-        forMouseOver =a ;
+  // ArrayList<Tweet> theTweets = tweetSets.get(0).getTweets();   
+
+
+  for (int i=0; i<tweetSets.size(); i++)
+    for (Tweet a: tweetSets.get(i).getTweets()) {
+      if (dateSelection.contains(a.mDate)) {
+        //float colourPerc = float(i-mini) / float(maxi-mini);
+        //fill(0, 255, 0);//, 20);// + (235 * colourPerc));
+        fill(tweetSets.get(i).getColour());
+
+        stroke(0, 0, 0);//, 20);// + (235 * colourPerc));
+
+        PVector loc = a.getLocation();
+        strokeWeight(2);
+        ellipse(loc.x, loc.y, 10, 10);
+        if (dist(mouseX, mouseY, loc.x, loc.y) < 7) {
+          forMouseOver =a ;
+        }
+        //drawMouseOver(a);
       }
-      //drawMouseOver(a);
     }
-  }
   if (forMouseOver != null)
     drawMouseOver(forMouseOver);
   //}
@@ -231,16 +254,149 @@ void drawTweetsOnce()//int mini, int maxi)
 
 
 
+void generateTweetSet(String keywords)
+{
+  //Get a fresh and exciting colour for this set
+  color setColour = colours.get(colourTracker);
+
+  if (colourTracker < colours.size()) 
+    colourTracker++;
+  else
+    colourTracker=0;
+
+  //Create new tweet set
+  TweetSet newTweetSetToAdd = new TweetSet(keywords, setColour);
+
+  println("Creating new tweet set...");
+  String[] filterTerms = splitTokens(keywords, ", ");
+
+  println("Terms are : ");
+
+  for (int i=0; i<filterTerms.length; i++)
+    println(filterTerms[i]);
+
+  //Build the query
+  String query_part1 = "SELECT * FROM micro2 WHERE ";
+  String query_part2 = "";
+
+
+  //append all the keywords to search for
+  for (int i=0; i<filterTerms.length; i++)
+  {
+    if (i!=0)
+      query_part2 += " OR ";
+    query_part2 += "message like '%" + filterTerms[i] + "%'";
+  } 
+
+  String sqlQuery =  query_part1 + query_part2;
+
+  println("Query being performed is : " + sqlQuery);
+  boolean firstRecord = true;
+
+  if ( db.connect() )
+  {
+    // list table names
+    db.query(sqlQuery);
+    Tweet newTweetToAdd;
+    DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
+    DateTime thisDate;
+    //reset max and min dates!
+    while (db.next ())
+    {
+
+      //we have a new record, create tweet object
+      newTweetToAdd = new Tweet();
+
+      //set the text of this tweet            
+      newTweetToAdd.setText(db.getString("message"));
+
+      //get and set the location of this tweet
+      PVector tweetLocation = new PVector(0, 0);
+      tweetLocation.x = db.getFloat("lon");
+      tweetLocation.y = db.getFloat("lat");
+      thisDate =fmt.parseDateTime(db.getString("date"));
+
+      newTweetToAdd.setDate(thisDate);
+      /*if (firstRecord) {
+       minDate = new DateTime(thisDate);
+       maxDate = new DateTime(thisDate);
+       firstRecord = false;
+       }
+       else if (thisDate.isAfter(maxDate)) {
+       maxDate = new DateTime(thisDate);
+       }
+       else if (thisDate.isBefore(maxDate)) {
+       minDate = new DateTime(thisDate);
+       }*/
+
+      //convert to pixels and set
+      newTweetToAdd.setLocation(mapCoordinates(tweetLocation));
+      //ready for next tweet record
+      //tweetCount++;
+
+      //add tweet to tweet set
+      newTweetSetToAdd.addTweet(newTweetToAdd);
+    }
+
+    println("Created " + newTweetSetToAdd.tweets.size() + " tweet records");
+    println("Date min is " + minDate + " and max is " + maxDate);
+  }
+
+  //add this finished tweet set to the array
+  tweetSets.add(newTweetSetToAdd);
+
+  //Add button for this tweet set
+  controlP5.ListBoxItem b = twitterSetList.addItem(keywords, tweetSets.size());
+  b.setId(tweetSets.size());
+}
+
+
+
+
+
+
+
+
 void controlEvent(ControlEvent theControlEvent) {
-  if (theControlEvent.controller().name().equals("Date")) {
-    // min and max values are stored in an array.
-    // access this array with controller().arrayValue().
-    // min is at index 0, max is at index 1.
-    dateSelection = new Interval(minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[0]))), 
-    minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[1]))));
-    println("Selection is " + dateSelection);
-    //tweetSelectionMin = int(theControlEvent.controller().arrayValue()[0]);
-    //tweetSelectionMax = int(theControlEvent.controller().arrayValue()[1]);
+
+
+
+  if (theControlEvent.isGroup()) {
+
+    if (theControlEvent.group().id() == 1) // id #1 is for the tweetSetListBox
+    {
+      int index = int(theControlEvent.group().value());
+
+      println("Removing : " + theControlEvent.group().name());
+     // twitterSetList.removeItem("fever");
+
+      tweetSets.remove(index-1);
+    }
+  }
+  else
+  {
+
+    if (theControlEvent.controller().name().equals("Date")) {
+      // min and max values are stored in an array.
+      // access this array with controller().arrayValue().
+      // min is at index 0, max is at index 1.
+      dateSelection = new Interval(minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[0]))), 
+      minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[1]))));
+      println("Selection is " + dateSelection);
+      //tweetSelectionMin = int(theControlEvent.controller().arrayValue()[0]);
+      //tweetSelectionMax = int(theControlEvent.controller().arrayValue()[1]);
+    }
+
+
+    if (theControlEvent.controller().name().equals("Filters")) {
+      String keywords = theControlEvent.controller().stringValue();
+      generateTweetSet(keywords);
+    }
   }
 }
+
+
+
+
+
 
