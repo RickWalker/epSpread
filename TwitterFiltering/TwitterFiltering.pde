@@ -239,7 +239,7 @@ void drawTweetsOnce()//int mini, int maxi)
 
         PVector loc = a.getLocation();
         strokeWeight(2);
-        rect(loc.x, loc.y, 10, 10);
+       // rect(loc.x, loc.y, 10, 10);
         if (dist(mouseX, mouseY, loc.x, loc.y) < 7) {
           forMouseOver =a ;
         }
