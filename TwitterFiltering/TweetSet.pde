@@ -3,10 +3,12 @@ class TweetSet{
 ArrayList<Tweet> tweets = new ArrayList<Tweet>();  
 String[] filterTerms;
 color setColour;
+HeatmapOverlay heatmap;
    
 TweetSet(String keywords, color colour)
     {
     setColour = colour;
+	heatmap = new HeatmapOverlay();
     }
   
   
@@ -20,6 +22,10 @@ void addTweet(Tweet theTweet)
 ArrayList<Tweet> getTweets()
 {
  return tweets; 
+}
+
+void updateHeatMap(){
+heatmap.createSurface(imgX, imgY, tweets);
 }
   
   

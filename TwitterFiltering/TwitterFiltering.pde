@@ -227,24 +227,26 @@ void drawTweetsOnce()//int mini, int maxi)
   // ArrayList<Tweet> theTweets = tweetSets.get(0).getTweets();   
 
 
-  for (int i=0; i<tweetSets.size(); i++)
-    for (Tweet a: tweetSets.get(i).getTweets()) {
+  for (TweetSet b: tweetSets){
+   b.heatmap.draw();
+    for (Tweet a: b.getTweets()) {
       if (dateSelection.contains(a.mDate)) {
         //float colourPerc = float(i-mini) / float(maxi-mini);
         //fill(0, 255, 0);//, 20);// + (235 * colourPerc));
-        fill(tweetSets.get(i).getColour());
+        fill(b.getColour());
 
         stroke(0, 0, 0);//, 20);// + (235 * colourPerc));
 
         PVector loc = a.getLocation();
         strokeWeight(2);
-        ellipse(loc.x, loc.y, 10, 10);
+        rect(loc.x, loc.y, 10, 10);
         if (dist(mouseX, mouseY, loc.x, loc.y) < 7) {
           forMouseOver =a ;
         }
         //drawMouseOver(a);
       }
     }
+  }
   if (forMouseOver != null)
     drawMouseOver(forMouseOver);
   //}
@@ -383,6 +385,8 @@ void controlEvent(ControlEvent theControlEvent) {
       dateSelection = new Interval(minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[0]))), 
       minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[1]))));
       println("Selection is " + dateSelection);
+	  for(TweetSet a: tweetSets)
+		a.updateHeatMap();
       //tweetSelectionMin = int(theControlEvent.controller().arrayValue()[0]);
       //tweetSelectionMax = int(theControlEvent.controller().arrayValue()[1]);
     }
