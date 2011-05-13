@@ -75,7 +75,7 @@ void draw() {
   image(imgMap, 0, 0, imgX, imgY);
 
   controlP5.draw();
-    test.draw();
+  test.draw();
   drawTweetsOnce();//tweetSelectionMin, tweetSelectionMax);
 
   //this has to happen every frame
@@ -89,7 +89,7 @@ void scrapeTweets()
   //Build the query
   String query_part1 = "SELECT * FROM micro2 WHERE ";
   String query_part2 = "";
-  String query_part3 = " LIMIT 50";
+  String query_part3 = "";
 
   //append all the keywords to search for
   for (int i=0; i<keywordList.length; i++)
@@ -129,16 +129,16 @@ void scrapeTweets()
 
       newTweetToAdd.setDate(thisDate);
       /*if (firstRecord) {
-        minDate = new DateTime(thisDate);
-        maxDate = new DateTime(thisDate);
-        firstRecord = false;
-      }
-      else if (thisDate.isAfter(maxDate)) {
-        maxDate = new DateTime(thisDate);
-      }
-      else if (thisDate.isBefore(maxDate)) {
-        minDate = new DateTime(thisDate);
-      }*/
+       minDate = new DateTime(thisDate);
+       maxDate = new DateTime(thisDate);
+       firstRecord = false;
+       }
+       else if (thisDate.isAfter(maxDate)) {
+       maxDate = new DateTime(thisDate);
+       }
+       else if (thisDate.isBefore(maxDate)) {
+       minDate = new DateTime(thisDate);
+       }*/
 
       //convert to pixels and set
       newTweetToAdd.setLocation(mapCoordinates(tweetLocation));
@@ -210,25 +210,25 @@ void drawTweetsOnce()//int mini, int maxi)
   float colourPerc;
   MutableInterval toDate = new MutableInterval(dateSelection);
   for (Tweet a: tweets) {
-    //if (dateSelection.contains(a.mDate)) {
-    toDate.setEnd(a.mDate);
-    colourPerc = Hours.hoursIn(toDate).getHours() * oneOverHoursInInterval;
-    //println(colourPerc);
-    //colorMode(HSB, 360, 100, 100);
-    //float colourPerc = float(i-mini) / float(maxi-mini);
-    fill(0, 255, 0, 20 + (235 * colourPerc));
-    stroke(0, 0, 0, 20 + (235 * colourPerc));
-    //fill(117, 100, colourPerc*100);//, colourPerc);
-    //stroke(0, 0, 0);
+    if (dateSelection.contains(a.mDate)) {
+      toDate.setEnd(a.mDate);
+      colourPerc = Hours.hoursIn(toDate).getHours() * oneOverHoursInInterval;
+      //println(colourPerc);
+      //colorMode(HSB, 360, 100, 100);
+      //float colourPerc = float(i-mini) / float(maxi-mini);
+      fill(0, 255, 0, 20 + (235 * colourPerc));
+      stroke(0, 0, 0, 20 + (235 * colourPerc));
+      //fill(117, 100, colourPerc*100);//, colourPerc);
+      //stroke(0, 0, 0);
 
-    PVector loc = a.getLocation();
-    strokeWeight(2);
-    ellipse(loc.x, loc.y, 10, 10);
-    if (dist(mouseX, mouseY, loc.x, loc.y) < 7) {
-      forMouseOver =a ;
+      PVector loc = a.getLocation();
+      strokeWeight(2);
+      ellipse(loc.x, loc.y, 10, 10);
+      if (dist(mouseX, mouseY, loc.x, loc.y) < 7) {
+        forMouseOver =a ;
+      }
+      //drawMouseOver(a);
     }
-    //drawMouseOver(a);
-    //}
   }
   colorMode(RGB, 255);
   if (forMouseOver != null)
@@ -247,6 +247,7 @@ void controlEvent(ControlEvent theControlEvent) {
     // min is at index 0, max is at index 1.
     dateSelection = new Interval(minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[0]))), 
     minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[1]))));
+    test.createSurface(imgX, imgY, tweets);
 
     //dateSelection = new Interval(minDate.plus(Period.days(int(theControlEvent.controller().arrayValue()[0]))), 
     //minDate.plus(Period.days(int(theControlEvent.controller().arrayValue()[1]))));

@@ -24,10 +24,11 @@ class HeatmapOverlay {
       for (int y = 0; y < gridres; y++) {
         //fill( map(overlay[x][y], 0, max_intensity, 0, 255), 0, 0, map(overlay[x][y], 0, max_intensity, 0, 255));
         //noStroke();
-        if (values[x][y] != 0.0) {
+        float v = overlay[y*gridres+x];
+        if (v != 0.0) {
           //println("Drawing!");
-          stroke(map(values[x][y], 0, max_intensity, 37, 2), 50, 50, map(values[x][y], 0, max_intensity, 2, 40));
-          fill(map(values[x][y], 0, max_intensity, 37, 2), 50, 50, map(values[x][y], 0, max_intensity, 2, 40));
+          stroke(map(v, 0, max_intensity, 37, 2), 50, 50, map(v, 0, max_intensity, 2, 40));
+          fill(map(v, 0, max_intensity, 37, 2), 50, 50, map(v, 0, max_intensity, 2, 40));
           ellipse(x*boxsize_x, y*boxsize_y, 20, 20);
           //point(x*boxsize_x, y*boxsize_y);
         }
@@ -44,6 +45,7 @@ class HeatmapOverlay {
     //println("box size is " + boxsize_x + " " + boxsize_y);
     float [] masses = new float[tweets.size()];
     Arrays.fill(masses, 1.0);
+    Arrays.fill(overlay, 0.0);
     xpos = new float[tweets.size()];
     ypos = new float[tweets.size()];
     for (int i = 0; i < tweets.size(); i++) {
@@ -86,50 +88,51 @@ class HeatmapOverlay {
     for (int i = 0 ; i < tweets.size() ; i++) {
       //ipixmin is the minimum x value that this cinema affects
       //so need to find the coordinates of the point twoh miles west of it, then take xmin from that?
+      if (dateSelection.contains(tweets.get(i).mDate)) {
+        //ipixmin = (int) ((cinemaLocations[i].lat - twoh - xmin) / pixwidth_i);
+        ipixmin = (int) ((xpos[i] - twoh) / pixwidth);
+        jpixmin = (int) ((ypos[i] - twoh) / pixheight);
+        ipixmax = (int) ((xpos[i] + twoh) / pixwidth) + 1;
+        jpixmax = (int) ((ypos[i] + twoh) / pixheight) + 1;
 
-      //ipixmin = (int) ((cinemaLocations[i].lat - twoh - xmin) / pixwidth_i);
-      ipixmin = (int) ((xpos[i] - twoh) / pixwidth);
-      jpixmin = (int) ((ypos[i] - twoh) / pixheight);
-      ipixmax = (int) ((xpos[i] + twoh) / pixwidth) + 1;
-      jpixmax = (int) ((ypos[i] + twoh) / pixheight) + 1;
+        //println(ipixmin + " " + ipixmax + " " + jpixmin + " " + jpixmax);
 
-      //println(ipixmin + " " + ipixmax + " " + jpixmin + " " + jpixmax);
+        if (ipixmin<0) ipixmin = 0;
+        if (jpixmin<0) jpixmin = 0;
+        if (ipixmax>npixx) ipixmax = npixx;
+        if (jpixmax>npixy) jpixmax = npixy;
 
-      if (ipixmin<0) ipixmin = 0;
-      if (jpixmin<0) jpixmin = 0;
-      if (ipixmax>npixx) ipixmax = npixx;
-      if (jpixmax>npixy) jpixmax = npixy;
-
-      for (ipix=ipixmin;ipix<=ipixmax;ipix++) {
-        dx2i[ipix]=(((ipix-0.5)*pixwidth - xpos[i]) * ( (ipix-0.5) * pixwidth - xpos[i]))*hi21; // + dz2;
-        //println("dx2i is " + dx2i[ipix]);
-      }
-
-      //assume total'mass' 100 and each 'density' is 50
-      //eventually, mass = , density = showings per day per screen
-      w_j = (masses[i] / tweets.size())/(hi1 * hi21);
-      //println("w_j is " + w_j);
-      termnorm = 10./(7.*PI)*w_j;
-      term = termnorm;
-
-      for (jpix=jpixmin;jpix<=jpixmax;jpix++) {
-        ypix=ymin+(jpix-0.5)*pixheight;
-        dy=ypix-ypos[i];
-        dy2=dy*dy*hi21;
         for (ipix=ipixmin;ipix<=ipixmax;ipix++) {
-          qq2=dx2i[ipix] + dy2;
-          //SPH Cubic spline
-          //if in range
-          if (qq2<4.0) {
-            qq=Math.sqrt(qq2);
-            if (qq<1.0) {
-              wab=(1.-1.5*qq2 + 0.75*qq*qq2);
+          dx2i[ipix]=(((ipix-0.5)*pixwidth - xpos[i]) * ( (ipix-0.5) * pixwidth - xpos[i]))*hi21; // + dz2;
+          //println("dx2i is " + dx2i[ipix]);
+        }
+
+        //assume total'mass' 100 and each 'density' is 50
+        //eventually, mass = , density = showings per day per screen
+        w_j = (masses[i] / tweets.size())/(hi1 * hi21);
+        //println("w_j is " + w_j);
+        termnorm = 10./(7.*PI)*w_j;
+        term = termnorm;
+
+        for (jpix=jpixmin;jpix<=jpixmax;jpix++) {
+          ypix=ymin+(jpix-0.5)*pixheight;
+          dy=ypix-ypos[i];
+          dy2=dy*dy*hi21;
+          for (ipix=ipixmin;ipix<=ipixmax;ipix++) {
+            qq2=dx2i[ipix] + dy2;
+            //SPH Cubic spline
+            //if in range
+            if (qq2<4.0) {
+              qq=Math.sqrt(qq2);
+              if (qq<1.0) {
+                wab=(1.-1.5*qq2 + 0.75*qq*qq2);
+              }
+              else { 
+                wab=0.25*(2.-qq)*(2.-qq)*(2.-qq);
+              }						
+              overlay[jpix*gridres + ipix]+= term*wab;
+              max_intensity = max(overlay[jpix*gridres + ipix], max_intensity);
             }
-            else { 
-              wab=0.25*(2.-qq)*(2.-qq)*(2.-qq);
-            }						
-            overlay[jpix*gridres + ipix]+= term*wab;
-            max_intensity = max(overlay[jpix*gridres + ipix], max_intensity);
           }
         }
       }
@@ -140,13 +143,13 @@ class HeatmapOverlay {
     //now that we have the grid, generate contours!
     //mangle array back into 2D
     //double [][] values = new double[gridres][gridres];
-    for (int x = 0 ; x< gridres; x++) {
-      for (int y = 0; y<gridres; y++) {
-        //println(x +" " + y + " " + gridres);
-        values[x][y] =overlay[y*gridres+x];
-        //println(values[x][y]);
-      }
-    }
+    /*for (int x = 0 ; x< gridres; x++) {
+     for (int y = 0; y<gridres; y++) {
+     //println(x +" " + y + " " + gridres);
+     values[x][y] =overlay[y*gridres+x];
+     //println(values[x][y]);
+     }
+     }*/
     println("Max intensity is " + max_intensity);
   }
 }
