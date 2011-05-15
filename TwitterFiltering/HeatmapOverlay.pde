@@ -5,12 +5,13 @@ class HeatmapOverlay {
   float [] xpos; 
   float [] ypos; 
   float max_intensity;
-  float [][] values;
+  float smoothingLength = 30;
+ // float [][] values;
 
   HeatmapOverlay() {
     gridres = 100;
     overlay = new float[gridres*gridres];
-    values = new float[gridres][gridres];
+    //values = new float[gridres][gridres];
   }
 
   void draw() {
@@ -28,8 +29,9 @@ class HeatmapOverlay {
         if (v != 0.0) {
           //println("Drawing!");
           stroke(map(v, 0, max_intensity, 37, 2), 50, 50, map(v, 0, max_intensity, 2, 40));
+          //noStroke();
           fill(map(v, 0, max_intensity, 37, 2), 50, 50, map(v, 0, max_intensity, 2, 40));
-          ellipse(x*boxsize_x, y*boxsize_y, 20, 20);
+          rect(x*boxsize_x, y*boxsize_y, imgX/gridres-1, imgY/gridres-1);
           //point(x*boxsize_x, y*boxsize_y);
         }
       }
@@ -65,7 +67,7 @@ class HeatmapOverlay {
     //double cinema_mass=100.0;
     double r_cloud = boxsize_x;
     double r_cloud_y = boxsize_y;
-    double h = 50;//r_cloud / 20.0; //smoothing length
+    double h = smoothingLength;//r_cloud / 20.0; //smoothing length
     double twoh = 2 * h;//2*smoothing length (kernel radius)
     double hi1 = 1.0/h; // 1/hi
     double hi21 = hi1 * hi1; //1/h^2
