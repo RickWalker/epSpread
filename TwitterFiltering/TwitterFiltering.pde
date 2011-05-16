@@ -9,19 +9,14 @@ import java.util.ArrayList;
 String[] keywordList;
 
 
-
-
 //ControlP5 objects
 //-----------------
 
 ControlP5 controlP5;
 Range range;
-ListBox twitterSetList;
 Textfield filterTextField;
 
 //-----------------
-
-
 
 SQLite db;
 PImage imgMap;
@@ -39,9 +34,7 @@ int tweetSelectionMax = 100;
 
 PVector tweet_loc = new PVector(42.2838, 93.47745);
 
-ArrayList<Tweet> tweets = new ArrayList<Tweet>();
-ArrayList<TweetSet> tweetSets = new ArrayList<TweetSet>();
-
+TweetSetManager tweetSetManager;
 ArrayList<Integer> colours = new ArrayList<Integer>();
 
 //Note : are intervals inclusive or exclusive?
@@ -57,6 +50,9 @@ void setup()
 
   //setup database
   db = new SQLite( this, "VAST2011_MC1.sqlite" );  // open database file
+
+  //setup tweetSetManager
+  tweetSetManager = new TweetSetManager();
 
   //Load font 
   PFont font;
@@ -78,7 +74,6 @@ void setup()
   for (int i=0; i<keywordList.length; i++)
     println(keywordList[i]);
 
-  //scrapeTweets();
   dateSelection = new Interval(minDate, maxDate);
   // add horizontal range slider
   range = controlP5.addRange("Date", 0, Hours.hoursIn(dateSelection).getHours(), 0, 24, 50, imgY + 10, imgX - 100, 30);
@@ -97,10 +92,11 @@ void draw() {
   background(130); //blank to start with
   image(imgMap, 0, 0, imgX, imgY);
 
+  tweetSetManager.draw();
   controlP5.draw();
   drawTweetsOnce();//tweetSelectionMin, tweetSelectionMax);
 
-
+  
   //this has to happen every frame
   //drawMouseOver();//tweetSelectionMin, tweetSelectionMax);
 }
@@ -126,32 +122,17 @@ void setupColours()
 
 void setupGUI()
 {
-  setupTwitterSetList();
+setupSearchField();
 }
 
 
-void setupTwitterSetList()
+void setupSearchField()
 {
 
-  int twitterSetList_x = width-210;
-  int twitterSetList_y = 90;
-  int twitterSetList_width = 180;
-  int twitterSetList_height = 180;
-
-  int filterTextField_x = twitterSetList_x;
-  int filterTextField_y = twitterSetList_y - 60;
+  int filterTextField_x = width-210;
+  int filterTextField_y = 30;
   int filterTextField_width = 180;
   int filterTextField_height = 20;
-
-
-  twitterSetList = controlP5.addListBox("TwitterSetList", twitterSetList_x, twitterSetList_y, twitterSetList_width, twitterSetList_height);
-  twitterSetList.setItemHeight(30);
-  twitterSetList.setBarHeight(20);
-  twitterSetList.setId(1);
-
-  twitterSetList.captionLabel().toUpperCase(false);
-  twitterSetList.captionLabel().set("TwitterSet List");
-  twitterSetList.captionLabel().style().marginTop = 10;
 
   filterTextField = controlP5.addTextfield("Filters", filterTextField_x, filterTextField_y, filterTextField_width, filterTextField_height);
   filterTextField.setFocus(true);
@@ -226,9 +207,9 @@ void drawTweetsOnce()//int mini, int maxi)
 
   // ArrayList<Tweet> theTweets = tweetSets.get(0).getTweets();   
 
-
-  for (TweetSet b: tweetSets){
-   b.heatmap.draw();
+  if(tweetSetManager.getTweetSetListSize() > 0)
+  for (TweetSet b: tweetSetManager.getTweetSetList()){
+  // b.heatmap.draw();
     for (Tweet a: b.getTweets()) {
       if (dateSelection.contains(a.mDate)) {
         //float colourPerc = float(i-mini) / float(maxi-mini);
@@ -239,7 +220,7 @@ void drawTweetsOnce()//int mini, int maxi)
 
         PVector loc = a.getLocation();
         strokeWeight(2);
-       // rect(loc.x, loc.y, 10, 10);
+        rect(loc.x, loc.y, 10, 10);
         if (dist(mouseX, mouseY, loc.x, loc.y) < 7) {
           forMouseOver =a ;
         }
@@ -345,11 +326,8 @@ void generateTweetSet(String keywords)
   }
 
   //add this finished tweet set to the array
-  tweetSets.add(newTweetSetToAdd);
+  tweetSetManager.addTweetSet(newTweetSetToAdd);
 
-  //Add button for this tweet set
-  controlP5.ListBoxItem b = twitterSetList.addItem(keywords, tweetSets.size());
-  b.setId(tweetSets.size());
 }
 
 
@@ -370,9 +348,8 @@ void controlEvent(ControlEvent theControlEvent) {
       int index = int(theControlEvent.group().value());
 
       println("Removing : " + theControlEvent.group().name());
-     // twitterSetList.removeItem("fever");
-
-      tweetSets.remove(index-1);
+    
+    //  tweetSets.remove(index-1);
     }
   }
   else
@@ -385,7 +362,7 @@ void controlEvent(ControlEvent theControlEvent) {
       dateSelection = new Interval(minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[0]))), 
       minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[1]))));
       println("Selection is " + dateSelection);
-	  for(TweetSet a: tweetSets)
+	  for(TweetSet a: tweetSetManager.getTweetSetList())
 		a.updateHeatMap();
       //tweetSelectionMin = int(theControlEvent.controller().arrayValue()[0]);
       //tweetSelectionMax = int(theControlEvent.controller().arrayValue()[1]);
