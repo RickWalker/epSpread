@@ -6,13 +6,23 @@ color setColour;
 HeatmapOverlay heatmap;
 int id = 0;
 String mSearchTerms = "";
+Integrator integrator_buttonPosY;  //Y position of this tweet set's button
    
 TweetSet(String keywords, color colour)
     {
     setColour = colour;
     heatmap = new HeatmapOverlay();
     mSearchTerms = keywords;
+    integrator_buttonPosY = new Integrator(80);
     }
+    
+    
+Integrator getButtonPosY()
+{
+ return integrator_buttonPosY; 
+}
+  
+  
   
   
 void setId(int _id){

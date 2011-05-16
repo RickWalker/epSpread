@@ -8,7 +8,6 @@ import java.util.ArrayList;
 
 String[] keywordList;
 
-
 //ControlP5 objects
 //-----------------
 
@@ -120,6 +119,9 @@ void setupColours()
 
 
 
+
+
+
 void setupGUI()
 {
 setupSearchField();
@@ -137,16 +139,6 @@ void setupSearchField()
   filterTextField = controlP5.addTextfield("Filters", filterTextField_x, filterTextField_y, filterTextField_width, filterTextField_height);
   filterTextField.setFocus(true);
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -337,9 +329,19 @@ void generateTweetSet(String keywords)
 
 
 
+void mouseReleased()
+{
+//mouse has clicked and released, let tweet set manager know!  
+tweetSetManager.processMouse();  
+}
+
+
+
+
+
+
+
 void controlEvent(ControlEvent theControlEvent) {
-
-
 
   if (theControlEvent.isGroup()) {
 
