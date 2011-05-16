@@ -57,7 +57,7 @@ void setup()
   PFont font;
   font = createFont("FFScala", 18);
   textFont(font); 
-
+  
 
   //Load an image
   imgMap = loadImage("Vastopolis_Map_B&W_2.png");
@@ -65,6 +65,7 @@ void setup()
   //Setup Time Slider
   controlP5 = new ControlP5(this);
   controlP5.setAutoDraw(false);
+
 
   //Load keyword list, scrape tweets
   keywordList = loadStrings("keywords.txt");
@@ -88,7 +89,7 @@ void setup()
 
 
 void draw() {
-  background(130); //blank to start with
+  background(160); //blank to start with
   image(imgMap, 0, 0, imgX, imgY);
 
   tweetSetManager.draw();

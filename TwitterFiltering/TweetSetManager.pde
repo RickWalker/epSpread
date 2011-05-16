@@ -29,15 +29,15 @@ for (TweetSet a: tweetSets)
   a.getButtonPosY().update();   //update the tweetSet's interpolator (y pos of button)
     
   PVector buttonPos = new PVector(origin.x, a.getButtonPosY().value);
-  PVector removeBoxPos = new PVector(buttonPos.x + buttonDim.x - 21, buttonPos.y + 5);
+  PVector removeBoxPos = new PVector(buttonPos.x + buttonDim.x - 23, buttonPos.y + 7);
     
-  color buttonColour = color(160,160,160); 
+  color buttonColour = color(200,200,200); 
   color removeBoxColour = color(170,170,170);  
   
   // -------- If mouse is over remove box, process! --------
    if(  (mouseX > removeBoxPos.x) && (mouseX < removeBoxPos.x + removeBoxDim.x)   && (mouseY > removeBoxPos.y) && (mouseY < removeBoxPos.y + removeBoxDim.y)  )
       {
-        removeBoxColour = color(200,200,200);
+        removeBoxColour = color(red(removeBoxColour) * 1.3, green(removeBoxColour) * 1.3, blue(removeBoxColour) * 1.3 );    
         mouseOverRemoveBox = a.getId();
       }
    
@@ -45,14 +45,14 @@ for (TweetSet a: tweetSets)
 
     else if(  (mouseX > buttonPos.x) && (mouseX < buttonPos.x + buttonDim.x)   && (mouseY > buttonPos.y) && (mouseY < buttonPos.y + buttonDim.y)  )
         {
-          buttonColour = color(180,180,180);    
+          buttonColour = color(red(buttonColour) * 1.1, green(buttonColour) * 1.1, blue(buttonColour) * 1.1 );    
           mouseOverBaseButton = a.getId();
         }
              
         
   // -------- Draw the button outline --------
-  stroke(0);
-  strokeWeight(3);
+  stroke(50);
+  strokeWeight(2);
   fill(buttonColour);
   //rect(buttonPos.x, buttonPos.y, buttonDim.x, buttonDim.y);
   rrect(buttonPos.x, buttonPos.y, buttonDim.x, buttonDim.y, 10.0f, 2.4f, "");
@@ -70,7 +70,7 @@ for (TweetSet a: tweetSets)
   
   // -------- Draw the button text --------
   textAlign(LEFT, CENTER);
-  fill(255);
+  fill(40);
   text(a.getSearchTerms(), buttonPos.x + 30, buttonPos.y + (buttonDim.y / 2.0));
   
   
@@ -84,7 +84,7 @@ for (TweetSet a: tweetSets)
 
   
   fill(0);
-  text("x",  removeBoxPos.x + 4.0, removeBoxPos.y + 6.0);
+  text("x",  removeBoxPos.x + 3.5, removeBoxPos.y + 6.0);
     
   textAlign(LEFT, LEFT);
   }
@@ -138,7 +138,7 @@ void addTweetSet(TweetSet newTweetSet)
   
  //give this new tweet set a unique id 
  newTweetSet.setId(theId);
- newTweetSet.getButtonPosY().set(origin.y + (buttonDim.y * theId-2) + (buttonDist * theId-2));
+ newTweetSet.getButtonPosY().set(origin.y + (buttonDim.y * theId) + (buttonDist * theId) - buttonDim.y);
  newTweetSet.getButtonPosY().target(origin.y + (buttonDim.y * theId) + (buttonDist * theId));
 
  tweetSets.add(newTweetSet); 
