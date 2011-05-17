@@ -76,7 +76,7 @@ void setup()
 
   dateSelection = new Interval(minDate, maxDate);
   // add horizontal range slider
-  range = controlP5.addRange("Date", 0, Hours.hoursIn(dateSelection).getHours(), 0, 24, 50, imgY + 10, imgX - 100, 30);
+  range = controlP5.addRange("Date", 0, Hours.hoursIn(dateSelection).getHours(), 0, 24, 50, imgY + 24, imgX - 100, 30);
 
   println("Duration is " + Hours.hoursIn(dateSelection).getHours() + " hours");
   dateSelection=new Interval(minDate, minDate.plus(Period.hours(24)));
@@ -89,8 +89,12 @@ void setup()
 
 
 void draw() {
-  background(160); //blank to start with
-  image(imgMap, 0, 0, imgX, imgY);
+  background(225, 228, 233); //blank to start with
+  
+  fill(40);
+  rect(7,7,imgX+6,imgY+6);
+  image(imgMap, 10, 10, imgX, imgY);
+  
 
   tweetSetManager.draw();
   controlP5.draw();
@@ -107,6 +111,7 @@ int colourTracker = 0;
 
 void setupColours()
 {
+  
   colours.add(color( 77, 175, 74  ));
   colours.add(color( 55, 126, 184   ));
   colours.add(color( 228, 26, 28 ));
@@ -115,6 +120,36 @@ void setupColours()
   colours.add(color( 255, 255, 51  ));
   colours.add(color( 166, 86, 40  ));
   colours.add(color( 247, 129, 191  ));
+  
+  
+  
+  //overspill
+  colours.add(color( 179, 222, 105  ));
+  colours.add(color( 128, 177, 211    ));
+  colours.add(color( 251, 128, 114 ));
+  colours.add(color( 255, 255, 179   ));
+  colours.add(color(  141, 211, 199 ));
+  colours.add(color( 190, 186, 218   ));
+  colours.add(color(253, 180, 98 ));
+  colours.add(color( 252, 205, 229  ));
+  colours.add(color(217, 217, 217  ));
+  colours.add(color( 188, 128, 189  )); 
+  
+  
+  /*
+  colours.add(color( 166, 206, 227  ));
+  colours.add(color( 31, 120, 180  ));
+  colours.add(color( 178, 223, 138  ));
+  colours.add(color(  51, 160, 44  ));
+  colours.add(color( 251, 154, 153   ));
+  colours.add(color(  227, 26, 28  ));
+  colours.add(color(253, 191, 111 ));
+  colours.add(color( 255, 127, 0  ));
+  colours.add(color(202, 178, 214  ));
+  colours.add(color( 106, 61, 154  )); 
+    */
+  
+  
 }
 
 
