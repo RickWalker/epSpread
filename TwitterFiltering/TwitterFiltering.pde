@@ -289,10 +289,11 @@ void drawTweetsOnce()//int mini, int maxi)
     for (TweetSet b: tweetSetManager.getTweetSetList()) {
       if (b.isActive())
       {      
-
-        // b.heatmap.draw();
-        for (Tweet a: b.getTweets()) {
-          if (dateSelection.contains(a.mDate)) {
+      if(tweetSetManager.isHeatmapViewActive())       
+         b.heatmap.draw();
+         
+      for (Tweet a: b.getTweets()) {
+         if (dateSelection.contains(a.mDate)) {
             //float colourPerc = float(i-mini) / float(maxi-mini);
             //fill(0, 255, 0);//, 20);// + (235 * colourPerc));
             fill(b.getColour());
@@ -301,7 +302,10 @@ void drawTweetsOnce()//int mini, int maxi)
 
             PVector loc = a.getLocation();
             strokeWeight(2);
-            rect(loc.x, loc.y, 10, 10);
+            
+            if(tweetSetManager.isPointsViewActive())
+              rect(loc.x, loc.y, 10, 10);
+              
             if (dist(mouseX, mouseY, loc.x, loc.y) < 7) {
               forMouseOver =a ;
             }
@@ -462,8 +466,11 @@ void controlEvent(ControlEvent theControlEvent) {
 
     if (theControlEvent.controller().name().equals("Filters")) {
       String keywords = theControlEvent.controller().stringValue();
-
+      
+    if(tweetSetManager.getTweetSetListSize() < tweetSetManager.getMaxTweetSets())
       generateTweetSet(keywords);
+      else
+      println("**** Too many tweetSets! Please remove before requesting another ***");
     }
   }
 }

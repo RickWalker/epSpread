@@ -4,17 +4,34 @@ ArrayList<TweetSet> tweetSets;
 PVector origin;
 PVector buttonDim;  
 PVector removeCircleDim;
+PVector optionButtonDim;
+PVector pointsOptionPos;
+PVector heatmapOptionPos;
+
+
 float buttonDist;
+int maxTweetSets;
 int mouseOverRemoveBox = -1;
 int mouseOverBaseButton = -1;
+boolean mouseOverPointsOptionButton = false;
+boolean mouseOverHeatmapOptionButton = false;
+
+boolean b_heatmapViewActive = false;
+boolean b_pointsViewActive = true;
+
+
+int optionButtonsOffset = 40;
     
 TweetSetManager(){
 
   tweetSets = new ArrayList<TweetSet>(); 
   origin = new PVector(width-260, 130);
   buttonDim = new PVector(180, 40);
+  
   removeCircleDim = new PVector(20,20);
+  optionButtonDim = new PVector(88, 40);
   buttonDist = 8.0;
+  maxTweetSets = 10;
 }  
    
  
@@ -24,8 +41,73 @@ void draw()
   float alphaCol = 255;
   mouseOverRemoveBox = -1;
   mouseOverBaseButton = -1;  
- 
- 
+  mouseOverPointsOptionButton = false;
+  mouseOverHeatmapOptionButton = false;   
+  
+
+  // -------- Draw the background pane --------
+  
+   strokeWeight(1);
+   stroke(200);
+   fill(225 - 5, 228 - 5, 233 - 5);
+     
+   for(int i=0; i<maxTweetSets; i++)
+     rrect(origin.x, origin.y + (buttonDim.y * i) + (buttonDist * i), 
+     buttonDim.x, buttonDim.y, 10.0f,  2.4f, "");    
+    
+   pointsOptionPos = new PVector(origin.x, optionButtonsOffset + origin.y + (optionButtonDim.y * maxTweetSets+1) + (buttonDist * maxTweetSets+1));
+   heatmapOptionPos = new PVector(origin.x + optionButtonDim.x + 5, optionButtonsOffset + origin.y + (optionButtonDim.y * maxTweetSets+1) + (buttonDist * maxTweetSets+1));
+   
+  // -------- Draw view options buttons --------    
+    
+    float pointsOptionButtonAlpha = 255 * 1.0;
+    float heatmapOptionButtonAlpha = 255 * 1.0;
+    
+    if(b_pointsViewActive == false)
+        pointsOptionButtonAlpha = 255 * 0.3;
+      
+     if(b_heatmapViewActive == false)
+        heatmapOptionButtonAlpha = 255 * 0.3;
+    
+    color pointsOptionButtonColour = color(247,247,247, pointsOptionButtonAlpha); 
+    color heatmapOptionButtonColour = color(247,247,247, heatmapOptionButtonAlpha); 
+    
+    
+    if(  (mouseX > pointsOptionPos.x) && (mouseX < pointsOptionPos.x + optionButtonDim.x)   && (mouseY > pointsOptionPos.y) && (mouseY < pointsOptionPos.y + optionButtonDim.y)  )
+      {
+        pointsOptionButtonColour = color(red(pointsOptionButtonColour) * 2.3, green(pointsOptionButtonColour) * 2.3, blue(pointsOptionButtonColour) * 2.3, pointsOptionButtonAlpha);    
+        mouseOverPointsOptionButton = true;
+      }
+
+    if(  (mouseX > heatmapOptionPos.x) && (mouseX < heatmapOptionPos.x + optionButtonDim.x)   && (mouseY > heatmapOptionPos.y) && (mouseY < heatmapOptionPos.y + optionButtonDim.y)  )
+      {
+        heatmapOptionButtonColour = color(red(heatmapOptionButtonColour) * 2.3, green(heatmapOptionButtonColour) * 2.3, blue(heatmapOptionButtonColour) * 2.3, heatmapOptionButtonAlpha);    
+        mouseOverHeatmapOptionButton = true;
+      }
+    
+    strokeWeight(1.5);
+    stroke(181, 184, 188, alphaCol);
+    
+    fill(pointsOptionButtonColour);
+    rrect(pointsOptionPos.x, pointsOptionPos.y, optionButtonDim.x, optionButtonDim.y, 10.0f,  2.4f, "");  
+    
+    fill(heatmapOptionButtonColour);
+    rrect(heatmapOptionPos.x, heatmapOptionPos.y, optionButtonDim.x, optionButtonDim.y, 10.0f,  2.4f, "");  
+    
+    
+    textAlign(LEFT, CENTER);
+    fill(50,50,50,pointsOptionButtonAlpha);
+    text("Points", pointsOptionPos.x + 20, pointsOptionPos.y + (optionButtonDim.y / 2.0));
+    fill(50,50,50,heatmapOptionButtonAlpha);
+    text("Heatmap", heatmapOptionPos.x + 10, heatmapOptionPos.y + (optionButtonDim.y / 2.0));
+    textAlign(LEFT, LEFT);
+   
+    fill(76, 86, 108);
+    text("Options", pointsOptionPos.x, pointsOptionPos.y - 12); 
+   
+
+
+  // -------- Loop through tweetSets --------  
     
 for (TweetSet a: tweetSets)
   {   
@@ -33,16 +115,17 @@ for (TweetSet a: tweetSets)
     alphaCol = 255 * 0.3;  
   else
     alphaCol = 255;
-        
-  a.getButtonPosY().update();   //update the tweetSet's interpolator (y pos of button)
-    
+       
   PVector buttonPos = new PVector(origin.x, a.getButtonPosY().value);
-  PVector removeCirclePos = new PVector(buttonPos.x + buttonDim.x - 12, buttonPos.y + 13);
-    
+  PVector removeCirclePos = new PVector(buttonPos.x + buttonDim.x - 12, buttonPos.y + 13);     
   color buttonColour = color(247,247,247, alphaCol); 
   color removeCircleColour = color(247,247,247, alphaCol); 
+        
+  a.getButtonPosY().update();   //update the tweetSet's interpolator (y pos of button)
+
   
   // -------- If mouse is over remove box, process! --------
+  
    if(  ( abs(mouseX - removeCirclePos.x) < 10) && (abs(mouseY - removeCirclePos.y) < 10) )
       {
         removeCircleColour = color(red(removeCircleColour) * 2.3, green(removeCircleColour) * 2.3, blue(removeCircleColour) * 2.3, 255 * 0.6 );    
@@ -82,7 +165,7 @@ for (TweetSet a: tweetSets)
   text(a.getSearchTerms(), buttonPos.x + 30, buttonPos.y + (buttonDim.y / 2.0));
   
   
-    // -------- Draw remove box --------
+  // -------- Draw remove box --------
   
   stroke(220,220,200,alphaCol);
   
@@ -108,12 +191,44 @@ for (TweetSet a: tweetSets)
   
 }
  
+
+boolean isHeatmapViewActive(){
+ return b_heatmapViewActive; 
+}
+
+boolean isPointsViewActive(){
+ return b_pointsViewActive; 
+} 
+ 
  
   
 void processMouse()
 {
   
-    
+  
+// -------- If user clicked on options button, select --------  
+  
+  if(mouseOverPointsOptionButton) {
+    b_pointsViewActive = true;
+    b_heatmapViewActive = false;
+  }
+  
+   if(mouseOverHeatmapOptionButton)
+  {
+    b_pointsViewActive = false;
+    b_heatmapViewActive = true;
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   if(mouseOverRemoveBox >= 0) {
   println("Over remove box : " + mouseOverRemoveBox);  
     
@@ -169,6 +284,7 @@ void addTweetSet(TweetSet newTweetSet)
  newTweetSet.getButtonPosY().set(origin.y + (buttonDim.y * theId) + (buttonDist * theId) - buttonDim.y);
  newTweetSet.getButtonPosY().target(origin.y + (buttonDim.y * theId) + (buttonDist * theId));
 
+
  tweetSets.add(newTweetSet); 
  
 }
@@ -177,6 +293,11 @@ void addTweetSet(TweetSet newTweetSet)
 int getTweetSetListSize()
 {
  return tweetSets.size(); 
+}
+ 
+int getMaxTweetSets()
+{
+ return maxTweetSets; 
 }
  
  
