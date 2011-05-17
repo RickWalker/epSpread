@@ -14,6 +14,7 @@ String[] keywordList;
 ControlP5 controlP5;
 Range range;
 Textfield filterTextField;
+ListBox filterShortcutList;
 
 //-----------------
 
@@ -27,6 +28,9 @@ float topleft_lat = 42.3017;
 float topleft_lon = 93.5673;
 float bottomright_lat = 42.1609;
 float bottomright_lon = 93.1923;
+
+int filterTextField_x;
+int filterTextField_y;
 
 int tweetSelectionMin = 0;
 int tweetSelectionMax = 100;
@@ -42,9 +46,11 @@ DateTime maxDate = (new DateTime(2011, 5, 20, 23, 59, 0, 0)).plus(Period.hours(1
 
 Interval dateSelection;
 
+PFont font = createFont("FFScala", 18);
+
 void setup()
 {
-  size( imgX+250, imgY + 100, OPENGL);
+  size( imgX+300, imgY + 100, OPENGL);
   smooth();
 
   //setup database
@@ -54,10 +60,8 @@ void setup()
   tweetSetManager = new TweetSetManager();
 
   //Load font 
-  PFont font;
-  font = createFont("FFScala", 18);
   textFont(font); 
-  
+
 
   //Load an image
   imgMap = loadImage("Vastopolis_Map_B&W_2.png");
@@ -65,7 +69,6 @@ void setup()
   //Setup Time Slider
   controlP5 = new ControlP5(this);
   controlP5.setAutoDraw(false);
-
 
   //Load keyword list, scrape tweets
   keywordList = loadStrings("keywords.txt");
@@ -90,17 +93,19 @@ void setup()
 
 void draw() {
   background(225, 228, 233); //blank to start with
-  
+
   fill(40);
-  rect(7,7,imgX+6,imgY+6);
-  image(imgMap, 10, 10, imgX, imgY);
-  
+  rect(7, 7, imgX+6, imgY+6);
+  image(imgMap, 10, 10, imgX, imgY);  
+
+  fill(76, 86, 108);
+  text("Filter Terms", filterTextField_x - 2, filterTextField_y - 10);
 
   tweetSetManager.draw();
   controlP5.draw();
   drawTweetsOnce();//tweetSelectionMin, tweetSelectionMax);
 
-  
+
   //this has to happen every frame
   //drawMouseOver();//tweetSelectionMin, tweetSelectionMax);
 }
@@ -111,7 +116,7 @@ int colourTracker = 0;
 
 void setupColours()
 {
-  
+
   colours.add(color( 77, 175, 74  ));
   colours.add(color( 55, 126, 184   ));
   colours.add(color( 228, 26, 28 ));
@@ -120,36 +125,34 @@ void setupColours()
   colours.add(color( 255, 255, 51  ));
   colours.add(color( 166, 86, 40  ));
   colours.add(color( 247, 129, 191  ));
-  
-  
-  
+
+
+
   //overspill
   colours.add(color( 179, 222, 105  ));
   colours.add(color( 128, 177, 211    ));
   colours.add(color( 251, 128, 114 ));
-  colours.add(color( 255, 255, 179   ));
   colours.add(color(  141, 211, 199 ));
+  colours.add(color( 255, 255, 179   ));
   colours.add(color( 190, 186, 218   ));
   colours.add(color(253, 180, 98 ));
   colours.add(color( 252, 205, 229  ));
   colours.add(color(217, 217, 217  ));
   colours.add(color( 188, 128, 189  )); 
-  
-  
+
+
   /*
   colours.add(color( 166, 206, 227  ));
-  colours.add(color( 31, 120, 180  ));
-  colours.add(color( 178, 223, 138  ));
-  colours.add(color(  51, 160, 44  ));
-  colours.add(color( 251, 154, 153   ));
-  colours.add(color(  227, 26, 28  ));
-  colours.add(color(253, 191, 111 ));
-  colours.add(color( 255, 127, 0  ));
-  colours.add(color(202, 178, 214  ));
-  colours.add(color( 106, 61, 154  )); 
-    */
-  
-  
+   colours.add(color( 31, 120, 180  ));
+   colours.add(color( 178, 223, 138  ));
+   colours.add(color(  51, 160, 44  ));
+   colours.add(color( 251, 154, 153   ));
+   colours.add(color(  227, 26, 28  ));
+   colours.add(color(253, 191, 111 ));
+   colours.add(color( 255, 127, 0  ));
+   colours.add(color(202, 178, 214  ));
+   colours.add(color( 106, 61, 154  )); 
+   */
 }
 
 
@@ -160,19 +163,64 @@ void setupColours()
 
 void setupGUI()
 {
-setupSearchField();
+  setupSearchField();
+  setupFilterShortcutList();
 }
+
+
+void setupFilterShortcutList()
+{
+  filterShortcutList = controlP5.addListBox("myList", width-260, 92, 180, 280);
+  filterShortcutList.setItemHeight(30);
+  filterShortcutList.setBarHeight(11);
+  filterShortcutList.setBackgroundColor(250);
+
+  filterShortcutList.captionLabel().toUpperCase(false);
+  filterShortcutList.setColorBackground(250);
+  filterShortcutList.setColorForeground(255);
+  //filterShortcutList.setColorValue(50);
+  filterShortcutList.setColorActive(255);
+  filterShortcutList.setColorLabel(50);
+  filterShortcutList.setLabel("Shortcuts");
+  filterShortcutList.captionLabel().style().marginTop = 4;
+  filterShortcutList.hideBar();
+  filterShortcutList.close();
+  filterShortcutList.valueLabel().toUpperCase(false);
+
+  ArrayList<String> keywordShortcuts = new ArrayList<String>();
+  keywordShortcuts.add("All Symptoms");
+  keywordShortcuts.add("All Events");
+  keywordShortcuts.add("All Emergencies");
+  keywordShortcuts.add("All Accidents");
+
+
+
+
+  for (String keyword: keywordShortcuts) {
+    int id = 0;
+    ListBoxItem b = filterShortcutList.addItem(keyword, id);
+    //b.captionLabel().toUpperCase(false);
+    id++;
+  }
+}
+
 
 
 void setupSearchField()
 {
-
-  int filterTextField_x = width-210;
-  int filterTextField_y = 30;
+  filterTextField_x = width-260;
+  filterTextField_y = 60;
   int filterTextField_width = 180;
-  int filterTextField_height = 20;
+  int filterTextField_height = 30;
 
   filterTextField = controlP5.addTextfield("Filters", filterTextField_x, filterTextField_y, filterTextField_width, filterTextField_height);
+  filterTextField.setColorBackground(250);
+  filterTextField.setColorForeground(50);
+  filterTextField.setColorValue(50);
+  filterTextField.setColorActive(50);
+  filterTextField.setColorLabel(0);
+  controlP5.setControlFont(new ControlFont(createFont("FFScala", 18), 18));
+  filterTextField.setLabel("");
   filterTextField.setFocus(true);
 }
 
@@ -226,6 +274,8 @@ void drawMouseOver(Tweet t)
 void drawTweetsOnce()//int mini, int maxi) 
 {
 
+  //Load font 
+  textFont(font); 
 
 
   //Draw all the ellipses
@@ -235,27 +285,27 @@ void drawTweetsOnce()//int mini, int maxi)
 
   // ArrayList<Tweet> theTweets = tweetSets.get(0).getTweets();   
 
-  if(tweetSetManager.getTweetSetListSize() > 0)
-  for (TweetSet b: tweetSetManager.getTweetSetList()){
-  // b.heatmap.draw();
-    for (Tweet a: b.getTweets()) {
-      if (dateSelection.contains(a.mDate)) {
-        //float colourPerc = float(i-mini) / float(maxi-mini);
-        //fill(0, 255, 0);//, 20);// + (235 * colourPerc));
-        fill(b.getColour());
+  if (tweetSetManager.getTweetSetListSize() > 0)
+    for (TweetSet b: tweetSetManager.getTweetSetList()) {
+      // b.heatmap.draw();
+      for (Tweet a: b.getTweets()) {
+        if (dateSelection.contains(a.mDate)) {
+          //float colourPerc = float(i-mini) / float(maxi-mini);
+          //fill(0, 255, 0);//, 20);// + (235 * colourPerc));
+          fill(b.getColour());
 
-        stroke(0, 0, 0);//, 20);// + (235 * colourPerc));
+          stroke(0, 0, 0);//, 20);// + (235 * colourPerc));
 
-        PVector loc = a.getLocation();
-        strokeWeight(2);
-        rect(loc.x, loc.y, 10, 10);
-        if (dist(mouseX, mouseY, loc.x, loc.y) < 7) {
-          forMouseOver =a ;
+          PVector loc = a.getLocation();
+          strokeWeight(2);
+          rect(loc.x, loc.y, 10, 10);
+          if (dist(mouseX, mouseY, loc.x, loc.y) < 7) {
+            forMouseOver =a ;
+          }
+          //drawMouseOver(a);
         }
-        //drawMouseOver(a);
       }
     }
-  }
   if (forMouseOver != null)
     drawMouseOver(forMouseOver);
   //}
@@ -355,7 +405,6 @@ void generateTweetSet(String keywords)
 
   //add this finished tweet set to the array
   tweetSetManager.addTweetSet(newTweetSetToAdd);
-
 }
 
 
@@ -367,8 +416,8 @@ void generateTweetSet(String keywords)
 
 void mouseReleased()
 {
-//mouse has clicked and released, let tweet set manager know!  
-tweetSetManager.processMouse();  
+  //mouse has clicked and released, let tweet set manager know!  
+  tweetSetManager.processMouse();
 }
 
 
@@ -386,8 +435,8 @@ void controlEvent(ControlEvent theControlEvent) {
       int index = int(theControlEvent.group().value());
 
       println("Removing : " + theControlEvent.group().name());
-    
-    //  tweetSets.remove(index-1);
+
+      //  tweetSets.remove(index-1);
     }
   }
   else
@@ -400,8 +449,8 @@ void controlEvent(ControlEvent theControlEvent) {
       dateSelection = new Interval(minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[0]))), 
       minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[1]))));
       println("Selection is " + dateSelection);
-	  for(TweetSet a: tweetSetManager.getTweetSetList())
-		a.updateHeatMap();
+      for (TweetSet a: tweetSetManager.getTweetSetList())
+        a.updateHeatMap();
       //tweetSelectionMin = int(theControlEvent.controller().arrayValue()[0]);
       //tweetSelectionMax = int(theControlEvent.controller().arrayValue()[1]);
     }
@@ -409,11 +458,11 @@ void controlEvent(ControlEvent theControlEvent) {
 
     if (theControlEvent.controller().name().equals("Filters")) {
       String keywords = theControlEvent.controller().stringValue();
+
       generateTweetSet(keywords);
     }
   }
 }
-
 
 
 
