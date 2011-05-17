@@ -215,9 +215,9 @@ void setupSearchField()
 
   filterTextField = controlP5.addTextfield("Filters", filterTextField_x, filterTextField_y, filterTextField_width, filterTextField_height);
   filterTextField.setColorBackground(250);
-  filterTextField.setColorForeground(50);
+  filterTextField.setColorForeground(0);
   filterTextField.setColorValue(50);
-  filterTextField.setColorActive(50);
+  filterTextField.setColorActive(0);
   filterTextField.setColorLabel(0);
   controlP5.setControlFont(new ControlFont(createFont("FFScala", 18), 18));
   filterTextField.setLabel("");
@@ -287,22 +287,26 @@ void drawTweetsOnce()//int mini, int maxi)
 
   if (tweetSetManager.getTweetSetListSize() > 0)
     for (TweetSet b: tweetSetManager.getTweetSetList()) {
-      // b.heatmap.draw();
-      for (Tweet a: b.getTweets()) {
-        if (dateSelection.contains(a.mDate)) {
-          //float colourPerc = float(i-mini) / float(maxi-mini);
-          //fill(0, 255, 0);//, 20);// + (235 * colourPerc));
-          fill(b.getColour());
+      if (b.isActive())
+      {      
 
-          stroke(0, 0, 0);//, 20);// + (235 * colourPerc));
+        // b.heatmap.draw();
+        for (Tweet a: b.getTweets()) {
+          if (dateSelection.contains(a.mDate)) {
+            //float colourPerc = float(i-mini) / float(maxi-mini);
+            //fill(0, 255, 0);//, 20);// + (235 * colourPerc));
+            fill(b.getColour());
 
-          PVector loc = a.getLocation();
-          strokeWeight(2);
-          rect(loc.x, loc.y, 10, 10);
-          if (dist(mouseX, mouseY, loc.x, loc.y) < 7) {
-            forMouseOver =a ;
+            stroke(0, 0, 0);//, 20);// + (235 * colourPerc));
+
+            PVector loc = a.getLocation();
+            strokeWeight(2);
+            rect(loc.x, loc.y, 10, 10);
+            if (dist(mouseX, mouseY, loc.x, loc.y) < 7) {
+              forMouseOver =a ;
+            }
+            //drawMouseOver(a);
           }
-          //drawMouseOver(a);
         }
       }
     }
@@ -463,7 +467,6 @@ void controlEvent(ControlEvent theControlEvent) {
     }
   }
 }
-
 
 
 

@@ -21,26 +21,31 @@ TweetSetManager(){
 void draw()
 {
   text("Results", origin.x - 1, origin.y - 12);
-  
-  
+  float alphaCol = 255;
   mouseOverRemoveBox = -1;
-  mouseOverBaseButton = -1;
-  
+  mouseOverBaseButton = -1;  
+ 
+ 
+    
 for (TweetSet a: tweetSets)
   {   
+  if(!a.isActive())
+    alphaCol = 255 * 0.3;  
+  else
+    alphaCol = 255;
+        
   a.getButtonPosY().update();   //update the tweetSet's interpolator (y pos of button)
     
   PVector buttonPos = new PVector(origin.x, a.getButtonPosY().value);
-  PVector removeCirclePos = new PVector(buttonPos.x + buttonDim.x - 13, buttonPos.y + 13);
+  PVector removeCirclePos = new PVector(buttonPos.x + buttonDim.x - 12, buttonPos.y + 13);
     
-  color buttonColour = color(247,247,247); 
-  color removeCircleColour = color(247,247,247); 
+  color buttonColour = color(247,247,247, alphaCol); 
+  color removeCircleColour = color(247,247,247, alphaCol); 
   
-  rect(removeCirclePos.x, removeCirclePos.y, 4, 4);
   // -------- If mouse is over remove box, process! --------
    if(  ( abs(mouseX - removeCirclePos.x) < 10) && (abs(mouseY - removeCirclePos.y) < 10) )
       {
-        removeCircleColour = color(red(removeCircleColour) * 1.3, green(removeCircleColour) * 1.3, blue(removeCircleColour) * 1.3 );    
+        removeCircleColour = color(red(removeCircleColour) * 2.3, green(removeCircleColour) * 2.3, blue(removeCircleColour) * 2.3, 255 * 0.6 );    
         mouseOverRemoveBox = a.getId();
       }
    
@@ -48,14 +53,14 @@ for (TweetSet a: tweetSets)
 
     else if(  (mouseX > buttonPos.x) && (mouseX < buttonPos.x + buttonDim.x)   && (mouseY > buttonPos.y) && (mouseY < buttonPos.y + buttonDim.y)  )
         {
-          buttonColour = color(red(buttonColour) * 1.3, green(buttonColour) * 1.3, blue(buttonColour) * 1.3 );    
-          removeCircleColour = color(red(removeCircleColour) * 1.3, green(removeCircleColour) * 1.3, blue(removeCircleColour) * 1.3 );
+          buttonColour = color(red(buttonColour) * 2.3, green(buttonColour) * 2.3, blue(buttonColour) * 2.3, alphaCol );    
+          removeCircleColour = color(red(removeCircleColour) * 2.3, green(removeCircleColour) * 2.3, blue(removeCircleColour) * 2.3, alphaCol );
           mouseOverBaseButton = a.getId();
         }
              
         
   // -------- Draw the button outline --------
-  stroke(181, 184, 188);
+  stroke(181, 184, 188, alphaCol);
   strokeWeight(1.5);
   fill(buttonColour);
   //rect(buttonPos.x, buttonPos.y, buttonDim.x, buttonDim.y);
@@ -64,21 +69,22 @@ for (TweetSet a: tweetSets)
   
   // -------- Draw the tweet box colour  --------
   
-  stroke(150);
+  stroke(150,150,150,alphaCol);
   strokeWeight(1);
-  fill(a.getColour());
+  color tweetSetColour = a.getColour();
+  fill(red(tweetSetColour), green(tweetSetColour), blue(tweetSetColour), alphaCol);
   rect(buttonPos.x + 8, buttonPos.y + 8, 11, 11);
 
   
   // -------- Draw the button text --------
   textAlign(LEFT, CENTER);
-  fill(40);
+  fill(40,40,40, alphaCol);
   text(a.getSearchTerms(), buttonPos.x + 30, buttonPos.y + (buttonDim.y / 2.0));
   
   
     // -------- Draw remove box --------
   
-  stroke(220);
+  stroke(220,220,200,alphaCol);
   
   strokeWeight(0);
   if(mouseOverRemoveBox == a.getId())  //if mouse over, add outline
@@ -89,7 +95,7 @@ for (TweetSet a: tweetSets)
   //rect(removeBoxPos.x, removeBoxPos.y, removeBoxDim.x, removeBoxDim.y);
   ellipse(removeCirclePos.x, removeCirclePos.y, removeCircleDim.x, removeCircleDim.y); 
   
-  fill(0);
+  fill(0,0,0, alphaCol);
   text("x",  removeCirclePos.x - 4.0, removeCirclePos.y - 1.0);
     
   textAlign(LEFT, LEFT);
@@ -106,22 +112,32 @@ for (TweetSet a: tweetSets)
   
 void processMouse()
 {
-  if(mouseOverRemoveBox >= 0)
-  {
+  
+    
+  if(mouseOverRemoveBox >= 0) {
   println("Over remove box : " + mouseOverRemoveBox);  
     
   //loop through tweet sets, find the one that has id = mouseOverRemoveBox and remove it!
   for (TweetSet a: tweetSets)
-    {
-    if(a.getId() == mouseOverRemoveBox)
-      {
+    if(a.getId() == mouseOverRemoveBox) {
       tweetSets.remove(a);
       colours.add(a.getColour());
       reallocateIds();  //tweetSet has been removed, reallocate id's for correct button drawing
       break;
-      }  
-    }
+      }
   }
+  else
+    if(mouseOverBaseButton >= 0) {
+      
+     for (TweetSet a: tweetSets)
+        if(a.getId() == mouseOverBaseButton) {
+          a.setActive(!a.isActive());  //activate or de-activate tweetSet
+          break;
+        } 
+    }
+  
+  
+  
 }
 
 

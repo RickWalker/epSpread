@@ -7,6 +7,7 @@ HeatmapOverlay heatmap;
 int id = 0;
 String mSearchTerms = "";
 Integrator integrator_buttonPosY;  //Y position of this tweet set's button
+boolean b_active;
    
 TweetSet(String keywords, color colour)
     {
@@ -14,6 +15,7 @@ TweetSet(String keywords, color colour)
     heatmap = new HeatmapOverlay();
     mSearchTerms = keywords;
     integrator_buttonPosY = new Integrator(80);
+    b_active = true;
     }
     
     
@@ -23,7 +25,14 @@ Integrator getButtonPosY()
 }
   
   
-  
+boolean isActive(){
+ return b_active; 
+}
+
+void setActive(boolean val)
+{
+  b_active = val;
+}
   
 void setId(int _id){
  id = _id;
