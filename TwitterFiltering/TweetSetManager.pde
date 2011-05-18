@@ -165,6 +165,16 @@ for (TweetSet a: tweetSets)
   text(a.getSearchTerms(), buttonPos.x + 30, buttonPos.y + (buttonDim.y / 2.0));
   
   
+  // ------- Draw the crossover percentage ----------
+  
+  if(a.getNumberOfCrossoverMatches() > 0)
+  {
+  float percentageMatch = (a.getNumberOfCrossoverMatches() / float(numberSelected)) * 100.0f;
+  
+  fill(100,100,100,alphaCol);
+  text(nf(percentageMatch, 1, 1) + "%", buttonPos.x + buttonDim.x + 10, buttonPos.y + (buttonDim.y / 2.0));
+  }
+  
   // -------- Draw remove box --------
   
   stroke(220,220,200,alphaCol);

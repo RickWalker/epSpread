@@ -26,6 +26,7 @@ float mouseDragEnd_y = -1;
 
 boolean b_draggingMouse = false;
 boolean b_selection = false;
+int numberSelected = 0;
 
 SQLite db;
 PImage imgMap;
@@ -120,13 +121,13 @@ void draw() {
   drawTweetsOnce();
 
   //draw semi-transparent rectangle if click-dragging
-  if (b_draggingMouse) {
-    stroke(200, 200, 255, 100);
-    strokeWeight(2);
-    fill(100, 100, 255, 50);
-    rect(mouseDragStart_x, mouseDragStart_y, constrain(mouseX, imgPos.x, imgX + imgPos.x) - mouseDragStart_x, constrain(mouseY, imgPos.y, imgY + imgPos.y) - mouseDragStart_y); //limit rectangle to image boundary
-  }
-
+    if (  (mouseX > imgPos.x) && (mouseY > imgPos.y) && (mouseX < imgX) && (mouseY < imgY) ) 
+      if (b_draggingMouse) {
+        stroke(200, 200, 255, 100);
+        strokeWeight(2);
+        fill(100, 100, 255, 50);
+        rect(mouseDragStart_x, mouseDragStart_y, constrain(mouseX, imgPos.x, imgX + imgPos.x) - mouseDragStart_x, constrain(mouseY, imgPos.y, imgY + imgPos.y) - mouseDragStart_y); //limit rectangle to image boundary
+      }
 }
 
 
@@ -272,19 +273,22 @@ void drawMouseOver(Tweet t)
 
     float shadowOffset = 4;
 
-    //shadow
-    strokeWeight(0);
-    fill(0, 0, 0, 100);
-    rect(shadowOffset + loc.x, shadowOffset + loc.y, shadowOffset + 200, shadowOffset + textBoxSize);
+    if (!b_draggingMouse)
+    {
+      //shadow
+      strokeWeight(0);
+      fill(0, 0, 0, 100);
+      rect(shadowOffset + loc.x, shadowOffset + loc.y, shadowOffset + 200, shadowOffset + textBoxSize);
 
-    stroke(0, 0, 0, 100);
-    strokeWeight(4);
+      stroke(0, 0, 0, 100);
+      strokeWeight(4);
 
-    fill(230, 230, 250, 200);
-    rect(loc.x, loc.y, 200, textBoxSize);
+      fill(230, 230, 250, 200);
+      rect(loc.x, loc.y, 200, textBoxSize);
 
-    fill(0, 50, 100);
-    text(s, loc.x + gap, loc.y + gap, 200 - gap*2, 300 - gap*2);
+      fill(0, 50, 100);
+      text(s, loc.x + gap, loc.y + gap, 200 - gap*2, 300 - gap*2);
+    }
   }
 }
 
@@ -322,6 +326,19 @@ void drawTweetsOnce()//int mini, int maxi)
             PVector loc = a.getLocation();
             strokeWeight(2);
 
+            //if there is a drag-select happening
+            if (b_draggingMouse) {
+              //if this tweet point is inside the selection box
+              if (isInsideSelectionBox(loc.x, loc.y)) {
+                fill(255);
+              }
+            }
+            
+            if(a.isSelected())
+            {
+              stroke(255);
+            }
+
             if (tweetSetManager.isPointsViewActive())
               rect(loc.x, loc.y, 10, 10);
 
@@ -338,6 +355,23 @@ void drawTweetsOnce()//int mini, int maxi)
   //}
 }
 
+
+
+
+
+boolean isInsideSelectionBox(float x, float y)
+{
+  if (  (x > mouseDragStart_x) && (y > mouseDragStart_y) && (x < mouseX) && (y < mouseY) )
+    return true;
+  else if (  (x < mouseDragStart_x) && (y > mouseDragStart_y) && (x > mouseX) && (y < mouseY) )
+    return true;
+  else if (  (x < mouseDragStart_x) && (y < mouseDragStart_y) && (x > mouseX) && (y > mouseY) )
+    return true;
+  else if (  (x > mouseDragStart_x) && (y < mouseDragStart_y) && (x < mouseX) && (y > mouseY) )
+    return true;   
+  else
+    return false;
+}
 
 
 
@@ -397,6 +431,9 @@ void generateTweetSet(String keywords)
 
       //set the text of this tweet            
       newTweetToAdd.setText(db.getString("message"));
+
+      //set the user id         
+      newTweetToAdd.setUserId(db.getInt("ID"));
 
       //get and set the location of this tweet
       PVector tweetLocation = new PVector(0, 0);
@@ -473,6 +510,9 @@ void controlEvent(ControlEvent theControlEvent) {
     }
 
 
+
+    // -------- Typing something in and hitting return will trigger this code, creating a new tweet set --------
+
     if (theControlEvent.controller().name().equals("Filters")) {
       String keywords = theControlEvent.controller().stringValue();
 
@@ -487,12 +527,59 @@ void controlEvent(ControlEvent theControlEvent) {
 
 
 
+void calculateTweetSetCrossover()
+{
+  //reset crossover matches at the start
+  for(TweetSet o: tweetSetManager.getTweetSetList()){
+     o.resetCrossoverMatches();
+  }
+  
+  
+  println("Number selected : " + numberSelected);
+  //loop through tweetsets
+  
+  
+ if (tweetSetManager.getTweetSetListSize() > 0)
+        for (TweetSet b: tweetSetManager.getTweetSetList()) { 
+           for (Tweet a: b.getTweets()) {
+            
+            if(a.isSelected()) //if this tweet is selected, find out if the user id exists in other tweetSets
+              {
+                int userId = a.getUserId();
+                
+                //loop through all tweet sets and tweets
+                for (TweetSet d: tweetSetManager.getTweetSetList()) { 
+                   for (Tweet c: d.getTweets()) {
+                     if(c.getUserId() == userId) {
+                       d.incrementCrossoverMatches();                      
+                       }
+                   }
+                }
+              }
+           }
+        }
+ 
+ 
+ for (TweetSet b: tweetSetManager.getTweetSetList()) { 
+     println("For tweetSet " + b.getSearchTerms() + " : " + b.getNumberOfCrossoverMatches()); 
+ } 
+ 
+  
+}
+
+
+
+
+
+
+
+
+
+
 
 void mousePressed() {
 
   //If mouse click / drag on image  
-  if (  (mouseX > imgPos.x) && (mouseY > imgPos.y) && (mouseX < imgX) && (mouseY < imgY) )
-  {
     if (mouseButton == LEFT) {
       mouseDragStart_x = mouseX;
       mouseDragStart_y = mouseY;
@@ -503,7 +590,6 @@ void mousePressed() {
       b_selection = false;
     }
   }
-}
 
 
 
@@ -513,23 +599,60 @@ void mouseReleased()
 {
   //mouse has clicked and released, let tweet set manager know!  
   tweetSetManager.processMouse();
-
+  numberSelected = 0;
 
   //If mouse click / drag on image  
-  if (  (mouseX > imgPos.x) && (mouseY > imgPos.y) && (mouseX < imgX) && (mouseY < imgY) ) {
+  if (  (mouseX > imgPos.x) && (mouseY > imgPos.y) && (mouseX < imgX) && (mouseY < imgY) ) 
+  {
     //click dragging
     if (mouseButton == LEFT) {  
+      
       b_draggingMouse = false;
 
       mouseDragEnd_x = max(mouseX, imgX);
       mouseDragEnd_y = min(mouseY, imgY);
       b_selection = true;
+
+      // finished dragging, so set any tweets within drag box to 'selected'
+      if (tweetSetManager.getTweetSetListSize() > 0)
+        for (TweetSet b: tweetSetManager.getTweetSetList()) {
+          if (b.isActive())
+          {      
+            for (Tweet a: b.getTweets()) {
+              if (dateSelection.contains(a.mDate)) 
+                if (isInsideSelectionBox(a.getLocation().x, a.getLocation().y))
+                {
+                  a.setSelected(true);
+                  numberSelected++;
+                }
+            }
+          }
+        }
+        
+        //now that we have a selection, calculate the crossover percentage between tweetSets (i.e. how many of these people also mention the other keywords)
+        calculateTweetSetCrossover(); 
+    }
+    
+    
+    if (mouseButton == RIGHT) {  
+      numberSelected = 0;
+       // right click means we clear all selections!
+      if (tweetSetManager.getTweetSetListSize() > 0)
+        for (TweetSet b: tweetSetManager.getTweetSetList()) {
+          b.resetCrossoverMatches();
+          
+          if (b.isActive())
+          {      
+            for (Tweet a: b.getTweets()) {
+                  a.setSelected(false);
+            }
+          }
+        }
     }
   }
   else
     b_draggingMouse = false;
 }
-
 
 
 

@@ -8,6 +8,9 @@ int id = 0;
 String mSearchTerms = "";
 Integrator integrator_buttonPosY;  //Y position of this tweet set's button
 boolean b_active;
+
+int crossoverMatches = 0;  //How many of these tweets are made by people currently selected
+
    
 TweetSet(String keywords, color colour)
     {
@@ -55,6 +58,12 @@ ArrayList<Tweet> getTweets()
 }
 
 
+int getNumberOfTweets()
+{
+ return tweets.size(); 
+}
+
+
 String getSearchTerms()
 {
   return mSearchTerms;
@@ -73,7 +82,17 @@ color getColour()
   
   
   
+void incrementCrossoverMatches(){
+  crossoverMatches++;
+}
   
-  
+int getNumberOfCrossoverMatches(){
+  return crossoverMatches;
+}
+
+
+void resetCrossoverMatches(){
+  crossoverMatches = 0; 
+}
   
 }
