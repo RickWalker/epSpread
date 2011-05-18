@@ -18,8 +18,19 @@ ListBox filterShortcutList;
 
 //-----------------
 
+//mouse drag selection
+float mouseDragStart_x = -1;
+float mouseDragStart_y = -1; 
+float mouseDragEnd_x = -1;
+float mouseDragEnd_y = -1;
+
+boolean b_draggingMouse = false;
+boolean b_selection = false;
+
 SQLite db;
 PImage imgMap;
+PVector imgPos;
+
 
 int imgX = 1304;
 int imgY = 663;
@@ -36,6 +47,7 @@ int tweetSelectionMin = 0;
 int tweetSelectionMax = 100;
 
 PVector tweet_loc = new PVector(42.2838, 93.47745);
+
 
 TweetSetManager tweetSetManager;
 ArrayList<Integer> colours = new ArrayList<Integer>();
@@ -65,6 +77,7 @@ void setup()
 
   //Load an image
   imgMap = loadImage("Vastopolis_Map_B&W_2.png");
+  imgPos = new PVector(10, 10);
 
   //Setup Time Slider
   controlP5 = new ControlP5(this);
@@ -94,20 +107,26 @@ void setup()
 void draw() {
   background(225, 228, 233); //blank to start with
 
+  strokeWeight(0);
   fill(40);
   rect(7, 7, imgX+6, imgY+6);
-  image(imgMap, 10, 10, imgX, imgY);  
+  image(imgMap, imgPos.x, imgPos.y, imgX, imgY);  
 
   fill(76, 86, 108);
   text("Filter Terms", filterTextField_x - 2, filterTextField_y - 10);
 
   tweetSetManager.draw();
   controlP5.draw();
-  drawTweetsOnce();//tweetSelectionMin, tweetSelectionMax);
+  drawTweetsOnce();
 
+  //draw semi-transparent rectangle if click-dragging
+  if (b_draggingMouse) {
+    stroke(200, 200, 255, 100);
+    strokeWeight(2);
+    fill(100, 100, 255, 50);
+    rect(mouseDragStart_x, mouseDragStart_y, constrain(mouseX, imgPos.x, imgX + imgPos.x) - mouseDragStart_x, constrain(mouseY, imgPos.y, imgY + imgPos.y) - mouseDragStart_y); //limit rectangle to image boundary
+  }
 
-  //this has to happen every frame
-  //drawMouseOver();//tweetSelectionMin, tweetSelectionMax);
 }
 
 
@@ -289,11 +308,11 @@ void drawTweetsOnce()//int mini, int maxi)
     for (TweetSet b: tweetSetManager.getTweetSetList()) {
       if (b.isActive())
       {      
-      if(tweetSetManager.isHeatmapViewActive())       
-         b.heatmap.draw();
-         
-      for (Tweet a: b.getTweets()) {
-         if (dateSelection.contains(a.mDate)) {
+        if (tweetSetManager.isHeatmapViewActive())       
+          b.heatmap.draw();
+
+        for (Tweet a: b.getTweets()) {
+          if (dateSelection.contains(a.mDate)) {
             //float colourPerc = float(i-mini) / float(maxi-mini);
             //fill(0, 255, 0);//, 20);// + (235 * colourPerc));
             fill(b.getColour());
@@ -302,10 +321,10 @@ void drawTweetsOnce()//int mini, int maxi)
 
             PVector loc = a.getLocation();
             strokeWeight(2);
-            
-            if(tweetSetManager.isPointsViewActive())
+
+            if (tweetSetManager.isPointsViewActive())
               rect(loc.x, loc.y, 10, 10);
-              
+
             if (dist(mouseX, mouseY, loc.x, loc.y) < 7) {
               forMouseOver =a ;
             }
@@ -422,16 +441,6 @@ void generateTweetSet(String keywords)
 
 
 
-void mouseReleased()
-{
-  //mouse has clicked and released, let tweet set manager know!  
-  tweetSetManager.processMouse();
-}
-
-
-
-
-
 
 
 void controlEvent(ControlEvent theControlEvent) {
@@ -466,14 +475,64 @@ void controlEvent(ControlEvent theControlEvent) {
 
     if (theControlEvent.controller().name().equals("Filters")) {
       String keywords = theControlEvent.controller().stringValue();
-      
-    if(tweetSetManager.getTweetSetListSize() < tweetSetManager.getMaxTweetSets())
-      generateTweetSet(keywords);
+
+      if (tweetSetManager.getTweetSetListSize() < tweetSetManager.getMaxTweetSets())
+        generateTweetSet(keywords);
       else
-      println("**** Too many tweetSets! Please remove before requesting another ***");
+        println("**** Too many tweetSets! Please remove before requesting another ***");
     }
   }
 }
+
+
+
+
+
+void mousePressed() {
+
+  //If mouse click / drag on image  
+  if (  (mouseX > imgPos.x) && (mouseY > imgPos.y) && (mouseX < imgX) && (mouseY < imgY) )
+  {
+    if (mouseButton == LEFT) {
+      mouseDragStart_x = mouseX;
+      mouseDragStart_y = mouseY;
+      b_draggingMouse = true;
+    }
+
+    if (mouseButton == RIGHT) {
+      b_selection = false;
+    }
+  }
+}
+
+
+
+
+
+void mouseReleased()
+{
+  //mouse has clicked and released, let tweet set manager know!  
+  tweetSetManager.processMouse();
+
+
+  //If mouse click / drag on image  
+  if (  (mouseX > imgPos.x) && (mouseY > imgPos.y) && (mouseX < imgX) && (mouseY < imgY) ) {
+    //click dragging
+    if (mouseButton == LEFT) {  
+      b_draggingMouse = false;
+
+      mouseDragEnd_x = max(mouseX, imgX);
+      mouseDragEnd_y = min(mouseY, imgY);
+      b_selection = true;
+    }
+  }
+  else
+    b_draggingMouse = false;
+}
+
+
+
+
 
 
 
