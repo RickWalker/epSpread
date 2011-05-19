@@ -84,12 +84,6 @@ void setup()
   controlP5 = new ControlP5(this);
   controlP5.setAutoDraw(false);
 
-  //Load keyword list, scrape tweets
-  keywordList = loadStrings("keywords.txt");
-
-  println("Keywords are : ");  
-  for (int i=0; i<keywordList.length; i++)
-    println(keywordList[i]);
 
   dateSelection = new Interval(minDate, maxDate);
   // add horizontal range slider
@@ -121,7 +115,7 @@ void draw() {
   drawTweetsOnce();
 
   //draw semi-transparent rectangle if click-dragging
-    if (  (mouseX > imgPos.x) && (mouseY > imgPos.y) && (mouseX < imgX) && (mouseY < imgY) ) 
+    //if (  (mouseX > imgPos.x) && (mouseY > imgPos.y) && (mouseX < imgX) && (mouseY < imgY) ) 
       if (b_draggingMouse) {
         stroke(200, 200, 255, 100);
         strokeWeight(2);
@@ -539,26 +533,30 @@ void calculateTweetSetCrossover()
   //loop through tweetsets
   
   
- if (tweetSetManager.getTweetSetListSize() > 0)
+   if (tweetSetManager.getTweetSetListSize() > 0)
         for (TweetSet b: tweetSetManager.getTweetSetList()) { 
            for (Tweet a: b.getTweets()) {
-            
-            if(a.isSelected()) //if this tweet is selected, find out if the user id exists in other tweetSets
+             
+              if(a.isSelected()) //if this tweet is selected, find out if the user id exists in other tweetSets
               {
                 int userId = a.getUserId();
-                
-                //loop through all tweet sets and tweets
+               
+               //now loop through the tweetSets and see if there are matches to this id 
                 for (TweetSet d: tweetSetManager.getTweetSetList()) { 
+                  boolean b_found = false;
+                  
                    for (Tweet c: d.getTweets()) {
-                     if(c.getUserId() == userId) {
-                       d.incrementCrossoverMatches();                      
-                       }
+                       if(c.getUserId() == userId)
+                         b_found = true; //found an id match in this tweetSet
                    }
-                }
+                   
+                   if(b_found)
+                     d.incrementCrossoverMatches();   
               }
            }
-        }
- 
+        }       
+    }
+  
  
  for (TweetSet b: tweetSetManager.getTweetSetList()) { 
      println("For tweetSet " + b.getSearchTerms() + " : " + b.getNumberOfCrossoverMatches()); 
@@ -580,9 +578,11 @@ void calculateTweetSetCrossover()
 void mousePressed() {
 
   //If mouse click / drag on image  
+  if (  (mouseX > imgPos.x) && (mouseY > imgPos.y) && (mouseX < imgX) && (mouseY < imgY) ) 
     if (mouseButton == LEFT) {
       mouseDragStart_x = mouseX;
       mouseDragStart_y = mouseY;
+      println("fuckowawa");
       b_draggingMouse = true;
     }
 
@@ -600,12 +600,24 @@ void mouseReleased()
   //mouse has clicked and released, let tweet set manager know!  
   tweetSetManager.processMouse();
   numberSelected = 0;
-
-  //If mouse click / drag on image  
-  if (  (mouseX > imgPos.x) && (mouseY > imgPos.y) && (mouseX < imgX) && (mouseY < imgY) ) 
-  {
+  
     //click dragging
+    if(b_draggingMouse == true)
     if (mouseButton == LEFT) {  
+
+// clear all selections!
+        for (TweetSet b: tweetSetManager.getTweetSetList()) {
+          b.resetCrossoverMatches();
+          
+          if (b.isActive())
+          {      
+            for (Tweet a: b.getTweets()) {
+                  a.setSelected(false);
+            }
+          }
+        }
+
+
       
       b_draggingMouse = false;
 
@@ -633,7 +645,7 @@ void mouseReleased()
         calculateTweetSetCrossover(); 
     }
     
-    
+
     if (mouseButton == RIGHT) {  
       numberSelected = 0;
        // right click means we clear all selections!
@@ -641,15 +653,13 @@ void mouseReleased()
         for (TweetSet b: tweetSetManager.getTweetSetList()) {
           b.resetCrossoverMatches();
           
-          if (b.isActive())
-          {      
             for (Tweet a: b.getTweets()) {
                   a.setSelected(false);
             }
-          }
+         
         }
     }
-  }
+  
   else
     b_draggingMouse = false;
 }
