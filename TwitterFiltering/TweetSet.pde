@@ -2,6 +2,7 @@ class TweetSet{
   
 ArrayList<Tweet> tweets = new ArrayList<Tweet>();  
 String[] filterTerms;
+String regularExpression = "";
 color setColour;
 HeatmapOverlay heatmap;
 int id = 0;
@@ -12,13 +13,14 @@ boolean b_active;
 int crossoverMatches = 0;  //How many of these tweets are made by people currently selected
 
    
-TweetSet(String keywords, color colour)
+TweetSet(String keywords, color colour, String re)
     {
     setColour = colour;
     heatmap = new HeatmapOverlay();
     mSearchTerms = keywords;
     integrator_buttonPosY = new Integrator(80);
     b_active = true;
+    regularExpression = re;
     }
     
     
@@ -93,6 +95,12 @@ int getNumberOfCrossoverMatches(){
 
 void resetCrossoverMatches(){
   crossoverMatches = 0; 
+}
+
+
+String getRegularExpressionSymbol()
+{
+ return regularExpression; 
 }
   
 }

@@ -86,8 +86,14 @@ void setup()
 
 
   dateSelection = new Interval(minDate, maxDate);
+  
+  
   // add horizontal range slider
   range = controlP5.addRange("Date", 0, Hours.hoursIn(dateSelection).getHours(), 0, 24, 50, imgY + 24, imgX - 100, 30);
+  range.setColorBackground(color(130,130,130));
+  range.setLabelVisible(false);
+  range.setCaptionLabel("");
+  
 
   println("Duration is " + Hours.hoursIn(dateSelection).getHours() + " hours");
   dateSelection=new Interval(minDate, minDate.plus(Period.hours(24)));
@@ -109,6 +115,11 @@ void draw() {
 
   fill(76, 86, 108);
   text("Filter Terms", filterTextField_x - 2, filterTextField_y - 10);
+
+  //add border to date range slider!
+  float rangeBorderSize = 2;
+  fill(80);
+  rect(50 - rangeBorderSize, imgY + 24 - rangeBorderSize, imgX-100 + rangeBorderSize*2, 30 + rangeBorderSize*2);
 
   tweetSetManager.draw();
   controlP5.draw();
@@ -347,6 +358,8 @@ void drawTweetsOnce()//int mini, int maxi)
   if (forMouseOver != null)
     drawMouseOver(forMouseOver);
   //}
+
+  
 }
 
 
@@ -380,8 +393,19 @@ void generateTweetSet(String keywords)
   else
     colourTracker=0;
 
+  String RESymbol = "";
+  
+  //Find out if we are processing this tweetSet using RE's, store symbol in RESymbol
+  if(keywords.indexOf("*") >= 0)
+  {
+    RESymbol = "*";
+    keywords = keywords.substring(1);
+  }
+
+
+
   //Create new tweet set
-  TweetSet newTweetSetToAdd = new TweetSet(keywords, setColour);
+  TweetSet newTweetSetToAdd = new TweetSet(keywords, setColour, RESymbol);
 
   println("Creating new tweet set...");
   String[] filterTerms = splitTokens(keywords, ", ");
@@ -417,9 +441,25 @@ void generateTweetSet(String keywords)
     DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
     DateTime thisDate;
     //reset max and min dates!
+    
+    
+    // -------- Go through data, storing them as tweets in a tweetset (if they pass optional RE match) --------   
+    
     while (db.next ())
     {
-
+      boolean passesRE = true;  //passes RE check?
+      
+      if(RESymbol != "") //if a symbol has been specified for this tweetSet
+      {
+        //check if it matches a RE      
+        if(!matchesRegularExpression( db.getString("message"), RESymbol))
+          passesRE = false;
+      }
+            
+      
+      if(passesRE)
+      {
+      
       //we have a new record, create tweet object
       newTweetToAdd = new Tweet();
 
@@ -455,14 +495,20 @@ void generateTweetSet(String keywords)
 
       //add tweet to tweet set
       newTweetSetToAdd.addTweet(newTweetToAdd);
+      }
     }
-
+    
     println("Created " + newTweetSetToAdd.tweets.size() + " tweet records");
     println("Date min is " + minDate + " and max is " + maxDate);
   }
 
   //add this finished tweet set to the array
   tweetSetManager.addTweetSet(newTweetSetToAdd);
+  
+    
+  //update heat maps for first time
+  for (TweetSet a: tweetSetManager.getTweetSetList())
+        a.updateHeatMap();
 }
 
 

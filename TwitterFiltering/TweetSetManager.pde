@@ -122,6 +122,13 @@ for (TweetSet a: tweetSets)
   color removeCircleColour = color(247,247,247, alphaCol); 
         
   a.getButtonPosY().update();   //update the tweetSet's interpolator (y pos of button)
+  
+  if(a.getRegularExpressionSymbol() == "*")
+  {
+    buttonColour = color(210,242,210, alphaCol);
+    removeCircleColour = color(210,242,210, alphaCol);
+    
+  }
 
   
   // -------- If mouse is over remove box, process! --------
@@ -136,8 +143,8 @@ for (TweetSet a: tweetSets)
 
     else if(  (mouseX > buttonPos.x) && (mouseX < buttonPos.x + buttonDim.x)   && (mouseY > buttonPos.y) && (mouseY < buttonPos.y + buttonDim.y)  )
         {
-          buttonColour = color(red(buttonColour) * 2.3, green(buttonColour) * 2.3, blue(buttonColour) * 2.3, alphaCol );    
-          removeCircleColour = color(red(removeCircleColour) * 2.3, green(removeCircleColour) * 2.3, blue(removeCircleColour) * 2.3, alphaCol );
+          buttonColour = color(red(buttonColour) * 1.05, green(buttonColour) * 1.05, blue(buttonColour) * 1.05, alphaCol );    
+          removeCircleColour = color(red(removeCircleColour) * 1.05, green(removeCircleColour) * 1.05, blue(removeCircleColour) * 1.05, alphaCol );
           mouseOverBaseButton = a.getId();
         }
              
