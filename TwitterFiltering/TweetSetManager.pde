@@ -173,7 +173,7 @@ for (TweetSet a: tweetSets)
   
   
   // ------- Draw the crossover percentage ----------
-  
+    
   if(a.getNumberOfCrossoverMatches() > 0)
   {
   float percentageMatch = (a.getNumberOfCrossoverMatches() / float(numberSelected)) * 100.0f;
@@ -237,15 +237,7 @@ void processMouse()
   }
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
+    
   if(mouseOverRemoveBox >= 0) {
   println("Over remove box : " + mouseOverRemoveBox);  
     
@@ -267,7 +259,6 @@ void processMouse()
           break;
         } 
     }
-  
   
   
 }

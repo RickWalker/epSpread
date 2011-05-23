@@ -569,6 +569,9 @@ void controlEvent(ControlEvent theControlEvent) {
 
 void calculateTweetSetCrossover()
 {
+  println("calculating tweet set crossover");
+  
+  
   //reset crossover matches at the start
   for(TweetSet o: tweetSetManager.getTweetSetList()){
      o.resetCrossoverMatches();
@@ -623,12 +626,12 @@ void calculateTweetSetCrossover()
 
 void mousePressed() {
 
+
   //If mouse click / drag on image  
   if (  (mouseX > imgPos.x) && (mouseY > imgPos.y) && (mouseX < imgX) && (mouseY < imgY) ) 
     if (mouseButton == LEFT) {
       mouseDragStart_x = mouseX;
       mouseDragStart_y = mouseY;
-      println("fuckowawa");
       b_draggingMouse = true;
     }
 
@@ -645,14 +648,17 @@ void mouseReleased()
 {
   //mouse has clicked and released, let tweet set manager know!  
   tweetSetManager.processMouse();
-  numberSelected = 0;
+
   
     //click dragging
     if(b_draggingMouse == true)
     if (mouseButton == LEFT) {  
-
-// clear all selections!
+       numberSelected = 0;
+  
+      println("calculating new crossover matches");
+      // clear all selections!
         for (TweetSet b: tweetSetManager.getTweetSetList()) {
+          
           b.resetCrossoverMatches();
           
           if (b.isActive())
@@ -690,6 +696,8 @@ void mouseReleased()
         //now that we have a selection, calculate the crossover percentage between tweetSets (i.e. how many of these people also mention the other keywords)
         calculateTweetSetCrossover(); 
     }
+     else
+    b_draggingMouse = false;
     
 
     if (mouseButton == RIGHT) {  
@@ -706,8 +714,7 @@ void mouseReleased()
         }
     }
   
-  else
-    b_draggingMouse = false;
+ 
 }
 
 
