@@ -1,10 +1,13 @@
 class Tweet{
   
 String mText;  
+
 PVector mLocation;
 DateTime mDate;
 int userId;
 boolean b_selected;
+color tweetSetColour;
+Integrator alphaVal;
   
 Tweet(){
   
@@ -13,7 +16,34 @@ Tweet(){
   //mDate = 0.0f;
   userId = -1;
   b_selected = false;
+  tweetSetColour = color(0,0,0);
+  alphaVal = new Integrator(255);
 }
+
+
+
+void setAlphaTarget(float value){
+ alphaVal.target(value); 
+}
+
+
+Integrator getAlphaIntegrator(){
+ return alphaVal; 
+}
+
+float getAlpha(){
+ return alphaVal.value; 
+}
+
+
+void setTweetSetColour(color _theColour){
+ tweetSetColour = _theColour; 
+}
+
+color getTweetSetColour(){
+ return tweetSetColour; 
+}
+
 
 void setText(String someText){
  mText = someText; 
@@ -44,8 +74,10 @@ PVector getLocation(){
 
 
 String getText(){
- return mText;
+  return mText;
 }
+  
+
   
   
 void setSelected(boolean val){

@@ -293,6 +293,8 @@ void drawMouseOver(Tweet t)
 
       fill(0, 50, 100);
       text(s, loc.x + gap, loc.y + gap, 200 - gap*2, 300 - gap*2);
+      
+      fill(t.getTweetSetColour());
     }
   }
 }
@@ -321,12 +323,19 @@ void drawTweetsOnce()//int mini, int maxi)
           b.heatmap.draw();
 
         for (Tweet a: b.getTweets()) {
+          
+         // a.getAlphaIntegrator().update();
+          
           if (dateSelection.contains(a.mDate)) {
             //float colourPerc = float(i-mini) / float(maxi-mini);
             //fill(0, 255, 0);//, 20);// + (235 * colourPerc));
-            fill(b.getColour());
+            
+            color c = b.getColour();
+            a.setAlphaTarget(255);
+            
+            fill(red(c), green(c), blue(c), a.getAlpha());
 
-            stroke(0, 0, 0);//, 20);// + (235 * colourPerc));
+            stroke(0, 0, 0, a.getAlpha());//, 20);// + (235 * colourPerc));
 
             PVector loc = a.getLocation();
             strokeWeight(2);
@@ -351,6 +360,10 @@ void drawTweetsOnce()//int mini, int maxi)
               forMouseOver =a ;
             }
             //drawMouseOver(a);
+          }
+          else{
+           //tweet not in date range 
+           a.setAlphaTarget(0);
           }
         }
       }
@@ -452,7 +465,7 @@ void generateTweetSet(String keywords)
       if(RESymbol != "") //if a symbol has been specified for this tweetSet
       {
         //check if it matches a RE      
-        if(!matchesRegularExpression( db.getString("message"), RESymbol))
+        if(!matchesRegularExpression( db.getString("message"), filterTerms[0], RESymbol))
           passesRE = false;
       }
             
@@ -474,8 +487,11 @@ void generateTweetSet(String keywords)
       tweetLocation.x = db.getFloat("lon");
       tweetLocation.y = db.getFloat("lat");
       thisDate =fmt.parseDateTime(db.getString("date"));
+      
+      newTweetToAdd.setTweetSetColour(setColour);
 
       newTweetToAdd.setDate(thisDate);
+
       /*if (firstRecord) {
        minDate = new DateTime(thisDate);
        maxDate = new DateTime(thisDate);
@@ -660,17 +676,12 @@ void mouseReleased()
         for (TweetSet b: tweetSetManager.getTweetSetList()) {
           
           b.resetCrossoverMatches();
-          
-          if (b.isActive())
-          {      
+
             for (Tweet a: b.getTweets()) {
                   a.setSelected(false);
             }
-          }
         }
 
-
-      
       b_draggingMouse = false;
 
       mouseDragEnd_x = max(mouseX, imgX);

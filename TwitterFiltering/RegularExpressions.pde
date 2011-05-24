@@ -4,9 +4,9 @@
 
 
 
-boolean matchesRegularExpression(String _theText, String _RESymbol)
+boolean matchesRegularExpression(String _theText, String keyword, String _RESymbol)
 {
-String[] symptomsDict = {"fatigue", "vomit", "vomitting", "flu", "the flu", "cold", "headache", "a headache", "fever", "chills", "breathing", "cough", "coughing", "a dry cough", "nausea", "diarrhea", "sweats", "the sweats", "ache", "stomach ache", "throwing up", "coughing up", "bleeding", "back pain", "abdomen pain", "ab pain", "chest pain"};
+String[] symptomsDict = {"fatigue", "vomit", "vomitting", "flu", "the flu", "cold", "headache", "a headache", "fever", "chills", "breathing", "cough", "coughing", "a dry cough", "nausea", "diarrhea", "sweats", "the sweats", "ache", "stomach ache", "throwing up", "coughing up", "bleeding", "back pain", "abdomen pain", "ab pain", "chest pain", keyword};
 String[] adjectivesDict = {"bad", "horrible", "nasty", "terrible", "terible", "annoying", "attrocious", "painful", "severe", "extremely painful"};  // how would I get this to be an optional extra?
 
 //Build regular expressions
@@ -14,7 +14,8 @@ String symptomString = createREMatchString(symptomsDict);
 String adjectiveString = createREMatchString(adjectivesDict);  //not used
 String optionalAdjectives = "(" + adjectiveString + "\\s)?";
 
-String regularExpression = "(just got|trouble|have been|these|case of the|caught|caught a|with the a|getting a|has a|has|have|caught a|I have a|I have|I cought a|I got a|I am|this|come down with a|come down with|come down with a|difficulty|difficult to)\\s" + optionalAdjectives + symptomString + "\\s*";    
+String regularExpression = "(that|just got|trouble|have been|these|case of the|caught|caught a|with the a|getting a|has a|has|have|caught a|I have a|I have|I cought a|I got a|I am|this|come down with a|come down with|come down with a|difficulty|difficult to)\\s" + optionalAdjectives + symptomString + "\\s*";    
+//String regularExpression = "(that|just got|trouble|have been|these|case of the|caught|caught a|with the a|getting a|has a|has|have|caught a|I have a|I have|I cought a|I got a|I am|this|come down with a|come down with|come down with a|difficulty|difficult to)\\s" + optionalAdjectives + keyword + "\\s*";    
 
 
 boolean found = PerformPatternMatch(_theText, regularExpression);
