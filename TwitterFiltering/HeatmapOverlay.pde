@@ -31,7 +31,7 @@ class HeatmapOverlay {
           stroke(map(v, 0, max_intensity, 37, 2), 50, 50, map(v, 0, max_intensity, 2, 40));
           //noStroke();
           fill(map(v, 0, max_intensity, 37, 2), 50, 50, map(v, 0, max_intensity, 2, 40));
-          rect(x*boxsize_x, y*boxsize_y, imgX/gridres-1, imgY/gridres-1);
+          rect(x*boxsize_x + imgPos.x, y*boxsize_y + imgPos.y, imgX/gridres-1, imgY/gridres-1);
           //point(x*boxsize_x, y*boxsize_y);
         }
       }

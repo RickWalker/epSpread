@@ -21,6 +21,10 @@ Tweet(){
 }
 
 
+DateTime getDate(){
+ return mDate; 
+}
+
 
 void setAlphaTarget(float value){
  alphaVal.target(value); 

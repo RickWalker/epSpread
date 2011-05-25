@@ -25,7 +25,7 @@ int optionButtonsOffset = 40;
 TweetSetManager(){
 
   tweetSets = new ArrayList<TweetSet>(); 
-  origin = new PVector(width-260, 130);
+  origin = new PVector(width-400 + imgPos.x, 130);
   buttonDim = new PVector(180, 40);
   
   removeCircleDim = new PVector(20,20);
@@ -37,6 +37,7 @@ TweetSetManager(){
  
 void draw()
 {
+  
   text("Results", origin.x - 1, origin.y - 12);
   float alphaCol = 255;
   mouseOverRemoveBox = -1;
