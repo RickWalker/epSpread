@@ -248,7 +248,7 @@ void setupFilterShortcutList()
 
 void setupSearchField()
 {
-  filterTextField_x = width-270;
+  filterTextField_x = imgX + (int)imgPos.x + 50;
   filterTextField_y = 60;
   int filterTextField_width = 180;
   int filterTextField_height = 30;
@@ -841,7 +841,7 @@ void mousePressed() {
 
 
   //If mouse click / drag on image  
-  if (  (mouseX > imgPos.x) && (mouseY > imgPos.y) && (mouseX < imgX + imgPos.x) && (mouseY < imgY + imgPos.x) ) 
+  if (  (mouseX > imgPos.x) && (mouseY > imgPos.y) && (mouseX < imgX + imgPos.x) && (mouseY < imgY + imgPos.y) ) 
     if (mouseButton == LEFT) {
       mouseDragStart_x = mouseX;
       mouseDragStart_y = mouseY;

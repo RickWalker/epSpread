@@ -25,7 +25,7 @@ int optionButtonsOffset = 40;
 TweetSetManager(){
 
   tweetSets = new ArrayList<TweetSet>(); 
-  origin = new PVector(width-400 + imgPos.x, 130);
+  origin = new PVector(imgPos.x + imgX + 50, 130);
   buttonDim = new PVector(180, 40);
   
   removeCircleDim = new PVector(20,20);
