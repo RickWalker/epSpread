@@ -62,7 +62,9 @@ ArrayList<Integer> selectedTweetUserIds = new ArrayList<Integer>();
 //Note : are intervals inclusive or exclusive?
 DateTime minDate = (new DateTime(2011, 4, 30, 0, 0, 0, 0)).minus(Period.hours(1));
 DateTime maxDate = (new DateTime(2011, 5, 20, 23, 59, 0, 0)).plus(Period.hours(1));
-
+DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
+DateTimeFormatter fmt2 = DateTimeFormat.forPattern("MMM dd              HH:mma");
+    
 Interval dateSelection;
 
 PFont font = createFont("FFScala", 18);
@@ -285,9 +287,12 @@ void drawMouseOver(Tweet t)
   PVector loc = t.getLocation();
 
     String s =  t.getText();
+    DateTime date = t.getDate();
+    String d = fmt2.print(date);
+  // date.month().getText();
     int sLength = s.length();
     float gap = 20;
-
+    float info_header_size = 30;
     int textBoxSize = sLength * 2;
 
     float shadowOffset = 4;
@@ -297,16 +302,25 @@ void drawMouseOver(Tweet t)
       //shadow
       strokeWeight(0);
       fill(0, 0, 0, 100);
-      rect(shadowOffset + loc.x + imgPos.x, shadowOffset + loc.y + imgPos.y, shadowOffset + 200, shadowOffset + textBoxSize);
+      rect(shadowOffset + loc.x + imgPos.x, shadowOffset + loc.y + imgPos.y, shadowOffset + 200, shadowOffset + textBoxSize + info_header_size);
 
-      stroke(0, 0, 0, 100);
+      stroke(0, 0, 0, 200);
       strokeWeight(4);
 
+
+    
+      
       fill(230, 230, 250, 200);
-      rect(loc.x  + imgPos.x, loc.y  + imgPos.y, 200, textBoxSize);
+      rect(loc.x  + imgPos.x, loc.y  + imgPos.y + info_header_size, 200, textBoxSize);
+      
+      fill(130, 180, 130, 200);
+      rect(loc.x  + imgPos.x, loc.y  + imgPos.y, 200, info_header_size);
+
+      fill(255, 255, 255, 255);
+      text(d, loc.x  + imgPos.x + 10, loc.y  + imgPos.y + info_header_size - 8);
 
       fill(0, 50, 100);
-      text(s, loc.x + gap  + imgPos.x, loc.y + gap  + imgPos.y, 200 - gap*2, 300 - gap*2);
+      text(s, loc.x + gap  + imgPos.x, loc.y + gap  + imgPos.y + info_header_size, 200 - gap*2, 300 - gap*2);
 
       fill(t.getTweetSetColour());
     }
@@ -465,7 +479,6 @@ void generateTweetSet(String keywords)
     // list table names
     db.query(sqlQuery);
     Tweet newTweetToAdd;
-    DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
     DateTime thisDate;
     //reset max and min dates!
 
@@ -755,7 +768,7 @@ void drawTweetNetwork() {
        //if we are at the second point+, draw line
        if(counter > 0)
        {
-         line(lastLocation.x + imgPos.x, lastLocation.y + imgPos.y, loc.x+ imgPos.x, loc.y + imgPos.y);
+        // line(lastLocation.x + imgPos.x, lastLocation.y + imgPos.y, loc.x+ imgPos.x, loc.y + imgPos.y);
        }
       
        lastLocation = loc;
