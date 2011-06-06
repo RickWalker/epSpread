@@ -18,6 +18,9 @@ ListBox filterShortcutList;
 
 //-----------------
 
+WeatherFrame weatherFrame;
+WeatherApplet weatherApplet;
+
 //mouse drag selection
 float mouseDragStart_x = -1;
 float mouseDragStart_y = -1; 
@@ -32,6 +35,13 @@ int numberSelected = 0;
 
 SQLite db;
 PImage imgMap;
+PImage rain;
+PImage showers;
+PImage cloudy;
+PImage clear;
+
+
+
 PVector imgPos;
 
 
@@ -69,6 +79,10 @@ Interval dateSelection;
 
 PFont font = createFont("FFScala", 18);
 
+
+
+
+
 void setup()
 {
   size( imgX+450, imgY + 130, OPENGL);
@@ -77,9 +91,18 @@ void setup()
   //setup database
   db = new SQLite( this, "VAST2011_MC1.sqlite" );  // open database file
 
+
+
   //Load an image
-  imgMap = loadImage("Vastopolis_Map_B&W_2.png");
+  imgMap = loadImage("data/Vastopolis_Map_B&W_2.png");
   imgPos = new PVector(130, 40);
+  
+  
+  rain= loadImage("data/rain.jpg");
+  showers= loadImage("data/showers.jpg");
+  cloudy= loadImage("data/cloudy.jpg");
+  clear= loadImage("data/clear.jpg");
+  
   
     //Load font 
   textFont(font); 
@@ -87,7 +110,8 @@ void setup()
   //setup tweetSetManager
   tweetSetManager = new TweetSetManager();
 
-
+  //Setup Weather frame
+  WeatherFrame weatherFrame = new WeatherFrame();
 
 
   //Setup Time Slider
@@ -116,8 +140,8 @@ void setup()
 
 
 void draw() {
-  background(225, 228, 233); //blank to start with
-  //background(225, 225, 225); //blank to start with
+  background(225, 228, 233); //blank
+
 
   strokeWeight(0);
   fill(40);
@@ -150,6 +174,10 @@ if (b_selection)
     rect(mouseDragStart_x, mouseDragStart_y, constrain(mouseX, imgPos.x, imgX + imgPos.x) - mouseDragStart_x, constrain(mouseY, imgPos.y, imgY + imgPos.y) - mouseDragStart_y); //limit rectangle to image boundary
   }
   
+  
+  
+   weatherApplet.redraw();
+
 }
 
 
@@ -592,6 +620,8 @@ void controlEvent(ControlEvent theControlEvent) {
         a.updateHeatMap();
       //tweetSelectionMin = int(theControlEvent.controller().arrayValue()[0]);
       //tweetSelectionMax = int(theControlEvent.controller().arrayValue()[1]);
+      
+      weatherApplet.setDate(minDate, int(theControlEvent.controller().arrayValue()[1]));
     }
 
 
@@ -952,6 +982,7 @@ void mouseReleased()
       }
   }
 }
+
 
 
 
