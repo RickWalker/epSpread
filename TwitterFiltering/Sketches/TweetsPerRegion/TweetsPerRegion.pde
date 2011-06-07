@@ -15,6 +15,7 @@ DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
 DateTime startDate = (new DateTime(2011, 4, 30, 0, 0, 0, 0)).minus(Period.hours(1));
 DateTime endDate = (new DateTime(2011, 5, 20, 23, 59, 0, 0)).plus(Period.hours(1));
 
+PrintWriter output;
 
 // -------- Region class --------
 
@@ -121,7 +122,7 @@ void setup()
 
   //setup database
   db = new SQLite( this, "../../VAST2011_MC1.sqlite" );  // open database file
-
+  output = createWriter("output.csv");
 
   RG.init( this );
 
@@ -476,14 +477,13 @@ void setup()
 
   newRegion = new Region( villa, "villa", color(255, 0, 0) );
   regions.add(newRegion);
-
-
   newRegion = new Region( suburbia, "suburbia", color(0, 255, 0) );
    regions.add(newRegion);
+   
    newRegion = new Region( eastside, "eastside", color(0, 255, 0) );
    regions.add(newRegion);
    
-   
+   /*
    newRegion = new Region( lakeside, "lakeside", color(0, 255, 0) );
    regions.add(newRegion);
    newRegion = new Region( southville, "southville", color(0, 255, 0) );
@@ -507,7 +507,7 @@ void setup()
    regions.add(newRegion);
    newRegion = new Region( river, "river", color(0, 255, 0) );
    regions.add(newRegion);
-  
+  */
 
 
   println("Printing out the first region's name : " + regions.get(0).getName() );
@@ -534,7 +534,7 @@ void draw()
 
 void scrapeDatabase() {
 
-  String granularity = "Hours";  
+  String granularity = "Days";  
   
   if ( db.connect() )
   {
@@ -624,25 +624,49 @@ void scrapeDatabase() {
 
 if(granularity == "Days"){
   //Print out the totals
-  for (Region reg: regions) {
-    println("");
-    println(reg.getName() + ",");
-    for (int i=0; i<reg.getTweetCountDays().size(); i++)
-      println(reg.getTweetCountDays().get(i) + ",");
+
+    for (Region reg: regions) {
+      output.print(reg.getName() + ",");
+      print(reg.getName() + ",");
+    }
+    
+    output.println();
+    println();
+      
+    
+    
+    //println(reg.getName() + ",");
+    for (int i=0; i<21; i++){
+      for (Region reg: regions) 
+       {
+       output.print(reg.getTweetCountDays().get(i) + ",");
+       print(reg.getTweetCountDays().get(i) + ",");
+     }
+     output.println();
+     println();
+     
   }
 }
 
 if(granularity == "Hours"){
   //Print out the totals
-  for (Region reg: regions) {
-    println(reg.getName() + ",");
-    for (int i=0; i<reg.getTweetCountHours().size(); i++)
-      println(reg.getTweetCountHours().get(i) + ",");
+
+//    println(reg.getName() + ",");
+    for (int i=0; i<505; i++)
+    {
+      for (Region reg: regions) {
+      {
+      output.print(reg.getTweetCountHours().get(i) + ",");
+      print(reg.getTweetCountHours().get(i) + ",");
+      }
+      output.println();
+      println();
+      }
   }
 }
 
-
-
+ output.flush(); // Write the remaining data
+ output.close(); // Finish the file
 }
 
 
