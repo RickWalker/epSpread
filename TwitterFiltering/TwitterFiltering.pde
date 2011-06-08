@@ -85,7 +85,7 @@ PFont font = createFont("FFScala", 18);
 
 void setup()
 {
-  size( imgX+270, imgY + 130, OPENGL);
+  size( imgX+310, imgY + 130, OPENGL);
   smooth();
 
   //setup database
