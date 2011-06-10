@@ -50,21 +50,27 @@ void setup() {
       size = new float[layerSize];
       
       for(int j=0; j<layerSize; j++)
-      {
-      size[j] =  (float(tweetFrequencies[l].getData().get(j)) / float(tweetFrequencies[l].getTotalTweets()) ); // needs to be normalized (value depends on name)
-     // size[j] = float(tweetFrequencies[l].getData().get(j));
-      }
+      {    
+     float normalized;
+ 
+     
+     normalized = (tweetFrequencies[l].getData().get(j) - tweetFrequencies[l].getMinTweets() ) / (tweetFrequencies[l].getMaxTweets() - tweetFrequencies[l].getMinTweets()); 
+    
+     size[j] = normalized;
+     }
+      
+      //println(tweetFrequencies[l].getName() + " " + float(tweetFrequencies[l].getMaxTweets()));
      
       
       layers[l]  = new Layer(name, size);
     }
 
   // ORDER DATA
-  //ordering = new LateOnsetSort();
+ // ordering = new LateOnsetSort();
   //ordering = new VolatilitySort();
   ordering = new InverseVolatilitySort();
-  //ordering = new BasicLateOnsetSort();
-  //ordering = new NoLayerSort();
+ // ordering = new BasicLateOnsetSort();
+ // ordering = new NoLayerSort();
 
   // LAYOUT DATA
   layout   = new StreamLayout();

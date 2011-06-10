@@ -6,7 +6,9 @@ public class TweetFrequencies {
 
   int hours = 505;
   int days = 21;
-  int totalTweets;
+  float maxTweets = -10000000;
+  float minTweets = 10000000;
+  
 
   String mName;
   ArrayList<Integer> mData = new ArrayList<Integer>();
@@ -31,10 +33,21 @@ public class TweetFrequencies {
 
   void addToData(Integer value) {
     mData.add(value);
-    totalTweets += value;
+    
+    if(value > maxTweets)
+      maxTweets = value;
+    
+    if(value < minTweets)
+      minTweets = value;
   }
   
-    int getTotalTweets(){
-   return totalTweets; 
+    float getMaxTweets(){
+   return maxTweets; 
   }
+  
+   float getMinTweets(){
+   return minTweets; 
+  }
+  
+  
 }

@@ -1,54 +1,31 @@
+
+/*
+*
+* Main Code
+*
+*/
+
 import processing.opengl.*;
-
-// fjenett 20081129
-
 import de.bezier.data.sql.*;
 import controlP5.*;
 import java.util.ArrayList;
 
+// ---- Globals ----
+
 String[] keywordList;
-
-//ControlP5 objects
-//-----------------
-
-ControlP5 controlP5;
-Range range;
-Textfield filterTextField;
-ListBox filterShortcutList;
-
-//-----------------
-
-WeatherFrame weatherFrame;
-WeatherApplet weatherApplet;
-
-//mouse drag selection
-float mouseDragStart_x = -1;
-float mouseDragStart_y = -1; 
-float mouseDragEnd_x = -1;
-float mouseDragEnd_y = -1;
-
-boolean b_draggingMouse = false;
-boolean b_selection = false;
-boolean b_generateNetwork = false;
-
-int numberSelected = 0;
-
 SQLite db;
-PImage imgMap;
-PImage rain;
-PImage showers;
-PImage cloudy;
-PImage clear;
+PFont font = createFont("FFScala", 18);
 
+TweetSetManager tweetSetManager;
+ArrayList<Integer> colours = new ArrayList<Integer>();
+ArrayList<TweetNetwork> tweetNetworks = new ArrayList<TweetNetwork>();
+ArrayList<Integer> selectedTweetUserIds = new ArrayList<Integer>();
 
-
-PVector imgPos;
-
-
-int imgX = 1304;
-int imgY = 663;
-float tweetBoxSize = 10;
-
+PVector imgPos;  //pos offset of image
+int imgX = 1304; //image size 
+int imgY = 663;  //image size
+float tweetBoxSize = 10; //size of tweet map icon
+int colourTracker = 0; //tracks number of colours
 
 float topleft_lat = 42.3017;
 float topleft_lon = 93.5673;
@@ -58,29 +35,63 @@ float bottomright_lon = 93.1923;
 int filterTextField_x;
 int filterTextField_y;
 
-int tweetSelectionMin = 0;
-int tweetSelectionMax = 100;
+boolean b_generateNetwork = false;  //Generate network for selected tweets?
 
-PVector tweet_loc = new PVector(42.2838, 93.47745);
-
-
-TweetSetManager tweetSetManager;
-ArrayList<Integer> colours = new ArrayList<Integer>();
-ArrayList<TweetNetwork> tweetNetworks = new ArrayList<TweetNetwork>();
-ArrayList<Integer> selectedTweetUserIds = new ArrayList<Integer>();
+// ---- Interval Range -----
 
 //Note : are intervals inclusive or exclusive?
 DateTime minDate = (new DateTime(2011, 4, 30, 0, 0, 0, 0)).minus(Period.hours(1));
 DateTime maxDate = (new DateTime(2011, 5, 20, 23, 59, 0, 0)).plus(Period.hours(1));
 DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
-DateTimeFormatter fmt2 = DateTimeFormat.forPattern("MMM dd              HH:mma");
-    
+DateTimeFormatter fmt2 = DateTimeFormat.forPattern("MMM dd              HH:mma"); 
 Interval dateSelection;
 
-PFont font = createFont("FFScala", 18);
+// ---- Control P5 objects ----
+
+ControlP5 controlP5;
+Range range;
+Textfield filterTextField;
+ListBox filterShortcutList;
+
+// ---- Weather ----
+
+WeatherFrame weatherFrame;
+WeatherApplet weatherApplet;
+PImage imgMap;
+PImage rain;
+PImage showers;
+PImage cloudy;
+PImage clear;
+
+// ---- Mouse Drag/Selection ----
+
+//mouse drag selection
+float mouseDragStart_x = -1;
+float mouseDragStart_y = -1; 
+float mouseDragEnd_x = -1;
+float mouseDragEnd_y = -1;
+
+boolean b_draggingMouse = false;
+boolean b_selection = false;
+int numberSelected = 0;
 
 
 
+
+
+
+
+
+
+
+
+
+
+/* -----------------------------
+*
+* Setup the application
+*
+* -----------------------------*/
 
 
 void setup()
@@ -91,20 +102,17 @@ void setup()
   //setup database
   db = new SQLite( this, "VAST2011_MC1.sqlite" );  // open database file
 
-
-
-  //Load an image
+  //Load the map
   imgMap = loadImage("data/Vastopolis_Map_B&W_2.png");
   imgPos = new PVector(10, 40);
   
-  
+  //Load the weather images
   rain= loadImage("data/rain.jpg");
   showers= loadImage("data/showers.jpg");
   cloudy= loadImage("data/cloudy.jpg");
   clear= loadImage("data/clear.jpg");
   
-  
-    //Load font 
+  //Load font 
   textFont(font); 
 
   //setup tweetSetManager
@@ -113,60 +121,81 @@ void setup()
   //Setup Weather frame
   WeatherFrame weatherFrame = new WeatherFrame();
 
-
   //Setup Time Slider
   controlP5 = new ControlP5(this);
   controlP5.setAutoDraw(false);
-
-
   dateSelection = new Interval(minDate, maxDate);
 
-
-  // add horizontal range slider
+  //Add horizontal range slider
   range = controlP5.addRange("Date", 0, Hours.hoursIn(dateSelection).getHours(), 0, 24, 130, imgY + 50, imgX, 30);
   range.setColorBackground(color(130, 130, 130));
   range.setLabelVisible(false);
   range.setCaptionLabel("");
-
-
-  println("Duration is " + Hours.hoursIn(dateSelection).getHours() + " hours");
   dateSelection=new Interval(minDate, minDate.plus(Period.hours(24)));
 
+  //Setup Colours
   setupColours();
-  setupGUI();
+  
+  //Setup CP5 search field
+  setupSearchField();
 }
 
 
 
 
-void draw() {
-  background(225, 228, 233); //blank
 
+
+
+
+
+
+
+
+/* -----------------------------
+*
+* Main draw method
+*
+* -----------------------------*/
+
+void draw() {
+  background(225, 228, 233);
+
+  
+// ---- Border + Map ----
 
   strokeWeight(0);
   fill(40);
   rect(imgPos.x - 3, imgPos.y - 3, imgX+6, imgY+6);
   image(imgMap, imgPos.x, imgPos.y, imgX, imgY);  
 
+// ---- Filter terms text ----
+
   fill(76, 86, 108);
   text("Filter Terms", filterTextField_x - 2, filterTextField_y - 10);
 
-  //add border to date range slider!
+// ---- Border for Range slider ----
+
   float rangeBorderSize = 2;
   fill(80);
   rect(130 - rangeBorderSize, imgY + 50 - rangeBorderSize, imgX + rangeBorderSize*2, 30 + rangeBorderSize*2);
 
+// ---- Draw all the TweetSet Buttons ----
   tweetSetManager.draw();
+  
+// ---- Draw ControlP5 ----  
   controlP5.draw();
 
+// ---- Draw tweet network if selected / on ----  
 if (b_selection)
     drawTweetNetwork();
 
+
+// ---- Draw the tweets on the map ----  
   drawTweetsOnce();
 
 
-  //draw semi-transparent rectangle if click-dragging
-  //if (  (mouseX > imgPos.x) && (mouseY > imgPos.y) && (mouseX < imgX) && (mouseY < imgY) ) 
+// --- draw semi-transparent rectangle if click-dragging ---
+
   if (b_draggingMouse) {
     stroke(200, 200, 255, 100);
     strokeWeight(2);
@@ -175,18 +204,22 @@ if (b_selection)
   }
   
   
-  
+// ---- Refresh weather applet ----    
    weatherApplet.redraw();
 
 }
 
 
 
-int colourTracker = 0;
+/* -----------------------------
+*
+* Setup colours (from colorbrewer)
+*
+* -----------------------------*/
+
 
 void setupColours()
 {
-
   colours.add(color( 77, 175, 74  ));
   colours.add(color( 55, 126, 184   ));
   colours.add(color( 228, 26, 28 ));
@@ -195,7 +228,6 @@ void setupColours()
   colours.add(color( 255, 255, 51  ));
   colours.add(color( 166, 86, 40  ));
   colours.add(color( 247, 129, 191  ));
-
 
   //overspill
   colours.add(color( 179, 222, 105  ));
@@ -208,20 +240,6 @@ void setupColours()
   colours.add(color( 252, 205, 229  ));
   colours.add(color(217, 217, 217  ));
   colours.add(color( 188, 128, 189  )); 
-
-
-  /*
-  colours.add(color( 166, 206, 227  ));
-   colours.add(color( 31, 120, 180  ));
-   colours.add(color( 178, 223, 138  ));
-   colours.add(color(  51, 160, 44  ));
-   colours.add(color( 251, 154, 153   ));
-   colours.add(color(  227, 26, 28  ));
-   colours.add(color(253, 191, 111 ));
-   colours.add(color( 255, 127, 0  ));
-   colours.add(color(202, 178, 214  ));
-   colours.add(color( 106, 61, 154  )); 
-   */
 }
 
 
@@ -230,50 +248,11 @@ void setupColours()
 
 
 
-void setupGUI()
-{
-  setupSearchField();
-  setupFilterShortcutList();
-}
-
-
-void setupFilterShortcutList()
-{
-  filterShortcutList = controlP5.addListBox("myList", width-260, 92, 180, 280);
-  filterShortcutList.setItemHeight(30);
-  filterShortcutList.setBarHeight(11);
-  filterShortcutList.setBackgroundColor(250);
-
-  filterShortcutList.captionLabel().toUpperCase(false);
-  filterShortcutList.setColorBackground(250);
-  filterShortcutList.setColorForeground(255);
-  //filterShortcutList.setColorValue(50);
-  filterShortcutList.setColorActive(255);
-  filterShortcutList.setColorLabel(50);
-  filterShortcutList.setLabel("Shortcuts");
-  filterShortcutList.captionLabel().style().marginTop = 4;
-  filterShortcutList.hideBar();
-  filterShortcutList.close();
-  filterShortcutList.valueLabel().toUpperCase(false);
-
-  ArrayList<String> keywordShortcuts = new ArrayList<String>();
-  keywordShortcuts.add("All Symptoms");
-  keywordShortcuts.add("All Events");
-  keywordShortcuts.add("All Emergencies");
-  keywordShortcuts.add("All Accidents");
-
-
-
-
-  for (String keyword: keywordShortcuts) {
-    int id = 0;
-    ListBoxItem b = filterShortcutList.addItem(keyword, id);
-    //b.captionLabel().toUpperCase(false);
-    id++;
-  }
-}
-
-
+/* -----------------------------
+*
+* Setup the CP5 search field
+*
+* -----------------------------*/
 
 void setupSearchField()
 {
@@ -296,6 +275,12 @@ void setupSearchField()
 
 
 
+/* -----------------------------
+*
+* Translate map lon/lat to image map
+*
+* -----------------------------*/
+
 PVector mapCoordinates(PVector coords)
 {
   PVector result = new PVector(0.0f, 0.0f);
@@ -306,6 +291,15 @@ PVector mapCoordinates(PVector coords)
 }
 
 
+
+
+
+
+/* -----------------------------
+*
+* Draw mouse over info box
+*
+* -----------------------------*/
 
 
 void drawMouseOver(Tweet t)
@@ -334,9 +328,6 @@ void drawMouseOver(Tweet t)
       stroke(0, 0, 0, 200);
       strokeWeight(4);
 
-
-    
-      
       fill(230, 230, 250, 200);
       rect(loc.x  + imgPos.x, loc.y  + imgPos.y + info_header_size, 200, textBoxSize);
       
@@ -351,52 +342,52 @@ void drawMouseOver(Tweet t)
 
       fill(t.getTweetSetColour());
     }
-  
 }
 
 
 
+
+
+
+
+
+
+
+/* -----------------------------------------------
+*
+* Draws all the tweets from the tweetsets active
+*
+* -----------------------------------------------*/
+
+
 void drawTweetsOnce()//int mini, int maxi) 
 {
-
-
-  //Load font 
   textFont(font); 
-
-
-  //Draw all the ellipses
   strokeWeight(2);
   Tweet forMouseOver = null;
-  //for (int i=mini; i<maxi; i++) {
 
-  // ArrayList<Tweet> theTweets = tweetSets.get(0).getTweets();   
-
+  //Draw all the tweets
   if (tweetSetManager.getTweetSetListSize() > 0)
     for (TweetSet b: tweetSetManager.getTweetSetList()) {
-      if (b.isActive())
+      if (b.isActive()) //if this tweetset is active
       {      
         if (tweetSetManager.isHeatmapViewActive())       
           b.heatmap.draw();
 
         for (Tweet a: b.getTweets()) {
 
-          // a.getAlphaIntegrator().update();
-
           if (dateSelection.contains(a.mDate)) {
-            //float colourPerc = float(i-mini) / float(maxi-mini);
-            //fill(0, 255, 0);//, 20);// + (235 * colourPerc));
-
+           
             color c = b.getColour();
             a.setAlphaTarget(255);
 
             fill(red(c), green(c), blue(c), a.getAlpha());
 
-            stroke(0, 0, 0, a.getAlpha());//, 20);// + (235 * colourPerc));
+            stroke(0, 0, 0, a.getAlpha());
+            strokeWeight(2);
 
             PVector loc = a.getLocation();
           
-            strokeWeight(2);
-
             //if there is a drag-select happening
             if (b_draggingMouse) {
               //if this tweet point is inside the selection box
@@ -405,8 +396,7 @@ void drawTweetsOnce()//int mini, int maxi)
               }
             }
 
-            if (a.isSelected())
-            {
+            if (a.isSelected()){
               stroke(255);
             }
             
@@ -416,7 +406,7 @@ void drawTweetsOnce()//int mini, int maxi)
             if (dist(mouseX, mouseY, loc.x + imgPos.x, loc.y + imgPos.y) < 10) {
               forMouseOver =a ;
             }
-            //drawMouseOver(a);
+            
           }
           else {
             //tweet not in date range 
@@ -427,12 +417,17 @@ void drawTweetsOnce()//int mini, int maxi)
     }
   if (forMouseOver != null)
     drawMouseOver(forMouseOver);
-  //}
 }
 
 
 
 
+
+/* -----------------------------------------------
+*
+* Returns true if tweet is inside the drag-select box
+*
+* -----------------------------------------------*/
 
 boolean isInsideSelectionBox(float x, float y)
 {
@@ -449,6 +444,14 @@ boolean isInsideSelectionBox(float x, float y)
 }
 
 
+
+
+
+/* -----------------------------------------------
+*
+* Generates a tweet set based on filter term (* for RE)
+*
+* -----------------------------------------------*/
 
 
 void generateTweetSet(String keywords)
@@ -470,8 +473,6 @@ void generateTweetSet(String keywords)
     keywords = keywords.substring(1);
   }
 
-
-
   //Create new tweet set
   TweetSet newTweetSetToAdd = new TweetSet(keywords, setColour, RESymbol);
 
@@ -486,7 +487,6 @@ void generateTweetSet(String keywords)
   //Build the query
   String query_part1 = "SELECT * FROM micro2 WHERE ";
   String query_part2 = "";
-
 
   //append all the keywords to search for
   for (int i=0; i<filterTerms.length; i++)
@@ -507,8 +507,6 @@ void generateTweetSet(String keywords)
     db.query(sqlQuery);
     Tweet newTweetToAdd;
     DateTime thisDate;
-    //reset max and min dates!
-
 
     // -------- Go through data, storing them as tweets in a tweetset (if they pass optional RE match) --------   
 
@@ -523,10 +521,8 @@ void generateTweetSet(String keywords)
           passesRE = false;
       }
 
-
       if (passesRE)
       {
-
         //we have a new record, create tweet object
         newTweetToAdd = new Tweet();
 
@@ -543,25 +539,10 @@ void generateTweetSet(String keywords)
         thisDate =fmt.parseDateTime(db.getString("date"));
 
         newTweetToAdd.setTweetSetColour(setColour);
-
         newTweetToAdd.setDate(thisDate);
-
-        /*if (firstRecord) {
-         minDate = new DateTime(thisDate);
-         maxDate = new DateTime(thisDate);
-         firstRecord = false;
-         }
-         else if (thisDate.isAfter(maxDate)) {
-         maxDate = new DateTime(thisDate);
-         }
-         else if (thisDate.isBefore(maxDate)) {
-         minDate = new DateTime(thisDate);
-         }*/
 
         //convert to pixels and set
         newTweetToAdd.setLocation(mapCoordinates(tweetLocation));
-        //ready for next tweet record
-        //tweetCount++;
 
         //add tweet to tweet set
         newTweetSetToAdd.addTweet(newTweetToAdd);
@@ -569,12 +550,10 @@ void generateTweetSet(String keywords)
     }
 
     println("Created " + newTweetSetToAdd.tweets.size() + " tweet records");
-    println("Date min is " + minDate + " and max is " + maxDate);
   }
 
   //add this finished tweet set to the array
   tweetSetManager.addTweetSet(newTweetSetToAdd);
-
 
   //update heat maps for first time
   for (TweetSet a: tweetSetManager.getTweetSetList())
@@ -589,8 +568,11 @@ void generateTweetSet(String keywords)
 
 
 
-
-
+/* -----------------------------------------------
+*
+* Process ControlP5 events
+*
+* -----------------------------------------------*/
 
 void controlEvent(ControlEvent theControlEvent) {
 
@@ -599,16 +581,12 @@ void controlEvent(ControlEvent theControlEvent) {
     if (theControlEvent.group().id() == 1) // id #1 is for the tweetSetListBox
     {
       int index = int(theControlEvent.group().value());
-
       println("Removing : " + theControlEvent.group().name());
-
-      //  tweetSets.remove(index-1);
     }
   }
   else
   {
-
-    if (theControlEvent.controller().name().equals("Date")) {
+   if (theControlEvent.controller().name().equals("Date")) {
       // min and max values are stored in an array.
       // access this array with controller().arrayValue().
       // min is at index 0, max is at index 1.
@@ -617,16 +595,12 @@ void controlEvent(ControlEvent theControlEvent) {
       println("Selection is " + dateSelection);
       for (TweetSet a: tweetSetManager.getTweetSetList())
         a.updateHeatMap();
-      //tweetSelectionMin = int(theControlEvent.controller().arrayValue()[0]);
-      //tweetSelectionMax = int(theControlEvent.controller().arrayValue()[1]);
       
       weatherApplet.setDate(minDate, int(theControlEvent.controller().arrayValue()[1]));
     }
 
 
-
     // -------- Typing something in and hitting return will trigger this code, creating a new tweet set --------
-
     if (theControlEvent.controller().name().equals("Filters")) {
       String keywords = theControlEvent.controller().stringValue();
 
@@ -645,7 +619,17 @@ void controlEvent(ControlEvent theControlEvent) {
 
 
 
-// -------- For each uniquely selected user, create a tweet history that stores all of their tweets --------   
+
+
+/* -----------------------------------------------
+*
+* For each uniquely selected user, create a tweet 
+* history that stores all of their tweets
+*
+* Note : Nothing in the data by the look of things
+*
+* -----------------------------------------------*/
+
 
 void generateTweetNetwork() {
 
@@ -669,7 +653,6 @@ void generateTweetNetwork() {
       counter++;
     }
 
-
     //this way of querying (all in one go) is significantly faster than doing the queries userId by userId
     //requires more work later though, as the tweets aren't organised by id!
 
@@ -688,7 +671,6 @@ void generateTweetNetwork() {
       Integer lon = db.getInt("lon");
 
       DateTime thisDate;
-
 
       boolean found = false;
       TweetNetwork thisNetwork = new TweetNetwork(0);  //blank
@@ -734,8 +716,6 @@ void generateTweetNetwork() {
       }
     }
 
-
- 
       //uncomment to print out 
      
      for(TweetNetwork v: tweetNetworks){
@@ -759,6 +739,18 @@ void generateTweetNetwork() {
 
 
 
+
+
+
+
+
+
+
+/* -----------------------
+*
+* Draw tweet network 
+*
+* ----------------------- */
 
 
 void drawTweetNetwork() {
@@ -812,10 +804,7 @@ void drawTweetNetwork() {
  }
 }
   
-  
- // stroke(255);
- // fill(255,255,255);
-  
+   
 }
 
 
@@ -824,19 +813,22 @@ void drawTweetNetwork() {
 
 
 
-
+/* -----------------------------------------------
+*
+* Calculates based on selection if the users talk 
+* about other filter terms at some point
+*
+* -----------------------------------------------*/
 
 
 void calculateTweetSetCrossover()
 {
   println("calculating tweet set crossover");
 
-
   //reset crossover matches at the start
   for (TweetSet o: tweetSetManager.getTweetSetList()) {
     o.resetCrossoverMatches();
   }
-
 
   //loop through tweetsets
   if (tweetSetManager.getTweetSetListSize() > 0)
@@ -863,7 +855,6 @@ void calculateTweetSetCrossover()
       }
     }
 
-
   for (TweetSet b: tweetSetManager.getTweetSetList()) { 
     println("For tweetSet " + b.getSearchTerms() + " : " + b.getNumberOfCrossoverMatches());
   }
@@ -877,6 +868,11 @@ void calculateTweetSetCrossover()
 
 
 
+/* -----------------------
+*
+* Mouse code!
+*
+* ----------------------- */
 
 
 void mousePressed() {
@@ -894,9 +890,6 @@ void mousePressed() {
     b_selection = false;
   }
 }
-
-
-
 
 
 void mouseReleased()
@@ -959,8 +952,6 @@ void mouseReleased()
 
       //now that we have a selection, calculate the crossover percentage between tweetSets (i.e. how many of these people also mention the other keywords)
       calculateTweetSetCrossover(); 
-      //also generate tweet network for these selected users
-      
     }
     else
       b_draggingMouse = false;
