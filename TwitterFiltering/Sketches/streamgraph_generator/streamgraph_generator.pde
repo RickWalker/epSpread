@@ -13,13 +13,12 @@
 boolean     isGraphCurved = true; // catmull-rom interpolation
 int         seed          = 28;   // random seed
 
-float       DPI           = 300;
+float       DPI           = 400;
 float       widthInches   = 3.5;
-float       heightInches  = 0.7;
-int         numLayers     = 5;
-int         layerSize     = 10;
+float       heightInches  = 1.5;
+int         numLayers     = 13;
+int         layerSize     = 21;
 
-DataSource  data;
 LayerLayout layout;
 LayerSort   ordering;
 ColorPicker coloring;
@@ -32,14 +31,38 @@ void setup() {
   smooth();
   noLoop();
 
-  // GENERATE DATA
-  data     = new TweetFreqDataSource();
-  //data     = new BelievableDataSource();
+
+  //Get data
+  TweetFrequencies[] tweetFrequencies = loadCSV("output.csv", numLayers); 
+
+   println("Tweet Frequency name : " + tweetFrequencies[0].getName());
+      for (int i=0; i<tweetFrequencies[0].getData().size(); i++) {
+        println(tweetFrequencies[0].getData().get(i));
+      }
+
+   //place in layers
+   layers = new Layer[numLayers];
+
+    for (int l = 0; l < numLayers; l++) {
+      String name   = tweetFrequencies[l].getName();
+      float[] size  = new float[layerSize];
+            
+      size = new float[layerSize];
+      
+      for(int j=0; j<layerSize; j++)
+      {
+      size[j] =  (float(tweetFrequencies[l].getData().get(j)) / float(tweetFrequencies[l].getTotalTweets()) ); // needs to be normalized (value depends on name)
+     // size[j] = float(tweetFrequencies[l].getData().get(j));
+      }
+     
+      
+      layers[l]  = new Layer(name, size);
+    }
 
   // ORDER DATA
-  ordering = new LateOnsetSort();
+  //ordering = new LateOnsetSort();
   //ordering = new VolatilitySort();
-  //ordering = new InverseVolatilitySort();
+  ordering = new InverseVolatilitySort();
   //ordering = new BasicLateOnsetSort();
   //ordering = new NoLayerSort();
 
@@ -52,7 +75,33 @@ void setup() {
   // COLOR DATA
   //coloring = new LastFMColorPicker(this, "layers-nyt.jpg");
   //coloring = new LastFMColorPicker(this, "layers.jpg");
-  coloring = new RandomColorPicker(this);
+  //coloring = new RandomColorPicker(this);
+  
+  ArrayList<Integer> colours = new ArrayList<Integer>();
+  
+  
+  colours.add(color(77, 175, 74));
+  colours.add(color(55, 126, 184));
+  colours.add(color(179, 222, 105));
+  colours.add(color(252, 205, 229)); 
+  colours.add(color(217, 217, 217)); 
+  colours.add(color(188, 128, 189)); 
+  colours.add(color(204, 235, 197)); 
+  colours.add(color(255, 237, 111));
+   colours.add(color(141, 211, 199));
+  colours.add(color(255, 255, 179));
+  colours.add(color(190, 186, 218)); 
+  colours.add(color(251, 128, 114)); 
+  colours.add(color(128, 177, 211)); 
+  colours.add(color(253, 180, 98));
+
+  
+  //Give each layer a unique colour
+  for(int i=0; i<numLayers; i++)
+    layers[i].rgb = getRGB(int(red(colours.get(i))), int(green(colours.get(i))), int(blue(colours.get(i))), 255);
+
+    
+  
 
   //=========================================================================
 
@@ -60,13 +109,13 @@ void setup() {
   long time = System.currentTimeMillis();
 
   // generate graph
-  layers = data.make(numLayers, layerSize);
+ // layers = data.make(numLayers, layerSize);
   layers = ordering.sort(layers);
   layout.layout(layers);
-  coloring.colorize(layers);
+  //coloring.colorize(layers);
 
   // fit graph to viewport
-  scaleLayers(layers, 1, height - 1);
+  scaleLayers(layers, 10, height - 10);
 
   // give report
   long layoutTime = System.currentTimeMillis()-time;
@@ -79,6 +128,25 @@ void setup() {
   println("Coloring Method: " + layout.getName());
   println("Elapsed Time: " + layoutTime + "ms");
 }
+
+
+int getRGB(int r, int g, int b, int a){
+  
+ int value = ((a & 0xFF) << 24) |
+((r & 0xFF) << 16) |
+((g & 0xFF) << 8) |
+((b & 0xFF) << 0);
+
+return value;
+}
+
+
+
+
+
+
+
+
 
 // adding a pixel to the top compensate for antialiasing letting
 // background through. This is overlapped by following layers, so no

@@ -1,41 +1,5 @@
 
 
-// --------- Stores a labelled set of tweet frequencies ---------
-
-class TweetFrequencies {
-
-  int hours = 505;
-  int days = 21;
-
-  String mName;
-  ArrayList<Integer> mData = new ArrayList<Integer>();
-  
-
-  void TweetFrequencies() {
-
-    mName = "blank";
-  }
-
-  ArrayList<Integer> getData() {
-    return mData;
-  }
-
-
-  void setName(String name) {
-    mName = name;
-  }
-
-  String getName() {
-    return mName;
-  }
-
-  void addToData(Integer value) {
-    mData.add(value);
-    totalTweets++;
-  }
-  
-  
-}
 
 
 
@@ -61,12 +25,12 @@ TweetFrequencies[] loadCSV(String filename, int numRegions) {
 
 
   //This nested loop will work magic and put the csv columns in the correct tweetfrequency objects
-  for (int l=numRegions-2; l < theData.length; l++) {
+  for (int l=1; l < theData.length; l++) {
     regions = split(theData[l], ",");
-
-    for (int j=0; j<numRegions; j++) {
+ 
+    //region now contains data for each region
+    for(int j=0; j<numRegions; j++)
       tweetFrequencies[j].addToData(Integer.parseInt(regions[j]));
-    }
   }
 
   return tweetFrequencies;
@@ -75,7 +39,7 @@ TweetFrequencies[] loadCSV(String filename, int numRegions) {
 
 
 
-
+/*
 // --------- Test the code ---------
 
 void setup() {
@@ -88,5 +52,5 @@ void setup() {
     println(results[2].getData().get(i));
   }
 }
-
+*/
 

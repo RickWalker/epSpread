@@ -39,7 +39,7 @@ public class RandomColorPicker implements ColorPicker {
     }
   }
 
-  protected int hsb2rgb(float x, float y, float z) {
+  public int hsb2rgb(float x, float y, float z) {
     float calcR = 0;
     float calcG = 0;
     float calcB = 0;

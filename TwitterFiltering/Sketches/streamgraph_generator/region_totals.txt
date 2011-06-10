@@ -1,0 +1,14 @@
+villa 42342
+suburbia 90469
+eastside 50733
+lakeside 60134
+southville 49352
+plainville 50697
+smogtown 18450
+westside 72046
+cornertown 22421
+northville 61328
+riverside 43591
+uptown 184580
+downtown 269580
+river 110

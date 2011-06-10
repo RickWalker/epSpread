@@ -25,6 +25,7 @@ class Region {
   String regionName;   //stores name of region
   color regionColour;  //stores colour of region
   int tweetCount;
+  int totalCount;
   ArrayList<Integer> tweetCountDays;
   ArrayList<Integer> tweetCountHours;
 
@@ -35,6 +36,7 @@ class Region {
     regionName = _theName;
     regionColour = _theColour;
     tweetCount = 0;
+    totalCount = 0;
 
     tweetCountDays = new ArrayList<Integer>();
     tweetCountHours = new ArrayList<Integer>();
@@ -76,10 +78,12 @@ class Region {
 
   void incrementTweetCountForDay(Integer dayIndex) {
     tweetCountDays.set(dayIndex, tweetCountDays.get(dayIndex)+1);
+    totalCount++;
   }
 
   void incrementTweetCountForHour(Integer hourIndex) {
     tweetCountHours.set(hourIndex, tweetCountHours.get(hourIndex)+1);
+    totalCount++;
   }
 
 
@@ -87,6 +91,9 @@ class Region {
     return tweetCount;
   }
 
+Integer getTotalTweetCount(){
+ return totalCount; 
+}
 
   boolean contains(PVector coord) {
 
@@ -483,7 +490,7 @@ void setup()
    newRegion = new Region( eastside, "eastside", color(0, 255, 0) );
    regions.add(newRegion);
    
-   /*
+   
    newRegion = new Region( lakeside, "lakeside", color(0, 255, 0) );
    regions.add(newRegion);
    newRegion = new Region( southville, "southville", color(0, 255, 0) );
@@ -507,7 +514,7 @@ void setup()
    regions.add(newRegion);
    newRegion = new Region( river, "river", color(0, 255, 0) );
    regions.add(newRegion);
-  */
+  
 
 
   println("Printing out the first region's name : " + regions.get(0).getName() );
@@ -664,6 +671,16 @@ if(granularity == "Hours"){
       }
   }
 }
+
+
+
+for (Region reg: regions) 
+       {
+        print(reg.getName() + " " + reg.getTotalTweetCount()); 
+        println();
+       }
+
+
 
  output.flush(); // Write the remaining data
  output.close(); // Finish the file
