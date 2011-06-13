@@ -16,12 +16,15 @@ int         seed          = 28;   // random seed
 float       DPI           = 400;
 float       widthInches   = 3.5;
 float       heightInches  = 1.5;
-int         numLayers     = 13;
+int         numLayers     = 14;
 int         layerSize     = 21;
+
+PFont font = createFont("Calibri",20);
 
 LayerLayout layout;
 LayerSort   ordering;
 ColorPicker coloring;
+TweetFrequencies[] tweetFrequencies;
 
 Layer[]     layers;
 
@@ -31,83 +34,80 @@ void setup() {
   smooth();
   noLoop();
 
-
   //Get data
-  TweetFrequencies[] tweetFrequencies = loadCSV("output.csv", numLayers); 
+  tweetFrequencies = loadCSV("output.csv", numLayers); 
 
-   println("Tweet Frequency name : " + tweetFrequencies[0].getName());
-      for (int i=0; i<tweetFrequencies[0].getData().size(); i++) {
-        println(tweetFrequencies[0].getData().get(i));
-      }
+  println("Tweet Frequency name : " + tweetFrequencies[0].getName());
+  for (int i=0; i<tweetFrequencies[0].getData().size(); i++) {
+    println(tweetFrequencies[0].getData().get(i));
+  }
 
-   //place in layers
-   layers = new Layer[numLayers];
+  tweetFrequencies[0].setLayerColour(color(77, 175, 74));
+  tweetFrequencies[1].setLayerColour(color(55, 126, 184));
+  tweetFrequencies[2].setLayerColour(color(179, 222, 105));
+  tweetFrequencies[3].setLayerColour(color(252, 205, 229));
+  tweetFrequencies[4].setLayerColour(color(217, 217, 217));
+  tweetFrequencies[5].setLayerColour(color(188, 128, 189));
+  tweetFrequencies[6].setLayerColour(color(204, 235, 197) );
+  tweetFrequencies[7].setLayerColour(color(255, 237, 111));
+  tweetFrequencies[8].setLayerColour(color(141, 211, 199));
+  tweetFrequencies[9].setLayerColour(color(255, 255, 179));
+  tweetFrequencies[10].setLayerColour(color(190, 186, 218) );
+  tweetFrequencies[11].setLayerColour(color(251, 128, 114) );
+  tweetFrequencies[12].setLayerColour(color(128, 177, 211) );
+  tweetFrequencies[13].setLayerColour(color(253, 180, 98));
 
-    for (int l = 0; l < numLayers; l++) {
-      String name   = tweetFrequencies[l].getName();
-      float[] size  = new float[layerSize];
-            
-      size = new float[layerSize];
-      
-      for(int j=0; j<layerSize; j++)
-      {    
-     float normalized;
- 
-     
-     normalized = (tweetFrequencies[l].getData().get(j) - tweetFrequencies[l].getMinTweets() ) / (tweetFrequencies[l].getMaxTweets() - tweetFrequencies[l].getMinTweets()); 
-    
-     size[j] = normalized;
-     }
-      
-      //println(tweetFrequencies[l].getName() + " " + float(tweetFrequencies[l].getMaxTweets()));
-     
-      
-      layers[l]  = new Layer(name, size);
+  //place in layers
+  layers = new Layer[numLayers];
+
+  for (int l = 0; l < numLayers; l++) {
+    String name   = tweetFrequencies[l].getName();
+    float[] size  = new float[layerSize];
+
+    size = new float[layerSize];
+
+    for (int j=0; j<layerSize; j++)
+    {    
+      float normalized;
+
+
+      normalized = (tweetFrequencies[l].getData().get(j) - tweetFrequencies[l].getMinTweets() ) / (tweetFrequencies[l].getMaxTweets() - tweetFrequencies[l].getMinTweets()); 
+
+      size[j] = normalized;
     }
 
+    //println(tweetFrequencies[l].getName() + " " + float(tweetFrequencies[l].getMaxTweets()));
+
+    layers[l]  = new Layer(name, size);
+  }
+
   // ORDER DATA
- // ordering = new LateOnsetSort();
+  // ordering = new LateOnsetSort();
   //ordering = new VolatilitySort();
-  ordering = new InverseVolatilitySort();
- // ordering = new BasicLateOnsetSort();
- // ordering = new NoLayerSort();
+  //ordering = new InverseVolatilitySort();
+  // ordering = new BasicLateOnsetSort();
+  ordering = new NoLayerSort();
 
   // LAYOUT DATA
-  layout   = new StreamLayout();
+  //layout   = new StreamLayout();
   //layout   = new MinimizedWiggleLayout();
   //layout   = new ThemeRiverLayout();
-  //layout   = new StackLayout();
+  layout   = new StackLayout();
 
   // COLOR DATA
   //coloring = new LastFMColorPicker(this, "layers-nyt.jpg");
   //coloring = new LastFMColorPicker(this, "layers.jpg");
   //coloring = new RandomColorPicker(this);
-  
+
   ArrayList<Integer> colours = new ArrayList<Integer>();
-  
-  
-  colours.add(color(77, 175, 74));
-  colours.add(color(55, 126, 184));
-  colours.add(color(179, 222, 105));
-  colours.add(color(252, 205, 229)); 
-  colours.add(color(217, 217, 217)); 
-  colours.add(color(188, 128, 189)); 
-  colours.add(color(204, 235, 197)); 
-  colours.add(color(255, 237, 111));
-   colours.add(color(141, 211, 199));
-  colours.add(color(255, 255, 179));
-  colours.add(color(190, 186, 218)); 
-  colours.add(color(251, 128, 114)); 
-  colours.add(color(128, 177, 211)); 
-  colours.add(color(253, 180, 98));
 
-  
   //Give each layer a unique colour
-  for(int i=0; i<numLayers; i++)
+  for (int i=0; i<numLayers; i++)
+  {
+    colours.add(tweetFrequencies[i].getLayerColour());
     layers[i].rgb = getRGB(int(red(colours.get(i))), int(green(colours.get(i))), int(blue(colours.get(i))), 255);
+  }
 
-    
-  
 
   //=========================================================================
 
@@ -115,7 +115,7 @@ void setup() {
   long time = System.currentTimeMillis();
 
   // generate graph
- // layers = data.make(numLayers, layerSize);
+  // layers = data.make(numLayers, layerSize);
   layers = ordering.sort(layers);
   layout.layout(layers);
   //coloring.colorize(layers);
@@ -136,14 +136,14 @@ void setup() {
 }
 
 
-int getRGB(int r, int g, int b, int a){
-  
- int value = ((a & 0xFF) << 24) |
-((r & 0xFF) << 16) |
-((g & 0xFF) << 8) |
-((b & 0xFF) << 0);
+int getRGB(int r, int g, int b, int a) {
 
-return value;
+  int value = ((a & 0xFF) << 24) |
+    ((r & 0xFF) << 16) |
+    ((g & 0xFF) << 8) |
+    ((b & 0xFF) << 0);
+
+  return value;
 }
 
 
@@ -204,6 +204,8 @@ void draw() {
     endShape(CLOSE);
   }
 
+  drawLegend();
+
   // give report
   long layoutTime = System.currentTimeMillis() - time;
   println("Draw Time: " + layoutTime + "ms");
@@ -214,7 +216,8 @@ void graphVertex(int point, float[] source, boolean curve, boolean pxl) {
   float y = source[point] - (pxl ? 1 : 0);
   if (curve) {
     curveVertex(x, y);
-  } else {
+  } 
+  else {
     vertex(x, y);
   }
 }
@@ -258,3 +261,25 @@ String dateString() {
   return year() + "-" + nf(month(), 2) + "-" + nf(day(), 2) + "@" +
     nf(hour(), 2) + "-" + nf(minute(), 2) + "-" + nf(second(), 2);
 }
+
+
+void drawLegend(){
+ 
+  int gap = 25;
+  int x_offset = 30;
+  int y_offset = 20;
+  
+  stroke(80);
+  strokeWeight(1.5);
+  textFont(font); 
+  textAlign(LEFT, CENTER);
+  
+  for(int i=0; i<tweetFrequencies.length; i++){
+    fill(tweetFrequencies[i].getLayerColour());
+    rect(x_offset,10 + (i * gap) + y_offset,20,20);
+    fill(0);
+    text(tweetFrequencies[i].getName(),x_offset + 30,20 + (i * gap) + y_offset);
+    }
+  
+}
+

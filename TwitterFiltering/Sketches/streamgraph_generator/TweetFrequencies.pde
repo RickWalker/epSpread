@@ -8,7 +8,7 @@ public class TweetFrequencies {
   int days = 21;
   float maxTweets = -10000000;
   float minTweets = 10000000;
-  
+  color layerColour = color(0,0,0);
 
   String mName;
   ArrayList<Integer> mData = new ArrayList<Integer>();
@@ -22,6 +22,13 @@ public class TweetFrequencies {
     return mData;
   }
 
+ color getLayerColour(){
+  return layerColour; 
+ }
+ 
+ void setLayerColour(color theColour){
+  layerColour = theColour; 
+ }
 
   void setName(String name) {
     mName = name;
