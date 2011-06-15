@@ -30,7 +30,9 @@ TweetFrequencies[] loadCSV(String filename, int numRegions) {
  
     //region now contains data for each region
     for(int j=0; j<numRegions; j++)
+    {
       tweetFrequencies[j].addToData(Integer.parseInt(regions[j]));
+    }
   }
 
   return tweetFrequencies;

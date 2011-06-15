@@ -129,7 +129,7 @@ void setup()
 
   //setup database
   db = new SQLite( this, "../../VAST2011_MC1.sqlite" );  // open database file
-  output = createWriter("output.csv");
+  output = createWriter("hours.csv");
 
   RG.init( this );
 
@@ -484,9 +484,11 @@ void setup()
 
   newRegion = new Region( villa, "villa", color(255, 0, 0) );
   regions.add(newRegion);
+  
+  
   newRegion = new Region( suburbia, "suburbia", color(0, 255, 0) );
    regions.add(newRegion);
-   
+
    newRegion = new Region( eastside, "eastside", color(0, 255, 0) );
    regions.add(newRegion);
    
@@ -541,7 +543,7 @@ void draw()
 
 void scrapeDatabase() {
 
-  String granularity = "Days";  
+  String granularity = "Hours";  
   
   if ( db.connect() )
   {
@@ -651,24 +653,29 @@ if(granularity == "Days"){
      }
      output.println();
      println();
-     
   }
 }
 
 if(granularity == "Hours"){
   //Print out the totals
 
-//    println(reg.getName() + ",");
-    for (int i=0; i<505; i++)
-    {
-      for (Region reg: regions) {
-      {
-      output.print(reg.getTweetCountHours().get(i) + ",");
-      print(reg.getTweetCountHours().get(i) + ",");
-      }
-      output.println();
-      println();
-      }
+    for (Region reg: regions) {
+      output.print(reg.getName() + ",");
+      print(reg.getName() + ",");
+    }
+    
+    output.println();
+    println();
+
+    //println(reg.getName() + ",");
+    for (int i=0; i<505; i++){
+      for (Region reg: regions) 
+       {
+       output.print(reg.getTweetCountHours().get(i) + ",");
+       print(reg.getTweetCountHours().get(i) + ",");
+     }
+     output.println();
+     println();
   }
 }
 

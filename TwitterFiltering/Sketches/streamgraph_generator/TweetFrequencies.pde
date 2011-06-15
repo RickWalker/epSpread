@@ -9,6 +9,7 @@ public class TweetFrequencies {
   float maxTweets = -10000000;
   float minTweets = 10000000;
   color layerColour = color(0,0,0);
+  boolean bActive = true;
 
   String mName;
   ArrayList<Integer> mData = new ArrayList<Integer>();
@@ -24,6 +25,14 @@ public class TweetFrequencies {
 
  color getLayerColour(){
   return layerColour; 
+ }
+ 
+ void setActive(boolean _val){
+  bActive = _val; 
+ }
+ 
+  boolean isActive(){
+  return bActive;
  }
  
  void setLayerColour(color theColour){
@@ -43,8 +52,8 @@ public class TweetFrequencies {
     
     if(value > maxTweets)
       maxTweets = value;
-    
-    if(value < minTweets)
+
+    if(value < minTweets) 
       minTweets = value;
   }
   
