@@ -1,6 +1,6 @@
 class TwitterFilteringComponent {
   int x, y, width, height;
-  PApplet parent;
+  TimeLineComponent parent;
   int componentID;
   //SQLite db;
 
@@ -62,7 +62,7 @@ class TwitterFilteringComponent {
   float tweetBoxSize;// = 10; //size of tweet map icon
   Integrator xIntegrator, yIntegrator, widthIntegrator, heightIntegrator;
 
-  TwitterFilteringComponent(PApplet parent, int x, int y, int width, int height)
+  TwitterFilteringComponent(TimeLineComponent parent, int x, int y, int width, int height)
   {
     this.parent = parent;
     this.x = x;
@@ -470,24 +470,36 @@ class TwitterFilteringComponent {
     heightIntegrator.target(height*2);
     doneResize = false;
   }  
-  
-  void moveLeft(){
+
+  void moveLeft() {
     xIntegrator.target(x-100);
     doneResize = false;
   }
-  
-  void moveUp(){
+
+  void moveUp() {
     yIntegrator.target(y-100);
     doneResize = false;
   }
-  
-  void moveDown(){
+
+  void moveDown() {
     yIntegrator.target(y+100);
     doneResize = false;
   }
-  
-  void moveRight(){
+
+  void moveRight() {
     xIntegrator.target(x+100);
+    doneResize = false;
+  }
+
+  void moveTo(int mx, int my) {
+    xIntegrator.target(mx);
+    yIntegrator.target(my);
+    doneResize = false;
+  }
+
+  void setSize(int sw, int sh) {
+    widthIntegrator.target(sw);
+    heightIntegrator.target(sh);
     doneResize = false;
   }
 
@@ -672,6 +684,7 @@ class TwitterFilteringComponent {
         for (TweetSet a: tweetSetManager.getTweetSetList())
           a.updateHeatMap();
         previousDateSelection = new Interval(dateSelection);
+        //parent.moveToPosition(this);
       }
 
       //weatherApplet.setDate(minDate, int(theControlEvent.controller().arrayValue()[1]));
