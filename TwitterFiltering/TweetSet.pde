@@ -1,106 +1,109 @@
-class TweetSet{
-  
-ArrayList<Tweet> tweets = new ArrayList<Tweet>();  
-String[] filterTerms;
-String regularExpression = "";
-color setColour;
-HeatmapOverlay heatmap;
-int id = 0;
-String mSearchTerms = "";
-Integrator integrator_buttonPosY;  //Y position of this tweet set's button
-boolean b_active;
+class TweetSet {
 
-int crossoverMatches = 0;  //How many of these tweets are made by people currently selected
+  ArrayList<Tweet> tweets = new ArrayList<Tweet>();  
+  String[] filterTerms;
+  String regularExpression = "";
+  color setColour;
+  HeatmapOverlay heatmap;
+  int id = 0;
+  String mSearchTerms = "";
+  Integrator integrator_buttonPosY;  //Y position of this tweet set's button
+  boolean b_active;
+  TwitterFilteringComponent parent;
 
-   
-TweetSet(String keywords, color colour, String re)
-    {
+  int crossoverMatches = 0;  //How many of these tweets are made by people currently selected
+
+
+  TweetSet(String keywords, color colour, String re, TwitterFilteringComponent parent) //argh
+  {
+    this.parent = parent;
     setColour = colour;
-    heatmap = new HeatmapOverlay();
+    heatmap = new HeatmapOverlay(parent);
     mSearchTerms = keywords;
     integrator_buttonPosY = new Integrator(80);
     b_active = true;
     regularExpression = re;
-    }
-    
-    
-Integrator getButtonPosY()
-{
- return integrator_buttonPosY; 
-}
-  
-  
-boolean isActive(){
- return b_active; 
-}
-
-void setActive(boolean val)
-{
-  b_active = val;
-}
-  
-void setId(int _id){
- id = _id;
-}
-  
-int getId(){
-  return id;
-}
-  
-
-void addTweet(Tweet theTweet)
-{
- tweets.add(theTweet); 
-}
-  
-    
-ArrayList<Tweet> getTweets()
-{
- return tweets; 
-}
+  }
 
 
-int getNumberOfTweets()
-{
- return tweets.size(); 
-}
+  Integrator getButtonPosY()
+  {
+    return integrator_buttonPosY;
+  }
 
 
-String getSearchTerms()
-{
-  return mSearchTerms;
-}
+  boolean isActive() {
+    return b_active;
+  }
+
+  void setActive(boolean val)
+  {
+    b_active = val;
+  }
+
+  void setId(int _id) {
+    id = _id;
+  }
+
+  int getId() {
+    return id;
+  }
 
 
-void updateHeatMap(){
-heatmap.createSurface(imgX, imgY, tweets);
-}
-  
-  
-color getColour()
-{
- return setColour; 
-}
-  
-  
-  
-void incrementCrossoverMatches(){
-  crossoverMatches++;
-}
-  
-int getNumberOfCrossoverMatches(){
-  return crossoverMatches;
-}
+  void addTweet(Tweet theTweet)
+  {
+    tweets.add(theTweet);
+  }
 
 
-void resetCrossoverMatches(){
-  crossoverMatches = 0; 
-}
+  ArrayList<Tweet> getTweets()
+  {
+    return tweets;
+  }
 
 
-String getRegularExpressionSymbol()
-{
- return regularExpression; 
+  int getNumberOfTweets()
+  {
+    return tweets.size();
+  }
+
+
+  String getSearchTerms()
+  {
+    return mSearchTerms;
+  }
+
+
+  void updateHeatMap() {
+    //heatmap.createSimpleSurface(imgX, imgY, tweets);
+    heatmap.createWeightedSurface(imgX, imgY, tweets);
+  }
+
+
+  color getColour()
+  {
+    return setColour;
+  }
+
+
+
+  void incrementCrossoverMatches() {
+    crossoverMatches++;
+  }
+
+  int getNumberOfCrossoverMatches() {
+    return crossoverMatches;
+  }
+
+
+  void resetCrossoverMatches() {
+    crossoverMatches = 0;
+  }
+
+
+  String getRegularExpressionSymbol()
+  {
+    return regularExpression;
+  }
 }
-  
-}
+
