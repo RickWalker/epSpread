@@ -83,7 +83,7 @@ List<TwitterFilteringComponent> timePoints;// llyrComponent;
 
 void setup()
 {
-  size( 1200, 600, OPENGL);
+  size( screenWidth, screenHeight, OPENGL);
   //textMode(SHAPE);
   smooth();
   createRegions();
@@ -93,7 +93,7 @@ void setup()
   db = new SQLite( this, "VAST2011_MC1.sqlite" );  // open database file
   timePoints = new ArrayList<TwitterFilteringComponent>();
 
-  timePoints.add(new TwitterFilteringComponent(this, 0, 0, width/2, height/2));
+  timePoints.add(new TwitterFilteringComponent(this, 0, 0, width, height));
   //timePoints.add(new TwitterFilteringComponent(this, 0, height/2, width/2, height/2));
   //timePoints.add(new TwitterFilteringComponent(this, width/2, height/2, width/2, height/2));
   //timePoints.add(new TwitterFilteringComponent(this, width/2, 0, width/2, height/2));
@@ -102,7 +102,7 @@ void setup()
 void keyPressed() {
   if (key == 'r') {
     saveFrame("VASTMC2-####.png");
-  }
+  }/*
   else if (key == 'q') {
     timePoints.get(0).halveSize();
   }
@@ -120,7 +120,7 @@ void keyPressed() {
   }
   else if (key == 's') {
     timePoints.get(0).moveDown();
-  }
+  }*/
 }
 
 /* -----------------------------
