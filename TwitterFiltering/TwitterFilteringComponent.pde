@@ -6,6 +6,10 @@ class TwitterFilteringComponent {
 
   TweetSetManager tweetSetManager;
   Interval dateSelection;
+  Interval previousDateSelection;
+  String previousKeyword="";
+  int oldWidth, oldHeight;
+  boolean doneResize = true;
 
   ArrayList<TweetNetwork> tweetNetworks = new ArrayList<TweetNetwork>();
   ArrayList<Integer> selectedTweetUserIds = new ArrayList<Integer>();
@@ -55,7 +59,8 @@ class TwitterFilteringComponent {
    * -----------------------------*/
   float scaleFactorX, scaleFactorY;
   float fontScale;
-  float tweetBoxSize = 10; //size of tweet map icon
+  float tweetBoxSize;// = 10; //size of tweet map icon
+  Integrator xIntegrator, yIntegrator, widthIntegrator, heightIntegrator;
 
   TwitterFilteringComponent(PApplet parent, int x, int y, int width, int height)
   {
@@ -64,13 +69,19 @@ class TwitterFilteringComponent {
     this.y = y;
     this.width = width;
     this.height = height;
+    oldWidth = width;
+    oldHeight = height;
+    xIntegrator = new Integrator(x);
+    yIntegrator = new Integrator(y);
+    widthIntegrator = new Integrator(width);
+    heightIntegrator = new Integrator(height);
+
 
     componentID = componentCount++;
 
-    scaleFactorX = (float)width/(imgX+310);
-    scaleFactorY = (float)height/(imgY+130);
-    fontScale = min(scaleFactorX, scaleFactorY);
-    tweetBoxSize *= fontScale;
+    calculateScale();
+
+    //tweetBoxSize = 10*fontScale;
     println("Scale factors are " + scaleFactorX + " and " + scaleFactorY);
     //size( imgX+310, imgY + 130, OPENGL);
     //smooth();
@@ -93,27 +104,36 @@ class TwitterFilteringComponent {
 
     //setup tweetSetManager
     tweetSetManager = new TweetSetManager(this);
-
+    setConstants();
     //Setup Weather frame
     WeatherFrame weatherFrame = new WeatherFrame();
 
     //Setup Time Slider
 
-    dateSelection = new Interval(minDate, maxDate);
+    dateSelection=new Interval(minDate, minDate.plus(Period.hours(24)));
 
+    createP5Components();
     //Add horizontal range slider
-    range = controlP5.addRange("Date"+componentID, 0, Hours.hoursIn(dateSelection).getHours(), 0, 24, int(x + 130*scaleFactorX), int(y + (imgY + 50)*scaleFactorY), int((imgX-260) * scaleFactorX), int(30*scaleFactorY));
+
+
+    previousDateSelection = new Interval(minDate, minDate.plus(Period.hours(24)));
+    //Setup Colours
+    setupColours();
+  }
+
+  void createP5Components() {
+    range = controlP5.addRange("Date"+componentID, 0, Hours.hoursIn(new Interval(minDate, maxDate)).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getStart())).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getEnd())).getHours(), int(x + 130*scaleFactorX), int(y + (imgY + 50)*scaleFactorY), int((imgX-260) * scaleFactorX), int(30*scaleFactorY));
     //println("Range slider at" + int(imgY*scaleFactorY));
     range.setColorBackground(color(130, 130, 130));
     range.setLabelVisible(false);
     range.setCaptionLabel("");
-    dateSelection=new Interval(minDate, minDate.plus(Period.hours(24)));
-
-    //Setup Colours
-    setupColours();
-
     //Setup CP5 search field
     setupSearchField();
+  }
+
+  void removeP5Components() { ///aaaargh
+    controlP5.remove("Date"+componentID);
+    controlP5.remove("Filters"+componentID);
   }
 
 
@@ -121,8 +141,50 @@ class TwitterFilteringComponent {
     return mouseX>x && mouseX<(x+width) && mouseY>y && mouseY<(y+height);
   }
 
+  void calculateScale() {
+    scaleFactorX = (float)width/(imgX+310);
+    scaleFactorY = (float)height/(imgY+130);
+    fontScale = min(scaleFactorX, scaleFactorY);
+  }
+
+  void updateIntegrators() {
+    xIntegrator.update();
+    yIntegrator.update();
+    widthIntegrator.update();
+    heightIntegrator.update();
+  }
+
+  void updateSizes() {
+    x = int(xIntegrator.value);
+    y = int(yIntegrator.value);
+    width = int(widthIntegrator.value);
+    height = int(heightIntegrator.value);
+  }
+
+  void setConstants() {
+    tweetBoxSize = 10*fontScale;
+    filterTextField_x = int(x + scaleFactorX*(imgX+ imgPos.x+ 50));
+    filterTextField_y = int(y + 60*scaleFactorY);
+    tweetSetManager.setConstants();
+  }
+
+  void resizeP5Components() {
+    range.setPosition(int(x + 130*scaleFactorX), int(y + (imgY + 50)*scaleFactorY));
+    range.setSize(int((imgX-260) * scaleFactorX), int(30*scaleFactorY)); //doesn't update the handles!
 
 
+    filterTextField.setSize(int(180*scaleFactorX), int(30*scaleFactorY));
+    filterTextField.setPosition(filterTextField_x, filterTextField_y);
+    //controlP5.setControlFont(new ControlFont(createFont("FFScala", int(18.0*fontScale)), int(18.0*fontScale))); //this is expensive - do it once stopped moving?
+    controlP5.setControlFont(font, int(18.0*fontScale)); //this is expensive - do it once stopped moving?
+
+    //filterTextField.update();
+    range.update();
+  }
+
+  boolean doneMoving() {
+    return width == int(widthIntegrator.value) && height == int(heightIntegrator.value) && x == int(xIntegrator.value) && y == int(yIntegrator.value);
+  }
 
 
 
@@ -136,7 +198,21 @@ class TwitterFilteringComponent {
    * -----------------------------*/
 
   void draw() {
-
+    updateIntegrators();
+    if (!doneMoving()) {
+      updateSizes();
+      calculateScale();
+      setConstants();
+      resizeP5Components();
+    }
+    else if (!doneResize) {
+      //re-add p5 components?
+      println("Done resize!");
+      removeP5Components();
+      createP5Components();
+      //range.update();
+      doneResize=true;
+    }
     // ---- Border + Map ----
     stroke(0);
     noFill();
@@ -213,8 +289,7 @@ class TwitterFilteringComponent {
 
   void setupSearchField()
   {
-    filterTextField_x = int(x + scaleFactorX*(imgX+ imgPos.x+ 50));
-    filterTextField_y = int(y + 60*scaleFactorY);
+
     int filterTextField_width = int(180*scaleFactorX);
     int filterTextField_height = int(30*scaleFactorY);
 
@@ -384,7 +459,37 @@ class TwitterFilteringComponent {
       drawMouseOver(forMouseOver);
   }
 
+  void halveSize() {
+    widthIntegrator.target(width/2);
+    heightIntegrator.target(height/2);
+    doneResize = false;
+  }
 
+  void doubleSize() {
+    widthIntegrator.target(width*2);
+    heightIntegrator.target(height*2);
+    doneResize = false;
+  }  
+  
+  void moveLeft(){
+    xIntegrator.target(x-100);
+    doneResize = false;
+  }
+  
+  void moveUp(){
+    yIntegrator.target(y-100);
+    doneResize = false;
+  }
+  
+  void moveDown(){
+    yIntegrator.target(y+100);
+    doneResize = false;
+  }
+  
+  void moveRight(){
+    xIntegrator.target(x+100);
+    doneResize = false;
+  }
 
 
 
@@ -523,7 +628,7 @@ class TwitterFilteringComponent {
     println("Added tweetset to list");
 
     //update heat maps for first time
-    for (TweetSet a: tweetSetManager.getTweetSetList()){
+    for (TweetSet a: tweetSetManager.getTweetSetList()) {
       println("Updating heatmap!");
       a.updateHeatMap();
     }
@@ -562,9 +667,12 @@ class TwitterFilteringComponent {
       // min is at index 0, max is at index 1.
       dateSelection = new Interval(minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[0]))), 
       minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[1]))));
-      println("Selection is " + dateSelection);
-      for (TweetSet a: tweetSetManager.getTweetSetList())
-        a.updateHeatMap();
+      if (!dateSelection.equals(previousDateSelection)) {
+        println("Selection is " + dateSelection);
+        for (TweetSet a: tweetSetManager.getTweetSetList())
+          a.updateHeatMap();
+        previousDateSelection = new Interval(dateSelection);
+      }
 
       //weatherApplet.setDate(minDate, int(theControlEvent.controller().arrayValue()[1]));
     }
@@ -573,11 +681,13 @@ class TwitterFilteringComponent {
     // -------- Typing something in and hitting return will trigger this code, creating a new tweet set --------
     if (theControlEvent.controller().name().equals("Filters"+componentID)) {
       String keywords = theControlEvent.controller().stringValue();
-
-      if (tweetSetManager.getTweetSetListSize() < tweetSetManager.getMaxTweetSets())
-        generateTweetSet(keywords);
-      else
-        println("**** Too many tweetSets! Please remove before requesting another ***");
+      if (!keywords.equals(previousKeyword)) {
+        if (tweetSetManager.getTweetSetListSize() < tweetSetManager.getMaxTweetSets())
+          generateTweetSet(keywords);
+        else
+          println("**** Too many tweetSets! Please remove before requesting another ***");
+      }
+      previousKeyword = new String(keywords);
     }
     //}
   }

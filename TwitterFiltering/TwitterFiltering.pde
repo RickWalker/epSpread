@@ -84,6 +84,7 @@ List<TwitterFilteringComponent> timePoints;// llyrComponent;
 void setup()
 {
   size( 1200, 600, OPENGL);
+  //textMode(SHAPE);
   smooth();
   createRegions();
   controlP5 = new ControlP5(this);
@@ -93,9 +94,33 @@ void setup()
   timePoints = new ArrayList<TwitterFilteringComponent>();
 
   timePoints.add(new TwitterFilteringComponent(this, 0, 0, width/2, height/2));
-  timePoints.add(new TwitterFilteringComponent(this, 0, height/2, width/2, height/2));
-  timePoints.add(new TwitterFilteringComponent(this, width/2, height/2, width/2, height/2));
-  timePoints.add(new TwitterFilteringComponent(this, width/2, 0, width/2, height/2));
+  //timePoints.add(new TwitterFilteringComponent(this, 0, height/2, width/2, height/2));
+  //timePoints.add(new TwitterFilteringComponent(this, width/2, height/2, width/2, height/2));
+  //timePoints.add(new TwitterFilteringComponent(this, width/2, 0, width/2, height/2));
+}
+
+void keyPressed() {
+  if (key == 'r') {
+    saveFrame("VASTMC2-####.png");
+  }
+  else if (key == 'q') {
+    timePoints.get(0).halveSize();
+  }
+  else if (key == 'e') {
+    timePoints.get(0).doubleSize();
+  }
+  else if (key == 'd') {
+    timePoints.get(0).moveRight();
+  }
+  else if (key == 'a') {
+    timePoints.get(0).moveLeft();
+  }
+  else if (key == 'w') {
+    timePoints.get(0).moveUp();
+  }
+  else if (key == 's') {
+    timePoints.get(0).moveDown();
+  }
 }
 
 /* -----------------------------

@@ -27,21 +27,32 @@ class TweetSetManager {
   TweetSetManager(TwitterFilteringComponent parent) {
     this.parent = parent;
 
-    optionButtonsOffset = int(40*parent.scaleFactorY);
+
     tweetSets = new ArrayList<TweetSet>(); 
+    setConstants();
+    maxTweetSets = 10;
+  }  
+
+  void setConstants() {
+    optionButtonsOffset = int(40*parent.scaleFactorY);
     origin = new PVector(parent.x + (parent.imgPos.x + imgX + 50)*parent.scaleFactorX, parent.y+ 130*parent.scaleFactorY);
     buttonDim = new PVector(180*parent.scaleFactorX, 40*parent.scaleFactorY);
 
     removeCircleDim = new PVector(20*parent.scaleFactorX, 20*parent.scaleFactorY);
     optionButtonDim = new PVector(88*parent.scaleFactorX, 40*parent.scaleFactorY);
     buttonDist = 8.0*parent.scaleFactorY;
-    maxTweetSets = 10;
-  }  
+    //also move buttons? shuffle tweet sets down!
+    for (TweetSet a: tweetSets) {
+      //target them at the right place!
+      a.getButtonPosY().set(origin.y + (buttonDim.y * a.id) + (buttonDist * a.id));
+      a.getButtonPosY().target(origin.y + (buttonDim.y * a.id) + (buttonDist * a.id));
+    }
+  }
 
 
   void draw()
   {
-   
+
     textSize(18*parent.fontScale);
     text("Results", origin.x - 1*parent.scaleFactorX, origin.y - 12*parent.scaleFactorY);
     float alphaCol = 255;
