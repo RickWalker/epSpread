@@ -5,6 +5,7 @@ class TimeLineComponent {
   PVector originalSize; //for scaling!
   PVector smallVizSize;
   TwitterFilteringComponent currentLarge;
+  PVector previousPos;
   int lineStart, lineStop, lineY;
   float scaleFactorX, scaleFactorY;
   float fontScale;
@@ -19,9 +20,9 @@ class TimeLineComponent {
     this.height = height;
     originalSize = new PVector(1280, 800);
 
-    scaleFactorX = 1.0;
-    scaleFactorY = 1.0; //change eventually!
-    smallVizSize = new PVector(300, 250);
+    scaleFactorX = width/originalSize.x;
+    scaleFactorY = height/originalSize.y; //change eventually!
+    smallVizSize = new PVector(200*scaleFactorX, 150*scaleFactorY);
 
     lineStart = int(x + 150*scaleFactorX);
     lineStop = int(x + width - 150*scaleFactorX);
@@ -103,24 +104,49 @@ class TimeLineComponent {
     text(tempdt.monthOfYear().getAsText(), (lineStop+monthStart)/2, lineY+minorTickHeight + 2*(textAscent() + textDescent()));
   }
 
+  void keyPressed() {
+    if (currentLarge == null)
+      addNew();
+  }
+
   void moveToPosition(TwitterFilteringComponent t) {
     //moves component to a position above the middle of its range
     float maxX = map(t.dateSelection.getEnd().getDayOfYear(), minDate.getDayOfYear(), maxDate.getDayOfYear(), lineStart, lineStop);
     float minX = map(t.dateSelection.getStart().getDayOfYear(), minDate.getDayOfYear(), maxDate.getDayOfYear(), lineStart, lineStop);
     //if (t.x != int((maxX+minX)/2)-t.width/2) {
-    t.moveTo(int((maxX+minX)/2-smallVizSize.x/2), t.y);
+    t.moveTo(int((maxX+minX)/2-smallVizSize.x/2), int(previousPos.y));
     //}
   }
   void drawLinksTo(TwitterFilteringComponent t) {
     noStroke();
     fill(128, 128);
+    int targetY;
+
+    if (t.y < lineY) {
+      targetY =  t.y + t.height;
+    }
+    else {
+      targetY = t.y;
+    }
+        //println(t.y + " and " + targetY);
     //draw links from timeline to this component
     beginShape(POLYGON);
     vertex(map(t.dateSelection.getStart().getDayOfYear(), minDate.getDayOfYear(), maxDate.getDayOfYear(), lineStart, lineStop), lineY);
-    vertex(t.x, t.y+t.height);
-    vertex(t.x+t.width, t.y+t.height);
+    vertex(t.x, targetY);
+    vertex(t.x+t.width, targetY);
     vertex(map(t.dateSelection.getEnd().getDayOfYear(), minDate.getDayOfYear(), maxDate.getDayOfYear(), lineStart, lineStop), lineY);
     endShape();
+  }
+
+  void addNew() {
+    //1 is above, -1 is below
+    //so 0 goes above, 1 goes below, 2 goes above etc
+    int side = int(pow(-1, timePoints.size()));
+    if(side>0){
+    timePoints.add(new TwitterFilteringComponent(this, 50, int(lineY-smallVizSize.y*1.5), int(smallVizSize.x), int(smallVizSize.y)));
+    }else{
+          timePoints.add(new TwitterFilteringComponent(this, 50, int(lineY+smallVizSize.y*1.5-int(smallVizSize.y)), int(smallVizSize.x), int(smallVizSize.y)));
+    }
   }
 
   void controlEvent(ControlEvent theControlEvent) {
@@ -136,7 +162,7 @@ class TimeLineComponent {
     if (currentLarge !=null) {
       if (mouseEvent.getClickCount()==2) {
         //shrink it back down!
-        currentLarge.setSize(300, 250);
+        currentLarge.setSize(int(smallVizSize.x), int(smallVizSize.y));
         moveToPosition(currentLarge);
         currentLarge = null;
       }
@@ -148,6 +174,7 @@ class TimeLineComponent {
       for (TwitterFilteringComponent a: timePoints) {
         if (mouseEvent.getClickCount()==2 && a.hasMouseOver()) {
           println("<double click> on " + a);
+          previousPos = new PVector(a.x, a.y);
           a.moveTo(0, 0);
           a.setSize(width, height);
           currentLarge = a;

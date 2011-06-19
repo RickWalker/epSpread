@@ -106,7 +106,7 @@ class TwitterFilteringComponent {
     tweetSetManager = new TweetSetManager(this);
     setConstants();
     //Setup Weather frame
-    WeatherFrame weatherFrame = new WeatherFrame();
+    //WeatherFrame weatherFrame = new WeatherFrame();
 
     //Setup Time Slider
 
@@ -262,7 +262,7 @@ class TwitterFilteringComponent {
 
 
     // ---- Refresh weather applet ----    
-    weatherApplet.redraw();
+    //weatherApplet.redraw();
   }
 
 
@@ -426,6 +426,7 @@ class TwitterFilteringComponent {
 
               stroke(0, 0, 0, a.getAlpha());
               strokeWeight(2*fontScale);
+              if((2*fontScale)<1.0) noStroke();
 
               PVector loc = a.getLocation();
 

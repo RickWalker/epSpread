@@ -81,6 +81,8 @@ void setup()
 void keyPressed() {
   if (key == 'r') {
     saveFrame("VASTMC2-####.png");
+  }else{
+    storyboard.keyPressed();
   }/*
   else if (key == 'q') {
     timePoints.get(0).halveSize();
