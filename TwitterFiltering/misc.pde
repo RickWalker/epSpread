@@ -421,7 +421,7 @@ void createRegions()
   regions.add(new Region( riverside, "riverside", color(0, 255, 0), 238095, 230952 ));
   regions.add(new Region( uptown, "uptown", color(0, 255, 0), 29762, 116072 ));
   regions.add(new Region( downtown, "downtown", color(0, 255, 0), 89286, 258928 ));
-  regions.add(new Region( river, "river", color(0, 255, 0), 10, 10 ));
+  regions.add(new Region( river, "river", color(0, 255, 0), 100000, 100000 ));
 
   //println("Printing out the first region's name : " + regions.get(0).getName() );
 

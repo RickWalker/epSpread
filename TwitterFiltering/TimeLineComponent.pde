@@ -39,6 +39,7 @@ class TimeLineComponent {
     if (currentLarge == null) {
       //draw the actual timeline
       drawTimeLine();
+      fixOverlaps();
       //draw visualisations!
       for (TwitterFilteringComponent a: timePoints) {
         a.draw();
@@ -105,8 +106,14 @@ class TimeLineComponent {
   }
 
   void keyPressed() {
-    if (currentLarge == null)
-      addNew();
+    if (currentLarge == null) {
+      if (key == 'r') {
+        saveFrame("VASTMC2-####.png");
+      }
+      else {
+        addNew();
+      }
+    }
   }
 
   void moveToPosition(TwitterFilteringComponent t) {
@@ -128,7 +135,7 @@ class TimeLineComponent {
     else {
       targetY = t.y;
     }
-        //println(t.y + " and " + targetY);
+    //println(t.y + " and " + targetY);
     //draw links from timeline to this component
     beginShape(POLYGON);
     vertex(map(t.dateSelection.getStart().getDayOfYear(), minDate.getDayOfYear(), maxDate.getDayOfYear(), lineStart, lineStop), lineY);
@@ -142,10 +149,28 @@ class TimeLineComponent {
     //1 is above, -1 is below
     //so 0 goes above, 1 goes below, 2 goes above etc
     int side = int(pow(-1, timePoints.size()));
-    if(side>0){
-    timePoints.add(new TwitterFilteringComponent(this, 50, int(lineY-smallVizSize.y*1.5), int(smallVizSize.x), int(smallVizSize.y)));
-    }else{
-          timePoints.add(new TwitterFilteringComponent(this, 50, int(lineY+smallVizSize.y*1.5-int(smallVizSize.y)), int(smallVizSize.x), int(smallVizSize.y)));
+    if (side>0) {
+      timePoints.add(new TwitterFilteringComponent(this, 50, int(lineY-smallVizSize.y*1.5), int(smallVizSize.x), int(smallVizSize.y)));
+    }
+    else {
+      timePoints.add(new TwitterFilteringComponent(this, 50, int(lineY+smallVizSize.y*1.5-int(smallVizSize.y)), int(smallVizSize.x), int(smallVizSize.y)));
+    }
+  }
+  void fixOverlaps() {
+    for (TwitterFilteringComponent a: timePoints) {    
+      for (TwitterFilteringComponent b: timePoints) {
+        if (a!=b) {
+          if (a.contains(b.x, b.y) || a.contains(b.x+width, b.y) || a.contains(b.x+width, b.y+height) || a.contains(b.x, b.y+height)) {
+            if (a.doneResize && b.doneResize)
+              if (b.y <lineY) {
+                b.moveTo(b.x, int(b.y-smallVizSize.y-10));
+              }
+              else {
+                b.moveTo(b.x, int(b.y+smallVizSize.y+10));
+              }
+          }
+        }
+      }
     }
   }
 

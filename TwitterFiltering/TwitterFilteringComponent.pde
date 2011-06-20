@@ -1,3 +1,9 @@
+/*import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;*/
+
 class TwitterFilteringComponent {
   int x, y, width, height;
   TimeLineComponent parent;
@@ -426,14 +432,14 @@ class TwitterFilteringComponent {
 
               stroke(0, 0, 0, a.getAlpha());
               strokeWeight(2*fontScale);
-              if((2*fontScale)<1.0) noStroke();
+              if ((2*fontScale)<1.0) noStroke();
 
               PVector loc = a.getLocation();
 
               //if there is a drag-select happening
               if (b_draggingMouse) {
                 //if this tweet point is inside the selection box
-                if (isInsideSelectionBox(loc.x + imgPos.x, loc.y + imgPos.y)) {
+                if (isInsideSelectionBox(x+(loc.x + imgPos.x)*scaleFactorX, y+(loc.y + imgPos.y)*scaleFactorY)) {
                   fill(255);
                 }
               }
@@ -584,6 +590,51 @@ class TwitterFilteringComponent {
     println("Query being performed is : " + sqlQuery);
     boolean firstRecord = true;
 
+/*
+    //use new sqlite driver for query!
+    try {
+      Class.forName("org.sqlite.JDBC");
+    }
+    catch(ClassNotFoundException e) {
+      println("Argh can't find db class");
+    }*/
+   /* Connection connection = null;
+    try
+    {
+      // create a database connection
+      connection = DriverManager.getConnection("jdbc:sqlite:sample.db");
+      Statement statement = connection.createStatement();
+      ResultSet rs = statement.executeQuery(sqlQuery);
+      while (rs.next ())
+      {
+        // read the result set
+        System.out.println("name = " + rs.getString("name"));
+        System.out.println("id = " + rs.getInt("id"));
+      }
+    }
+    catch(SQLException e)
+    {
+      // if the error message is "out of memory", 
+      // it probably means no database file is found
+      System.err.println(e.getMessage());
+    }
+    finally
+    {
+      try
+      {
+        if (connection != null)
+          connection.close();
+      }
+      catch(SQLException e)
+      {
+        // connection close failed.
+        System.err.println(e);
+      }
+    }*/
+    
+    //oh this is so messy: for now, I run the query once with the other driver to cache it, then leave the original code to re-run the query
+    //which is faster because it's already cached by the db
+    //biggest hack ever? Eventually, re-write code to use Xentus all the way through!
     if ( db.connect() )
     {
       // list table names
@@ -982,6 +1033,9 @@ class TwitterFilteringComponent {
     }
   }
 
+  boolean contains(int tx, int ty) {
+    return (tx >= x && tx<=x+width) && (ty>=y && ty<=y+height);
+  }
 
   void mouseReleased()
   {
@@ -1009,8 +1063,8 @@ class TwitterFilteringComponent {
 
         b_draggingMouse = false;
 
-        mouseDragEnd_x = max(mouseX, imgX*scaleFactorX);
-        mouseDragEnd_y = min(mouseY, imgY*scaleFactorY);
+        mouseDragEnd_x = max(mouseX, x + imgX*scaleFactorX);
+        mouseDragEnd_y = min(mouseY, y + imgY*scaleFactorY);
 
 
         // finished dragging, so set any tweets within drag box to 'selected'
