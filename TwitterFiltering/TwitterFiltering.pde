@@ -21,15 +21,14 @@ import java.util.ArrayList;
 //String[] keywordList;
 ///de.bezier.data.sql.SQLite db;
 PFont font = createFont("FFScala", 18);
-ArrayList<Integer> colours = new ArrayList<Integer>();
 
 
 int imgX = 1304; //original image size for scaling
 int imgY = 663;  //image size
 
-int colourTracker = 0; //tracks number of colours
 
-
+  ArrayList<Integer> colours = new ArrayList<Integer>(); 
+  int colourTracker = 0; //tracks number of colours
 
 
 boolean b_generateNetwork = false;  //Generate network for selected tweets?

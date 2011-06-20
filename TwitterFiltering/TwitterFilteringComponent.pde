@@ -21,7 +21,6 @@ class TwitterFilteringComponent {
   ArrayList<TweetNetwork> tweetNetworks = new ArrayList<TweetNetwork>();
   ArrayList<Integer> selectedTweetUserIds = new ArrayList<Integer>();
 
-
   // ---- Mouse Drag/Selection ----
 
   //mouse drag selection
@@ -50,6 +49,9 @@ class TwitterFilteringComponent {
   Range range;
   Textfield filterTextField;
   ListBox filterShortcutList;
+
+
+  StreamGraphRange streamGraphRange;
 
 
   PVector imgPos;  //pos offset of image
@@ -126,10 +128,13 @@ class TwitterFilteringComponent {
     previousDateSelection = new Interval(minDate, minDate.plus(Period.hours(24)));
     //Setup Colours
     setupColours();
+  
+    //Create Streamgraph range
+    streamGraphRange = new StreamGraphRange(this);
   }
 
   void createP5Components() {
-    range = controlP5.addRange("Date"+componentID, 0, Hours.hoursIn(new Interval(minDate, maxDate)).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getStart())).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getEnd())).getHours(), int(x + 130*scaleFactorX), int(y + (imgY + 50)*scaleFactorY), int((imgX-260) * scaleFactorX), int(30*scaleFactorY));
+    range = controlP5.addRange("Date"+componentID, 0, Hours.hoursIn(new Interval(minDate, maxDate)).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getStart())).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getEnd())).getHours(), int(x + 130*scaleFactorX), int(y + (imgY + 30)*scaleFactorY), int((imgX-260) * scaleFactorX), int(30*scaleFactorY));
     //println("Range slider at" + int(imgY*scaleFactorY));
     range.setColorBackground(color(130, 130, 130));
     range.setLabelVisible(false);
@@ -150,7 +155,7 @@ class TwitterFilteringComponent {
 
   void calculateScale() {
     scaleFactorX = (float)width/(imgX+310);
-    scaleFactorY = (float)height/(imgY+130);
+    scaleFactorY = (float)height/(imgY+230);
     fontScale = min(scaleFactorX, scaleFactorY);
   }
 
@@ -241,7 +246,7 @@ class TwitterFilteringComponent {
 
     float rangeBorderSize = 2;
     fill(80);
-    rect(x + (130 - rangeBorderSize)*scaleFactorX, y+(imgY + 50 - rangeBorderSize)*scaleFactorY, (imgX-260 + rangeBorderSize*2)*scaleFactorX, (30 + rangeBorderSize*2)*scaleFactorY);
+    //rect(x + (130 - rangeBorderSize)*scaleFactorX, y+(imgY + 50 - rangeBorderSize)*scaleFactorY, (imgX-260 + rangeBorderSize*2)*scaleFactorX, (30 + rangeBorderSize*2)*scaleFactorY);
 
     // ---- Draw all the TweetSet Buttons ----
     tweetSetManager.draw();
@@ -267,20 +272,12 @@ class TwitterFilteringComponent {
       rect(mouseDragStart_x, mouseDragStart_y, constrain(mouseX, x + imgPos.x*scaleFactorX, x+(imgX + imgPos.x)*scaleFactorX) - mouseDragStart_x, constrain(mouseY, y+imgPos.y, y+(imgY + imgPos.y)*scaleFactorY) - mouseDragStart_y); //limit rectangle to image boundary
     }
 
-
+    //----- Draw streamgraph range -------
+    streamGraphRange.draw();
+    
     // ---- Refresh weather applet ----    
     //weatherApplet.redraw();
   }
-
-
-
-  /* -----------------------------
-   *
-   * Setup colours (from colorbrewer)
-   *
-   * -----------------------------*/
-
-
 
 
 
@@ -737,6 +734,8 @@ class TwitterFilteringComponent {
     }
     println("Updated heatmaps");
 
+    //update the streamgraph
+    streamGraphRange.createStreamGraph();
     //db.close();
   }
 

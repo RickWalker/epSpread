@@ -11,7 +11,12 @@ class TweetSet {
   boolean b_active;
   TwitterFilteringComponent parent;
 
+  int[] tweetDayFrequencies = new int[21];
+
   int crossoverMatches = 0;  //How many of these tweets are made by people currently selected
+  
+  DateTime startDate = (new DateTime(2011, 4, 30, 0, 0, 0, 0)).minus(Period.hours(0));
+  DateTime endDate = (new DateTime(2011, 5, 20, 23, 59, 0, 0)).plus(Period.hours(0));
 
 
   TweetSet(String keywords, color colour, String re, TwitterFilteringComponent parent) //argh
@@ -23,6 +28,9 @@ class TweetSet {
     integrator_buttonPosY = new Integrator(80);
     b_active = true;
     regularExpression = re;
+    
+    for (int i=0; i<21; i++)
+      tweetDayFrequencies[i] = 0;
   }
 
 
@@ -53,7 +61,16 @@ class TweetSet {
   void addTweet(Tweet theTweet)
   {
     tweets.add(theTweet);
+
+    //find and increment day of tweet
+    int dayOfTweet = Days.daysIn(new Interval(startDate, theTweet.getDate())).getDays();
+    tweetDayFrequencies[dayOfTweet] = tweetDayFrequencies[dayOfTweet]+1;
   }
+
+
+int getFrequencyOnDay(int theDay){
+return tweetDayFrequencies[theDay];  
+}
 
 
   ArrayList<Tweet> getTweets()
@@ -100,6 +117,10 @@ class TweetSet {
     crossoverMatches = 0;
   }
 
+
+  int[] getTweetDayFrequencies(){
+  return tweetDayFrequencies;  
+  }
 
   String getRegularExpressionSymbol()
   {
