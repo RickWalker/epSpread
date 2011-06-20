@@ -1,8 +1,9 @@
-/*import java.sql.Connection;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;*/
+import java.sql.Statement;
+import org.sqlite.SQLiteJDBCLoader;
 
 class TwitterFilteringComponent {
   int x, y, width, height;
@@ -589,27 +590,65 @@ class TwitterFilteringComponent {
 
     println("Query being performed is : " + sqlQuery);
     boolean firstRecord = true;
+    System.out.println(String.format("running in %s mode", SQLiteJDBCLoader.isNativeMode() ? "native" : "pure-java"));
 
-/*
     //use new sqlite driver for query!
     try {
       Class.forName("org.sqlite.JDBC");
     }
     catch(ClassNotFoundException e) {
       println("Argh can't find db class");
-    }*/
-   /* Connection connection = null;
+    }
+    Connection connection = null;
     try
     {
       // create a database connection
-      connection = DriverManager.getConnection("jdbc:sqlite:sample.db");
+      connection = DriverManager.getConnection("jdbc:sqlite:"+sketchPath("VAST2011_MC1.sqlite"));//"+sketchPath("sample.db");
       Statement statement = connection.createStatement();
       ResultSet rs = statement.executeQuery(sqlQuery);
+      Tweet newTweetToAdd;
+      DateTime thisDate;
       while (rs.next ())
       {
         // read the result set
-        System.out.println("name = " + rs.getString("name"));
-        System.out.println("id = " + rs.getInt("id"));
+        //System.out.println("name = " + rs.getString("message"));
+        boolean passesRE = true;  //passes RE check?
+
+        if (RESymbol != "") //if a symbol has been specified for this tweetSet
+        {
+          //check if it matches a RE      
+          if (!matchesRegularExpression( rs.getString("message"), filterTerms[0], RESymbol))
+            passesRE = false;
+        }
+
+        if (passesRE)
+        {
+          //we have a new record, create tweet object
+          newTweetToAdd = new Tweet();
+
+          //set the text of this tweet            
+          newTweetToAdd.setText(rs.getString("message"));
+
+          //set the user id         
+          newTweetToAdd.setUserId(rs.getInt("ID"));
+
+          //get and set the location of this tweet
+          PVector tweetLocation = new PVector(0, 0);
+          tweetLocation.x = rs.getFloat("lon");
+          tweetLocation.y = rs.getFloat("lat");
+          thisDate =fmt.parseDateTime(rs.getString("date"));
+
+          newTweetToAdd.setTweetSetColour(setColour);
+          newTweetToAdd.setDate(thisDate);
+
+          //convert to pixels and set
+          newTweetToAdd.setLocation(mapCoordinates(tweetLocation));
+          //newTweetToAdd.findAndSetRegion(tweetLocation); //find and set region by uncorrected coords?
+
+          //add tweet to tweet set
+          newTweetSetToAdd.addTweet(newTweetToAdd);
+        }
+        //System.out.println("id = " + rs.getInt("id"));
       }
     }
     catch(SQLException e)
@@ -630,62 +669,62 @@ class TwitterFilteringComponent {
         // connection close failed.
         System.err.println(e);
       }
-    }*/
-    
+    }
+
     //oh this is so messy: for now, I run the query once with the other driver to cache it, then leave the original code to re-run the query
     //which is faster because it's already cached by the db
     //biggest hack ever? Eventually, re-write code to use Xentus all the way through!
-    if ( db.connect() )
-    {
-      // list table names
-      db.query(sqlQuery);
-      Tweet newTweetToAdd;
-      DateTime thisDate;
-
-      // -------- Go through data, storing them as tweets in a tweetset (if they pass optional RE match) --------   
-
-      while (db.next ())
-      {
-        boolean passesRE = true;  //passes RE check?
-
-        if (RESymbol != "") //if a symbol has been specified for this tweetSet
-        {
-          //check if it matches a RE      
-          if (!matchesRegularExpression( db.getString("message"), filterTerms[0], RESymbol))
-            passesRE = false;
-        }
-
-        if (passesRE)
-        {
-          //we have a new record, create tweet object
-          newTweetToAdd = new Tweet();
-
-          //set the text of this tweet            
-          newTweetToAdd.setText(db.getString("message"));
-
-          //set the user id         
-          newTweetToAdd.setUserId(db.getInt("ID"));
-
-          //get and set the location of this tweet
-          PVector tweetLocation = new PVector(0, 0);
-          tweetLocation.x = db.getFloat("lon");
-          tweetLocation.y = db.getFloat("lat");
-          thisDate =fmt.parseDateTime(db.getString("date"));
-
-          newTweetToAdd.setTweetSetColour(setColour);
-          newTweetToAdd.setDate(thisDate);
-
-          //convert to pixels and set
-          newTweetToAdd.setLocation(mapCoordinates(tweetLocation));
-          //newTweetToAdd.findAndSetRegion(tweetLocation); //find and set region by uncorrected coords?
-
-          //add tweet to tweet set
-          newTweetSetToAdd.addTweet(newTweetToAdd);
-        }
-      }
-
-      println("Created " + newTweetSetToAdd.tweets.size() + " tweet records");
-    }
+    /*if ( db.connect() )
+     {
+     // list table names
+     db.query(sqlQuery);
+     Tweet newTweetToAdd;
+     DateTime thisDate;
+     
+     // -------- Go through data, storing them as tweets in a tweetset (if they pass optional RE match) --------   
+     
+     while (db.next ())
+     {
+     boolean passesRE = true;  //passes RE check?
+     
+     if (RESymbol != "") //if a symbol has been specified for this tweetSet
+     {
+     //check if it matches a RE      
+     if (!matchesRegularExpression( db.getString("message"), filterTerms[0], RESymbol))
+     passesRE = false;
+     }
+     
+     if (passesRE)
+     {
+     //we have a new record, create tweet object
+     newTweetToAdd = new Tweet();
+     
+     //set the text of this tweet            
+     newTweetToAdd.setText(db.getString("message"));
+     
+     //set the user id         
+     newTweetToAdd.setUserId(db.getInt("ID"));
+     
+     //get and set the location of this tweet
+     PVector tweetLocation = new PVector(0, 0);
+     tweetLocation.x = db.getFloat("lon");
+     tweetLocation.y = db.getFloat("lat");
+     thisDate =fmt.parseDateTime(db.getString("date"));
+     
+     newTweetToAdd.setTweetSetColour(setColour);
+     newTweetToAdd.setDate(thisDate);
+     
+     //convert to pixels and set
+     newTweetToAdd.setLocation(mapCoordinates(tweetLocation));
+     //newTweetToAdd.findAndSetRegion(tweetLocation); //find and set region by uncorrected coords?
+     
+     //add tweet to tweet set
+     newTweetSetToAdd.addTweet(newTweetToAdd);
+     }
+     }
+     
+     println("Created " + newTweetSetToAdd.tweets.size() + " tweet records");
+     }*/
 
     //add this finished tweet set to the array
     tweetSetManager.addTweetSet(newTweetSetToAdd);
@@ -698,7 +737,7 @@ class TwitterFilteringComponent {
     }
     println("Updated heatmaps");
 
-    db.close();
+    //db.close();
   }
 
 
@@ -780,42 +819,47 @@ class TwitterFilteringComponent {
 
     println("Generating tweet network");  
     DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
+    String ids = "";
+    int counter = 0;
+    //loop through the users selected
+    for (Integer id: selectedTweetUserIds) {
 
+      println(counter);
+      if (counter < selectedTweetUserIds.size()-1)
+        ids += "ID= " + id + " OR ";
+      else
+        ids += "ID = " + id;
+
+      counter++;
+    }
+
+    //this way of querying (all in one go) is significantly faster than doing the queries userId by userId
+    //requires more work later though, as the tweets aren't organised by id!
+
+    String sqlQuery = "SELECT * FROM micro2 WHERE " + ids + " ORDER BY date";
+    println("sqlQuery : " + sqlQuery);
     //build the query  
-    if ( db.connect() ) {  
-
-      String ids = "";
-      int counter = 0;
-      //loop through the users selected
-      for (Integer id: selectedTweetUserIds) {
-
-        println(counter);
-        if (counter < selectedTweetUserIds.size()-1)
-          ids += "ID= " + id + " OR ";
-        else
-          ids += "ID = " + id;
-
-        counter++;
-      }
-
-      //this way of querying (all in one go) is significantly faster than doing the queries userId by userId
-      //requires more work later though, as the tweets aren't organised by id!
-
-      String sqlQuery = "SELECT * FROM micro2 WHERE " + ids + " ORDER BY date";
-      println("sqlQuery : " + sqlQuery);
-
-      // list table names
-      db.query(sqlQuery);
-
-
-      while (db.next ())
-      {        
-        Integer userId =  db.getInt("ID");
-        String message = db.getString("message");
-        Integer lat = db.getInt("lat");
-        Integer lon = db.getInt("lon");
-
-        DateTime thisDate;
+    try {
+      Class.forName("org.sqlite.JDBC");
+    }
+    catch(ClassNotFoundException e) {
+      println("Argh can't find db class");
+    }
+    Connection connection = null;
+    try
+    {
+      // create a database connection
+      connection = DriverManager.getConnection("jdbc:sqlite:"+sketchPath("VAST2011_MC1.sqlite"));//"+sketchPath("sample.db");
+      Statement statement = connection.createStatement();
+      ResultSet rs = statement.executeQuery(sqlQuery);
+      Tweet newTweetToAdd;
+      DateTime thisDate;
+      while (rs.next ())
+      {
+        Integer userId =  rs.getInt("ID");
+        String message = rs.getString("message");
+        Integer lat = rs.getInt("lat");
+        Integer lon = rs.getInt("lon");
 
         boolean found = false;
         TweetNetwork thisNetwork = new TweetNetwork(0, this);  //blank
@@ -847,12 +891,12 @@ class TwitterFilteringComponent {
 
             //set location
             PVector tweetLocation = new PVector(0, 0);
-            tweetLocation.x = db.getFloat("lon");
-            tweetLocation.y = db.getFloat("lat");
+            tweetLocation.x = rs.getFloat("lon");
+            tweetLocation.y = rs.getFloat("lat");
             newTweet.setLocation(mapCoordinates(tweetLocation));
 
             //set date
-            thisDate =fmt.parseDateTime(db.getString("date"));
+            thisDate =fmt.parseDateTime(rs.getString("date"));
             newTweet.setDate(thisDate);
 
             //add to tweet network
@@ -860,10 +904,7 @@ class TwitterFilteringComponent {
           }
         }
       }
-
-      //uncomment to print out 
-
-        for (TweetNetwork v: tweetNetworks) {
+      for (TweetNetwork v: tweetNetworks) {
         println();
         println();
 
@@ -874,8 +915,25 @@ class TwitterFilteringComponent {
           println(t.getDate());
       }
     }
-
-    db.close();
+    catch(SQLException e)
+    {
+      // if the error message is "out of memory", 
+      // it probably means no database file is found
+      System.err.println(e.getMessage());
+    }
+    finally
+    {
+      try
+      {
+        if (connection != null)
+          connection.close();
+      }
+      catch(SQLException e)
+      {
+        // connection close failed.
+        System.err.println(e);
+      }
+    }
 
     println("Tweet Networks size : " + tweetNetworks.size());
   }

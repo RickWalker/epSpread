@@ -11,7 +11,7 @@ import org.apache.batik.svggen.font.*;
 
 import processing.opengl.*;
 
-import de.bezier.data.sql.SQLite;
+//import de.bezier.data.sql.SQLite;
 import controlP5.*;
 import java.util.ArrayList;
 
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 // ---- Globals ----
 
 //String[] keywordList;
-de.bezier.data.sql.SQLite db;
+///de.bezier.data.sql.SQLite db;
 PFont font = createFont("FFScala", 18);
 ArrayList<Integer> colours = new ArrayList<Integer>();
 
@@ -71,7 +71,7 @@ void setup()
   controlP5 = new ControlP5(this);
   controlP5.setAutoDraw(false);
   //setup database
-  db = new de.bezier.data.sql.SQLite( this, "VAST2011_MC1.sqlite" );  // open database file
+  //db = new de.bezier.data.sql.SQLite( this, "VAST2011_MC1.sqlite" );  // open database file
   storyboard = new TimeLineComponent(this, 0, 0, width, height);
   //timePoints.add(new TwitterFilteringComponent(this, 0, height/2, width/2, height/2));
   //timePoints.add(new TwitterFilteringComponent(this, width/2, height/2, width/2, height/2));
