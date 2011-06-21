@@ -17,8 +17,8 @@ int         seed          = 28;   // random seed
 float       DPI           = 400;
 float       widthInches   = 3.2;
 float       heightInches  = 2.4;
-int         numLayers     = 14;
-int         layerSize     = 21;
+int         numLayers     = 1;
+int         layerSize     = 20;
 
 int layerTop;
 int layerBottom;
@@ -86,17 +86,43 @@ void setup() {
 
     size = new float[layerSize];
 
+    size[0] = 6;
+    size[1] = 2;
+    size[2] = 4;
+    size[3] = 2;
+    size[4] = 4;
+    size[5] = 1;
+    size[6] = 1;
+    size[7] = 6;
+    size[8] = 3;
+    size[9] = 3;
+    size[10] = 6;
+    size[11] = 3;
+    size[12] = 4;
+    size[13] = 2;
+    size[14] = 2;
+    size[15] = 3;
+    size[16] = 2;
+    size[17] = 3;
+    size[18] = 771;
+    size[19] = 11;
+
+
+
+
     for (int j=0; j<layerSize; j++)
     {    
       float normalized;
 
-      normalized = (tweetFrequencies[l].getData().get(j) - tweetFrequencies[l].getMinTweets() ) / (tweetFrequencies[l].getMaxTweets() - tweetFrequencies[l].getMinTweets()); 
+     // normalized = (size[j] - tweetFrequencies[l].getMinTweets() ) / (tweetFrequencies[l].getMaxTweets() - tweetFrequencies[l].getMinTweets()); 
       //normalized = normalized / float(getPopulationDensity(tweetFrequencies[l].getName()));
-     // normalized = tweetFrequencies[l].getData().get(j);
+      normalized = size[j];
 
 
       size[j] = normalized;
     }
+
+
 
     //println(tweetFrequencies[l].getName() + " " + float(tweetFrequencies[l].getMaxTweets()));
 
@@ -143,7 +169,7 @@ void setup() {
   //coloring.colorize(layers);
 
 
-  layerTop = 400;
+  layerTop = 700;
   layerBottom = height - 10;
 
   // fit graph to viewport
@@ -701,13 +727,15 @@ void generateNewStreamGraph(){
 
     size = new float[21];
 
-    for (int j=0; j<21; j++)
+    for (int j=0; j<22000; j++)
     {    
       float normalized;
 
       normalized = (tweetFrequencies[layerIndex].getData().get(j) - tweetFrequencies[layerIndex].getMinTweets() ) / (tweetFrequencies[layerIndex].getMaxTweets() - tweetFrequencies[layerIndex].getMinTweets()); 
+     // normalized = (
+      
       //normalized = normalized / float(getPopulationDensity(tweetFrequencies[l].getName()));
-     // normalized = tweetFrequencies[l].getData().get(j);
+     // normalized = tweetFrequencies[layerIndex].getData().get(j);
 
       size[j] = normalized;
     }

@@ -15,6 +15,7 @@ import processing.opengl.*;
 import controlP5.*;
 import java.util.ArrayList;
 
+float testVal = 0.028f;
 
 // ---- Globals ----
 
@@ -80,6 +81,19 @@ void setup()
 void keyPressed() {
   
     storyboard.keyPressed();
+    
+    if(key == 'i')
+    {
+      testVal += 0.01;
+      println(testVal);
+    }
+      
+    if(key == 'k')
+    {
+      testVal -= 0.01;  
+      println(testVal);
+    }
+    
   /*
   else if (key == 'q') {
     timePoints.get(0).halveSize();

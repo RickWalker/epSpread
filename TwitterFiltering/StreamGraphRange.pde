@@ -121,7 +121,8 @@ class StreamGraphRange {
 
         //normalize and store data
         //normalized = float(freqOnDay - minDayFreq ) / float(maxDayFreq - minDayFreq); 
-        normalized = (freqOnDay+1);
+        println(freqOnDay);
+        normalized = freqOnDay+1;
 
         size[j] = normalized;
         println(" (" + normalized + ")");
@@ -257,7 +258,11 @@ class StreamGraphRange {
   void graphVertex(int point, float[] source, boolean curve, boolean pxl) {
     float x = map(point, 0, layerSize - 1, this.x, this.mWidth+this.x);
     float y = source[point] - (pxl ? 1 : 0);
+
     if (curve) {
+     //curveTightness(testVal);
+     // stroke(0);
+     // strokeWeight(1);
       curveVertex(x, y);
     } 
     else {
@@ -355,19 +360,21 @@ class StreamGraphRange {
         // draw shape
         beginShape();
 
-        // draw top edge, left to right
-        graphVertex(start, layers[i].yTop, isGraphCurved, i == lastLayer);
-        for (int j = start; j <= end; j++) {
-          graphVertex(j, layers[i].yTop, isGraphCurved, i == lastLayer);
-        }
-        graphVertex(end, layers[i].yTop, isGraphCurved, i == lastLayer);
-
+      
         // draw bottom edge, right to left
         graphVertex(end, layers[i].yBottom, isGraphCurved, false);
         for (int j = end; j >= start; j--) {
           graphVertex(j, layers[i].yBottom, isGraphCurved, false);
         }
         graphVertex(start, layers[i].yBottom, isGraphCurved, false);
+        
+          // draw top edge, left to right
+        graphVertex(start, layers[i].yTop, isGraphCurved, i == lastLayer);
+        for (int j = start; j <= end; j++) {
+          graphVertex(j, layers[i].yTop, isGraphCurved, i == lastLayer);
+        }
+        graphVertex(end, layers[i].yTop, isGraphCurved, i == lastLayer);
+
 
         endShape(CLOSE);
       }
