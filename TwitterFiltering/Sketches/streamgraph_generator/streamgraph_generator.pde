@@ -10,7 +10,7 @@
  * @author Martin Wattenberg
  */
 
-
+import processing.opengl.*;
 boolean     isGraphCurved = true; // catmull-rom interpolation
 int         seed          = 28;   // random seed
 
@@ -18,7 +18,7 @@ float       DPI           = 400;
 float       widthInches   = 3.2;
 float       heightInches  = 2.4;
 int         numLayers     = 1;
-int         layerSize     = 20;
+int         layerSize     = 21;
 
 int layerTop;
 int layerBottom;
@@ -61,7 +61,7 @@ void setup() {
   labelY = y + height - (height * 0.26) + 50;
 
   
-  size(int(widthInches*DPI), int(heightInches*DPI));
+  size(int(widthInches*DPI), int(heightInches*DPI), JAVA2D);
   smooth();
   //noLoop();
 
@@ -106,6 +106,7 @@ void setup() {
     size[17] = 3;
     size[18] = 771;
     size[19] = 11;
+    size[20] = 11;
 
 
 
