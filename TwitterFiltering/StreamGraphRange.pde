@@ -6,7 +6,7 @@ class StreamGraphRange {
   int y = 0;
   int mWidth = 0;
   int mHeight = 0;
-  int sliderSize = 110;
+  int sliderSize = 140;
   int gapY = 40;
   float DPI = 400;
 
@@ -17,7 +17,6 @@ class StreamGraphRange {
   LayerSort   ordering;
   ColorPicker coloring;
   Layer[] layers;
-
 
   boolean isGraphCurved = false; // catmull-rom interpolation
 
@@ -200,7 +199,12 @@ class StreamGraphRange {
 
 
   void scaleLayers(Layer[] layers, int screenTop, int screenBottom) {
-    // Figure out max and min values of layers.
+    
+    screenTop += 10 * parent.scaleFactorY;
+    screenBottom -= 10 * parent.scaleFactorY;
+    
+    
+    // Figure out max and min values of layers. 
     float min = Float.MAX_VALUE;
     float max = Float.MIN_VALUE;
     for (int i = 0; i < layers[0].size.length; i++) {
@@ -287,10 +291,20 @@ class StreamGraphRange {
        */
 
       rect(x + (rectSize * k), y, rectSize, sliderSize * parent.scaleFactorY);
+
+
+      if(parent.tweetSetManager.isWeatherViewActive()) //cheeky!
+      {
+        sliderSize = 90; //amazing resize!
       //draw weather!
       PImage weatherImage = getWeatherImage(weatherInfo.get(k));
-      image(weatherImage, x + (rectSize * k) + (rectSize-weatherImage.width*parent.scaleFactorX)/2, y+sliderSize * parent.scaleFactorY, weatherImage.width*parent.scaleFactorX, weatherImage.height*parent.scaleFactorY);
-    }
+     // tint(255, 255, 255, 100); 
+      image(weatherImage, x + (rectSize * k) + (rectSize-weatherImage.width*parent.scaleFactorX)/2, y+sliderSize * parent.scaleFactorY, 1.1 * weatherImage.width*parent.scaleFactorX, 1.1 * weatherImage.height*parent.scaleFactorY);
+     // tint(255);
+      }
+      else
+        sliderSize = 140; 
+  }
   }
 
 
@@ -299,6 +313,13 @@ class StreamGraphRange {
 
   void draw() {
 
+
+    //check if a tweet set has recently been removed
+    if(layers.length > parent.tweetSetManager.getTweetSetListSize())
+    {
+      createStreamGraph();
+    }
+    
     updateScaling();
     int n = layers.length;
 

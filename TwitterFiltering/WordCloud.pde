@@ -14,7 +14,7 @@ class WordCloud {
     this.y = y;
     this.width = width;
     this.height = height;
-    buffer = createGraphics(350, 350, JAVA2D);
+    buffer = createGraphics(450, 450, JAVA2D);
     buffer.background(color(225, 228, 233));
     wordCounts = new HashMap<Integer, ArrayList<Word>>();
     //load them all in!
@@ -56,7 +56,7 @@ class WordCloud {
           //set canvas
           .withCustomCanvas(buffer)
 
-            .withSizer(Sizers.byWeight(24, 60))
+            .withSizer(Sizers.byWeight(32, 60))
               .withAngler(Anglers.horiz())
 
                 .withPlacer(Placers.horizLine());

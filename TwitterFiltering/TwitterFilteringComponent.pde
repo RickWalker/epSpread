@@ -134,7 +134,8 @@ class TwitterFilteringComponent {
     //Create Streamgraph range
     streamGraphRange = new StreamGraphRange(this);
 
-    wordCloud = new WordCloud(x+int((width-62.5)/scaleFactorX), y + int((height-135)/scaleFactorY), 250,250 );
+    //wordCloud = new WordCloud(x+int((width-62.5)/scaleFactorX), y + int((height-135)/scaleFactorY), 250,250 );
+     wordCloud = new WordCloud(x+int((width-55)/scaleFactorX), y + int((height-110)/scaleFactorY), 250,250 );
     wordCloud.setRange(19,20);
   }
 

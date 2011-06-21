@@ -7,7 +7,7 @@ class TweetSetManager {
   PVector optionButtonDim;
   PVector pointsOptionPos;
   PVector heatmapOptionPos;
-
+  PVector weatherOptionPos;
 
   float buttonDist;
   int maxTweetSets;
@@ -15,14 +15,16 @@ class TweetSetManager {
   int mouseOverBaseButton = -1;
   boolean mouseOverPointsOptionButton = false;
   boolean mouseOverHeatmapOptionButton = false;
+  boolean mouseOverWeatherOptionButton = false;
 
   boolean b_heatmapViewActive = false;
   boolean b_pointsViewActive = true;
+  boolean b_weatherViewActive = false;
 
   TwitterFilteringComponent parent;
 
 
-  int optionButtonsOffset = 40;
+  int optionButtonsOffset = 0;
 
   TweetSetManager(TwitterFilteringComponent parent) {
     this.parent = parent;
@@ -35,12 +37,12 @@ class TweetSetManager {
   }  
 
   void setConstants() {
-    optionButtonsOffset = int(40*parent.scaleFactorY);
+    optionButtonsOffset = int(110*parent.scaleFactorY);
     origin = new PVector(parent.x + (parent.imgPos.x + imgX + 50)*parent.scaleFactorX, parent.y+ 130*parent.scaleFactorY);
     buttonDim = new PVector(180*parent.scaleFactorX, 40*parent.scaleFactorY);
 
     removeCircleDim = new PVector(20*parent.scaleFactorX, 20*parent.scaleFactorY);
-    optionButtonDim = new PVector(88*parent.scaleFactorX, 40*parent.scaleFactorY);
+    optionButtonDim = new PVector(88*parent.scaleFactorX, 30*parent.scaleFactorY);
     buttonDist = 8.0*parent.scaleFactorY;
     //also move buttons? shuffle tweet sets down!
     for (TweetSet a: tweetSets) {
@@ -64,6 +66,7 @@ class TweetSetManager {
     mouseOverBaseButton = -1;  
     mouseOverPointsOptionButton = false;
     mouseOverHeatmapOptionButton = false;   
+    mouseOverWeatherOptionButton = false;   
 
 
     // -------- Draw the background pane --------
@@ -78,20 +81,26 @@ class TweetSetManager {
 
     pointsOptionPos = new PVector(origin.x, optionButtonsOffset + origin.y + (optionButtonDim.y * maxTweetSets+1) + (buttonDist * maxTweetSets+1));
     heatmapOptionPos = new PVector(origin.x + optionButtonDim.x + 5*parent.scaleFactorX, optionButtonsOffset + origin.y + (optionButtonDim.y * maxTweetSets+1) + (buttonDist * maxTweetSets+1));
+    weatherOptionPos = new PVector(origin.x, optionButtonsOffset + origin.y + (optionButtonDim.y * maxTweetSets+1) + (buttonDist * maxTweetSets+1) + (35 * parent.scaleFactorY));
 
     // -------- Draw view options buttons --------    
 
     float pointsOptionButtonAlpha = 255 * 1.0;
     float heatmapOptionButtonAlpha = 255 * 1.0;
+    float weatherOptionButtonAlpha = 255 * 1.0;
 
     if (b_pointsViewActive == false)
       pointsOptionButtonAlpha = 255 * 0.3;
 
     if (b_heatmapViewActive == false)
       heatmapOptionButtonAlpha = 255 * 0.3;
+      
+    if (b_weatherViewActive == false)
+      weatherOptionButtonAlpha = 255 * 0.3;
 
     color pointsOptionButtonColour = color(247, 247, 247, pointsOptionButtonAlpha); 
     color heatmapOptionButtonColour = color(247, 247, 247, heatmapOptionButtonAlpha); 
+    color weatherOptionButtonColour = color(247, 247, 247, weatherOptionButtonAlpha); 
 
 
     if (  (mouseX > pointsOptionPos.x) && (mouseX < pointsOptionPos.x + optionButtonDim.x)   && (mouseY > pointsOptionPos.y) && (mouseY < pointsOptionPos.y + optionButtonDim.y)  )
@@ -105,6 +114,12 @@ class TweetSetManager {
       heatmapOptionButtonColour = color(red(heatmapOptionButtonColour) * 2.3, green(heatmapOptionButtonColour) * 2.3, blue(heatmapOptionButtonColour) * 2.3, heatmapOptionButtonAlpha);    
       mouseOverHeatmapOptionButton = true;
     }
+    
+    if (  (mouseX > weatherOptionPos.x) && (mouseX < weatherOptionPos.x + optionButtonDim.x)   && (mouseY > weatherOptionPos.y) && (mouseY < weatherOptionPos.y + optionButtonDim.y)  )
+    {
+      weatherOptionButtonColour = color(red(weatherOptionButtonColour) * 2.3, green(weatherOptionButtonColour) * 2.3, blue(weatherOptionButtonColour) * 2.3, weatherOptionButtonAlpha);    
+      mouseOverWeatherOptionButton = true;
+    }
 
     strokeWeight(1.5*parent.fontScale);
     stroke(181, 184, 188, alphaCol);
@@ -114,6 +129,10 @@ class TweetSetManager {
 
     fill(heatmapOptionButtonColour);
     rrect(heatmapOptionPos.x, heatmapOptionPos.y, optionButtonDim.x, optionButtonDim.y, 10.0f*parent.scaleFactorX, 2.4f*parent.scaleFactorY, "");  
+ 
+     fill(weatherOptionButtonColour);
+    rrect(weatherOptionPos.x, weatherOptionPos.y, optionButtonDim.x, optionButtonDim.y, 10.0f*parent.scaleFactorX, 2.4f*parent.scaleFactorY, "");  
+
 
 
     textAlign(CENTER, CENTER);
@@ -121,6 +140,8 @@ class TweetSetManager {
     text("Points", pointsOptionPos.x + (optionButtonDim.x/2.0), pointsOptionPos.y + (optionButtonDim.y / 2.0));
     fill(50, 50, 50, heatmapOptionButtonAlpha);
     text("Heatmap", heatmapOptionPos.x + (optionButtonDim.x/2.0), heatmapOptionPos.y + (optionButtonDim.y / 2.0));
+    fill(50, 50, 50, weatherOptionButtonAlpha);
+    text("Weather", weatherOptionPos.x + (optionButtonDim.x/2.0), weatherOptionPos.y + (optionButtonDim.y / 2.0));
     textAlign(LEFT, LEFT);
 
     fill(76, 86, 108);
@@ -236,6 +257,9 @@ class TweetSetManager {
     return b_pointsViewActive;
   } 
 
+  boolean isWeatherViewActive() {
+    return b_weatherViewActive;
+  } 
 
 
   void processMouse()
@@ -255,7 +279,10 @@ class TweetSetManager {
       b_heatmapViewActive = true;
     }
 
-
+    if (mouseOverWeatherOptionButton)
+    {
+      b_weatherViewActive = !b_weatherViewActive;
+    }
 
     if (mouseOverRemoveBox >= 0) {
       println("Over remove box : " + mouseOverRemoveBox);  
