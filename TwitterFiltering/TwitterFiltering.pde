@@ -21,15 +21,14 @@ import java.util.ArrayList;
 //String[] keywordList;
 ///de.bezier.data.sql.SQLite db;
 PFont font = createFont("FFScala", 18);
+PApplet mainApplet;
 
 
 int imgX = 1304; //original image size for scaling
 int imgY = 663;  //image size
 
-
-  ArrayList<Integer> colours = new ArrayList<Integer>(); 
-  int colourTracker = 0; //tracks number of colours
-
+ArrayList<Integer> colours = new ArrayList<Integer>(); 
+int colourTracker = 0; //tracks number of colours
 
 boolean b_generateNetwork = false;  //Generate network for selected tweets?
 
@@ -69,6 +68,7 @@ void setup()
   createRegions();
   controlP5 = new ControlP5(this);
   controlP5.setAutoDraw(false);
+  mainApplet = this;
   //setup database
   //db = new de.bezier.data.sql.SQLite( this, "VAST2011_MC1.sqlite" );  // open database file
   storyboard = new TimeLineComponent(this, 0, 0, width, height);

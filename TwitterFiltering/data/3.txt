@@ -1,0 +1,4 @@
+10 oranges
+5 coconuts
+3 apples
+2 pears

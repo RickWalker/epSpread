@@ -1,5 +1,5 @@
 class TweetSetManager {
-
+  int height;
   ArrayList<TweetSet> tweetSets;
   PVector origin;
   PVector buttonDim;  
@@ -30,7 +30,8 @@ class TweetSetManager {
 
     tweetSets = new ArrayList<TweetSet>(); 
     setConstants();
-    maxTweetSets = 10;
+    maxTweetSets = 8;
+    height = int((buttonDim.y+buttonDist)*maxTweetSets);
   }  
 
   void setConstants() {
@@ -49,6 +50,9 @@ class TweetSetManager {
     }
   }
 
+  int getHeight() {
+    return int(origin.y) + height;
+  }
 
   void draw()
   {
@@ -121,7 +125,7 @@ class TweetSetManager {
 
     fill(76, 86, 108);
     text("Options", pointsOptionPos.x, pointsOptionPos.y - 12*parent.scaleFactorY); 
-
+    height = int(pointsOptionPos.y + optionButtonDim.y);
 
 
     // -------- Loop through tweetSets --------  

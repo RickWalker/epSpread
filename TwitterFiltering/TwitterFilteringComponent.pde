@@ -12,6 +12,8 @@ class TwitterFilteringComponent {
   //SQLite db;
 
   TweetSetManager tweetSetManager;
+  WordCloud wordCloud;
+
   Interval dateSelection;
   Interval previousDateSelection;
   String previousKeyword="";
@@ -128,13 +130,16 @@ class TwitterFilteringComponent {
     previousDateSelection = new Interval(minDate, minDate.plus(Period.hours(24)));
     //Setup Colours
     setupColours();
-  
+
     //Create Streamgraph range
     streamGraphRange = new StreamGraphRange(this);
+
+    wordCloud = new WordCloud(x+int((width-62.5)/scaleFactorX), y + int((height-135)/scaleFactorY), 250,250 );
+    wordCloud.setRange(19,20);
   }
 
   void createP5Components() {
-    range = controlP5.addRange("Date"+componentID, 0, Hours.hoursIn(new Interval(minDate, maxDate)).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getStart())).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getEnd())).getHours(), int(x + 130*scaleFactorX), int(y + (imgY + 30)*scaleFactorY), int((imgX-260) * scaleFactorX), int(30*scaleFactorY));
+    range = controlP5.addRange("Date"+componentID, 0, Hours.hoursIn(new Interval(minDate, maxDate)).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getStart())).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getEnd())).getHours(), int(x + (imgPos.x * scaleFactorX)), int(y + (imgY + 50)*scaleFactorY), int((imgX) * scaleFactorX), int(30*scaleFactorY));
     //println("Range slider at" + int(imgY*scaleFactorY));
     range.setColorBackground(color(130, 130, 130));
     range.setLabelVisible(false);
@@ -181,8 +186,8 @@ class TwitterFilteringComponent {
   }
 
   void resizeP5Components() {
-    range.setPosition(int(x + 130*scaleFactorX), int(y + (imgY + 50)*scaleFactorY));
-    range.setSize(int((imgX-260) * scaleFactorX), int(30*scaleFactorY)); //doesn't update the handles!
+    range.setPosition(int(x + ((imgPos.x-3) * scaleFactorX)), int(y + (imgY + 50)*scaleFactorY));
+    range.setSize(int((imgX+6) * scaleFactorX), int(30*scaleFactorY)); //doesn't update the handles!
 
 
     filterTextField.setSize(int(180*scaleFactorX), int(30*scaleFactorY));
@@ -210,6 +215,7 @@ class TwitterFilteringComponent {
    * -----------------------------*/
 
   void draw() {
+    colorMode(RGB, 255);
     updateIntegrators();
     if (!doneMoving()) {
       updateSizes();
@@ -246,7 +252,7 @@ class TwitterFilteringComponent {
 
     float rangeBorderSize = 2;
     fill(80);
-    //rect(x + (130 - rangeBorderSize)*scaleFactorX, y+(imgY + 50 - rangeBorderSize)*scaleFactorY, (imgX-260 + rangeBorderSize*2)*scaleFactorX, (30 + rangeBorderSize*2)*scaleFactorY);
+    //rect(x + (imgPos.x - rangeBorderSize)*scaleFactorX, y+(imgY + 50 - rangeBorderSize)*scaleFactorY, (imgX + rangeBorderSize*2)*scaleFactorX, (30 + rangeBorderSize*2)*scaleFactorY);
 
     // ---- Draw all the TweetSet Buttons ----
     tweetSetManager.draw();
@@ -274,9 +280,14 @@ class TwitterFilteringComponent {
 
     //----- Draw streamgraph range -------
     streamGraphRange.draw();
-    
+
     // ---- Refresh weather applet ----    
     //weatherApplet.redraw();
+    pushMatrix();
+    translate(x,y);
+    scale(scaleFactorX, scaleFactorY);
+    wordCloud.draw();
+  popMatrix();
   }
 
 
@@ -774,6 +785,8 @@ class TwitterFilteringComponent {
         for (TweetSet a: tweetSetManager.getTweetSetList())
           a.updateHeatMap();
         previousDateSelection = new Interval(dateSelection);
+        //update wordcloud
+        wordCloud.setRange( Days.daysBetween(minDate, dateSelection.getStart()).getDays(), 20);
         //parent.moveToPosition(this);
       }
 
