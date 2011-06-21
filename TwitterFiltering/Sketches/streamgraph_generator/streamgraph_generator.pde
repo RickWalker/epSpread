@@ -18,7 +18,7 @@ float       DPI           = 400;
 float       widthInches   = 3.2;
 float       heightInches  = 2.4;
 int         numLayers     = 1;
-int         layerSize     = 21;
+int         layerSize     = 20;
 
 int layerTop;
 int layerBottom;
@@ -61,7 +61,7 @@ void setup() {
   labelY = y + height - (height * 0.26) + 50;
 
   
-  size(int(widthInches*DPI), int(heightInches*DPI), JAVA2D);
+  size(int(widthInches*DPI), int(heightInches*DPI), OPENGL);
   smooth();
   //noLoop();
 
@@ -106,7 +106,7 @@ void setup() {
     size[17] = 3;
     size[18] = 771;
     size[19] = 11;
-    size[20] = 11;
+   
 
 
 
@@ -278,7 +278,7 @@ void draw() {
   // generate graph
   for (int i = 0; i < n; i++) {
     start = max(0, layers[i].onset - 1);
-    end   = min(m - 1, layers[i].end);
+    end   = min(m-1, layers[i].end);
     pxl   = i == lastLayer ? 0 : 1;
 
     // set fill color of layer
@@ -286,17 +286,21 @@ void draw() {
 
 
     // draw shape
-    beginShape();
+    beginShape(POLYGON);
 
+ 
     // draw top edge, left to right
     graphVertex(start, layers[i].yTop, isGraphCurved, i == lastLayer);
+
     for (int j = start; j <= end; j++) {
       graphVertex(j, layers[i].yTop, isGraphCurved, i == lastLayer);       
     }
     graphVertex(end, layers[i].yTop, isGraphCurved, i == lastLayer);
 
-    // draw bottom edge, right to left
+  
+   // draw bottom edge, right to left
     graphVertex(end, layers[i].yBottom, isGraphCurved, false);
+
     for (int j = end; j >= start; j--) {
       graphVertex(j, layers[i].yBottom, isGraphCurved, false);
     }
@@ -346,6 +350,8 @@ void graphVertex(int point, float[] source, boolean curve, boolean pxl) {
   float x = map(point, 0, layerSize - 1, 0, width);
   float y = source[point] - (pxl ? 1 : 0);
   if (curve) {
+    stroke(0);
+    strokeWeight(3);
     curveVertex(x, y);
   } 
   else {

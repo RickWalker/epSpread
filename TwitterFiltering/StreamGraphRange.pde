@@ -262,7 +262,7 @@ class StreamGraphRange {
     if (curve) {
      //curveTightness(testVal);
      // stroke(0);
-     // strokeWeight(1);
+     // strokeWeight(3);
       curveVertex(x, y);
     } 
     else {
@@ -360,7 +360,6 @@ class StreamGraphRange {
         // draw shape
         beginShape();
 
-      
         // draw bottom edge, right to left
         graphVertex(end, layers[i].yBottom, isGraphCurved, false);
         for (int j = end; j >= start; j--) {
@@ -374,7 +373,7 @@ class StreamGraphRange {
           graphVertex(j, layers[i].yTop, isGraphCurved, i == lastLayer);
         }
         graphVertex(end, layers[i].yTop, isGraphCurved, i == lastLayer);
-
+      
 
         endShape(CLOSE);
       }
