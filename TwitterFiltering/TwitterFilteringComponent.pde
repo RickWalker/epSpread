@@ -575,7 +575,7 @@ class TwitterFilteringComponent {
     TweetSet newTweetSetToAdd = new TweetSet(keywords, setColour, RESymbol, this);
 
     println("Creating new tweet set...");
-    String[] filterTerms = splitTokens(keywords, ", ");
+    String[] filterTerms = splitTokens(keywords, ",");
 
     println("Terms are : ");
 

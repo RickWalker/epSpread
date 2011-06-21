@@ -1,3 +1,5 @@
+import java.lang.Math.*;
+
 class StreamGraphRange {
 
   int x = 0;
@@ -17,7 +19,7 @@ class StreamGraphRange {
   Layer[] layers;
 
 
-  boolean isGraphCurved = false; // catmull-rom interpolation
+  boolean isGraphCurved = true; // catmull-rom interpolation
 
   ArrayList<String> weatherInfo = new ArrayList<String>() ;
   ArrayList<String> windDirection = new ArrayList<String>() ;
@@ -119,8 +121,8 @@ class StreamGraphRange {
         int maxDayFreq = frequencies[frequencies.length-1]; 
 
         //normalize and store data
-        normalized = float(freqOnDay - minDayFreq ) / float(maxDayFreq - minDayFreq); 
-        normalized = freqOnDay;
+        //normalized = float(freqOnDay - minDayFreq ) / float(maxDayFreq - minDayFreq); 
+        normalized = freqOnDay+1;
 
         size[j] = normalized;
         println(" (" + normalized + ")");

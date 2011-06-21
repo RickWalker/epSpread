@@ -23,7 +23,7 @@ class WordCloud {
     for (int k=1; k<= 20; k++) {
       oneDayCount = new ArrayList<Word>();
       int numLines = 0;
-      int maxLines = 15;
+      int maxLines = 25;
 
       String lines[] = loadStrings(k+".txt");
       if (lines != null) {
