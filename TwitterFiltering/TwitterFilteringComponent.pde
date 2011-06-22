@@ -21,6 +21,7 @@ class TwitterFilteringComponent {
   MovementState currentTransitionState;
   MovementState previousTransitionState;
   PImage thumbnail;
+  PImage windArrow;
   PGraphics thumbnailBuffer;
   //boolean doneResize = true;
 
@@ -117,6 +118,8 @@ class TwitterFilteringComponent {
     showers= loadImage("data/showers.jpg");
     cloudy= loadImage("data/cloudy.jpg");
     clear= loadImage("data/clear.jpg");
+    
+    windArrow = loadImage("data/arrow.png");
 
     //Load font 
     textFont(font); 
@@ -411,7 +414,7 @@ class TwitterFilteringComponent {
 
     String speed = windSpeed.get(dayOfTweet);
     //println(speed);
-    float fSpeed = map(Float.valueOf(speed).floatValue(), 4.0, 14.0, 0.4, 1.1);
+    float fSpeed = map(Float.valueOf(speed).floatValue(), 4.0, 14.0, 0.35, 0.9);
 
     int angle = 0;
 
@@ -434,25 +437,33 @@ class TwitterFilteringComponent {
     windSpeed_integrator.target(fSpeed);
 
     int gridRes = 10; 
-    float cov = 0.9;  //map coverage
+    float cov = 0.95;  //map coverage
+    int counter = 0;
+    int extra = 0;
+
 
     for (int i=int(imgX * (1.0f - cov)); i<imgX * cov; i+=imgX/gridRes) { 
-      for (int j=int(imgY * (1.0f - cov)); j<imgY * cov; j+=imgY/gridRes) { 
-
-        drawArrow(int(x + ((imgPos.x + i) * scaleFactorX)), 
-        int(y + ((imgPos.y + j) * scaleFactorY)), 
-        0.7 * scaleFactorX * windSpeed_integrator.value, 
-        0.7 * scaleFactorY * windSpeed_integrator.value, 
-        windAngle_integrator.value);
+           
+      for (int j=int(imgY * (1.0f - cov)); j<(imgY * cov); j+=imgY/gridRes) { 
+                  
+      if (counter % 2 != 0){  
+        extra = (imgX/gridRes)/4;
       }
+      else{
+        extra = 0;
+      }
+        drawArrow(int(x + ((imgPos.x + i - 10) * scaleFactorX)) + extra, 
+        int(y + ((imgPos.y + j) * scaleFactorY)), 
+        0.8 * scaleFactorX * windSpeed_integrator.value, 
+        0.8 * scaleFactorY * windSpeed_integrator.value, 
+        windAngle_integrator.value);
+              counter++;
+      }
+
     }
   }
 
   void drawArrow(int x, int y, float w, float h, float angle) {
-
-
-
-
 
 
     pushMatrix();     
@@ -466,13 +477,17 @@ class TwitterFilteringComponent {
     scale(w, h);
 
     //rotate(radians(angle));
-    fill(145, 145, 255, 230);
+    tint(165, 165, 255, 230);
     stroke(0, 0, 0, 50);
     strokeWeight(2);
-
-    triangle(0, 40, 25, 0, 50, 40);
-    quad(12.5, 40, 12.5, 100, 37.5, 100, 37.5, 40); 
+    
+    imageMode(CENTER);
+    image(windArrow, 0,0,windArrow.width, windArrow.height);
+   // triangle(0, 40, 25, 0, 50, 40);
+  //  quad(12.5, 40, 12.5, 100, 37.5, 100, 37.5, 40); 
     popMatrix();
+    imageMode(CORNER);
+    tint(255,255,255,255);
   }
 
 

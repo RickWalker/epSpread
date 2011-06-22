@@ -51,6 +51,7 @@ PImage rain;
 PImage showers;
 PImage cloudy;
 PImage clear;
+PImage windArrow;
 int componentCount = 0;//unique ID for each component!
 TimeLineComponent storyboard;
 
