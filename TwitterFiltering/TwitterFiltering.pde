@@ -84,13 +84,13 @@ void keyPressed() {
     
     if(key == 'i')
     {
-      testVal += 0.01;
+      testVal += 1.0;
       println(testVal);
     }
       
     if(key == 'k')
     {
-      testVal -= 0.01;  
+      testVal -= 1.0;  
       println(testVal);
     }
     
