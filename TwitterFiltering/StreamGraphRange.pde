@@ -242,6 +242,13 @@ class StreamGraphRange {
 
   void updateScaling() {
 
+     if(parent.tweetSetManager.isWeatherViewActive()) //cheeky!
+      {
+        sliderSize = 90;
+      }
+      else
+        sliderSize = 140;
+    
     int imageOffsetX = parent.x + int(parent.imgPos.x-3 * parent.scaleFactorX);
     int imageOffsetY = parent.y + int(parent.imgPos.y * parent.scaleFactorY) + int(imgY*parent.scaleFactorY) + int(gapY * parent.scaleFactorY);  
 
@@ -253,6 +260,7 @@ class StreamGraphRange {
 
     if (numLayers > 0)
       scaleLayers(layers, 0, int(sliderSize));
+
   }
 
 
@@ -263,7 +271,7 @@ class StreamGraphRange {
 
     buffer.beginDraw();
     if (curve) {
-     buffer.curveTightness(testVal);
+     //buffer.curveTightness(testVal);
      // stroke(0);
      // strokeWeight(3);
       buffer.curveVertex(x, y);
@@ -301,7 +309,7 @@ class StreamGraphRange {
       //draw weather!
       PImage weatherImage = getWeatherImage(weatherInfo.get(k));
 
-      image(weatherImage, x + (rectSize * k) + (rectSize-weatherImage.width*parent.scaleFactorX)/2, y+sliderSize * parent.scaleFactorY, 1.1 * weatherImage.width*parent.scaleFactorX, 1.1 * weatherImage.height*parent.scaleFactorY);
+      buffer.image(weatherImage, x + (rectSize * k) + (rectSize-weatherImage.width*parent.scaleFactorX)/2, y+sliderSize * parent.scaleFactorY, 1.1 * weatherImage.width*parent.scaleFactorX, 1.1 * weatherImage.height*parent.scaleFactorY);
       }
       else
         sliderSize = 140; 
@@ -320,8 +328,7 @@ void draw(){
    if(layers.length > parent.tweetSetManager.getTweetSetListSize()) {
       createStreamGraph();
    }
-  
-  
+    
   image(streamGraphImg, x, y, mWidth, mHeight);
   
 }

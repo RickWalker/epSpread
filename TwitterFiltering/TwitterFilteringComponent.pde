@@ -22,6 +22,9 @@ class TwitterFilteringComponent {
 
   ArrayList<TweetNetwork> tweetNetworks = new ArrayList<TweetNetwork>();
   ArrayList<Integer> selectedTweetUserIds = new ArrayList<Integer>();
+  
+  ArrayList<String> windDirection = new ArrayList<String>() ;
+  ArrayList<String> windSpeed = new ArrayList<String>() ;
 
   // ---- Mouse Drag/Selection ----
 
@@ -45,6 +48,8 @@ class TwitterFilteringComponent {
   int filterTextField_x;
   int filterTextField_y;
 
+  Integrator windAngle_integrator = new Integrator(-90);
+  Integrator windSpeed_integrator = new Integrator(0);
 
   // ---- Control P5 objects ----
 
@@ -137,6 +142,8 @@ class TwitterFilteringComponent {
     //wordCloud = new WordCloud(x+int((width-62.5)/scaleFactorX), y + int((height-135)/scaleFactorY), 250,250 );
     wordCloud = new WordCloud(this, 275, 275, 250, 250);//, x+int((width-250.0/scaleFactorX)), y + int(tweetSetManager.height/scaleFactorY), 250, 250 );
     wordCloud.setRange(19, 20);
+    
+    loadWeatherData();
   }
 
   void createP5Components() {
@@ -203,6 +210,62 @@ class TwitterFilteringComponent {
   boolean doneMoving() {
     return width == int(widthIntegrator.value) && height == int(heightIntegrator.value) && x == int(xIntegrator.value) && y == int(yIntegrator.value);
   }
+
+
+
+
+void loadWeatherData(){
+
+println("Loading weather data");  
+  
+try {
+      Class.forName("org.sqlite.JDBC");
+    }
+    catch(ClassNotFoundException e) {
+      println("Weather couldn't find database!");
+    }
+    Connection connection = null;
+    try
+    {
+      // create a database connection
+      connection = DriverManager.getConnection("jdbc:sqlite:"+sketchPath("VAST2011_MC1.sqlite"));
+      Statement statement = connection.createStatement();
+      statement.setQueryTimeout(30);  // set timeout to 30 sec.
+
+      ResultSet rs = statement.executeQuery("SELECT * FROM weather");
+      while (rs.next ())
+      {
+        // read the result set
+        windDirection.add(rs.getString("Wind_Direction"));
+        windSpeed.add(rs.getString("Average_Wind_Speed"));
+      }
+    }
+    catch(SQLException e)
+    {
+      // if the error message is "out of memory", 
+      // it probably means no database file is found
+      System.err.println(e.getMessage());
+    }
+    finally
+    {
+      try
+      {
+        if (connection != null)
+          connection.close();
+      }
+      catch(SQLException e)
+      {
+        // connection close failed.
+        System.err.println(e);
+      }
+    }
+  
+  
+  
+}
+
+
+
 
 
 
@@ -289,11 +352,89 @@ class TwitterFilteringComponent {
     //scale(scaleFactorX, scaleFactorY);
     wordCloud.draw();
     //popMatrix();
+
+    if(tweetSetManager.isWeatherViewActive())
+      drawWindArrows();
   }
 
 
+  void drawWindArrows() {
 
+    windAngle_integrator.update();
+    windSpeed_integrator.update();
+    
+    
+    int dayOfTweet = Days.daysIn(new Interval(minDate, dateSelection.getEnd())).getDays();
+    dayOfTweet = constrain(dayOfTweet, 0,20);
 
+    String dir = windDirection.get(dayOfTweet);
+    //println(windDirection);
+    
+    String speed = windSpeed.get(dayOfTweet);
+    //println(speed);
+    float fSpeed = map(Float.valueOf(speed).floatValue(), 4.0,14.0,0.4,1.1);
+     
+    int angle = 0;
+    
+    if(dir.equals("N"))
+      angle = 180;    
+    if(dir.equals("NW"))
+      angle = 135;        
+    if(dir.equals("NNW"))
+      angle = 158;   
+    if(dir.equals("WNW"))
+      angle = 113;     
+    if(dir.equals("W"))
+      angle = 90;
+    if(dir.equals("E"))
+      angle = -90;
+    if(dir.equals("SE"))
+      angle = -45;
+      
+    windAngle_integrator.target(angle);
+    windSpeed_integrator.target(fSpeed);
+ 
+    int gridRes = 10; 
+    float cov = 0.9;  //map coverage
+
+    for (int i=int(imgX * (1.0f - cov)); i<imgX * cov; i+=imgX/gridRes) { 
+      for (int j=int(imgY * (1.0f - cov)); j<imgY * cov; j+=imgY/gridRes) { 
+
+        drawArrow(int(x + ((imgPos.x + i) * scaleFactorX)), 
+        int(y + ((imgPos.y + j) * scaleFactorY)), 
+        0.7 * scaleFactorX * windSpeed_integrator.value, 
+        0.7 * scaleFactorY * windSpeed_integrator.value,
+        windAngle_integrator.value);
+      }
+    }
+  }
+
+  void drawArrow(int x, int y, float w, float h, float angle) {
+    
+   
+
+    
+
+    
+    pushMatrix();     
+    translate(x, y);
+    
+    fill(255,0,0);
+    
+    //translate(-26,24);
+    rotate(radians(angle));      
+    
+    scale(w, h);
+
+    //rotate(radians(angle));
+    fill(145, 145, 255,230);
+    stroke(0,0,0,50);
+    strokeWeight(2);
+   
+    triangle(0, 40, 25, 0, 50, 40);
+    quad(12.5, 40, 12.5, 100, 37.5, 100, 37.5, 40); 
+    popMatrix();
+  }
 
 
 
