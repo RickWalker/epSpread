@@ -135,8 +135,8 @@ class TwitterFilteringComponent {
     streamGraphRange = new StreamGraphRange(this);
 
     //wordCloud = new WordCloud(x+int((width-62.5)/scaleFactorX), y + int((height-135)/scaleFactorY), 250,250 );
-     wordCloud = new WordCloud(x+int((width-55)/scaleFactorX), y + int((height-110)/scaleFactorY), 250,250 );
-    wordCloud.setRange(19,20);
+    wordCloud = new WordCloud(this, 275, 275, 250, 250);//, x+int((width-250.0/scaleFactorX)), y + int(tweetSetManager.height/scaleFactorY), 250, 250 );
+    wordCloud.setRange(19, 20);
   }
 
   void createP5Components() {
@@ -284,11 +284,11 @@ class TwitterFilteringComponent {
 
     // ---- Refresh weather applet ----    
     //weatherApplet.redraw();
-    pushMatrix();
-    translate(x,y);
-    scale(scaleFactorX, scaleFactorY);
+    //pushMatrix();
+    //translate(x, y);
+    //scale(scaleFactorX, scaleFactorY);
     wordCloud.draw();
-  popMatrix();
+    //popMatrix();
   }
 
 
@@ -474,38 +474,6 @@ class TwitterFilteringComponent {
       }
     if (forMouseOver != null)
       drawMouseOver(forMouseOver);
-  }
-
-  void halveSize() {
-    widthIntegrator.target(width/2);
-    heightIntegrator.target(height/2);
-    doneResize = false;
-  }
-
-  void doubleSize() {
-    widthIntegrator.target(width*2);
-    heightIntegrator.target(height*2);
-    doneResize = false;
-  }  
-
-  void moveLeft() {
-    xIntegrator.target(x-100);
-    doneResize = false;
-  }
-
-  void moveUp() {
-    yIntegrator.target(y-100);
-    doneResize = false;
-  }
-
-  void moveDown() {
-    yIntegrator.target(y+100);
-    doneResize = false;
-  }
-
-  void moveRight() {
-    xIntegrator.target(x+100);
-    doneResize = false;
   }
 
   void moveTo(int mx, int my) {

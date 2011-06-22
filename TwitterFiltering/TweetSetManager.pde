@@ -50,10 +50,12 @@ class TweetSetManager {
       a.getButtonPosY().set(origin.y + (buttonDim.y * a.id) + (buttonDist * a.id));
       a.getButtonPosY().target(origin.y + (buttonDim.y * a.id) + (buttonDist * a.id));
     }
+    //height = int((buttonDim.y+buttonDist)*(maxTweetSets-1));
   }
 
   int getHeight() {
-    return int(origin.y) + height;
+    //println("position is " + int(origin.y) + height);
+    return height;
   }
 
   void draw()
@@ -94,7 +96,7 @@ class TweetSetManager {
 
     if (b_heatmapViewActive == false)
       heatmapOptionButtonAlpha = 255 * 0.3;
-      
+
     if (b_weatherViewActive == false)
       weatherOptionButtonAlpha = 255 * 0.3;
 
@@ -114,7 +116,7 @@ class TweetSetManager {
       heatmapOptionButtonColour = color(red(heatmapOptionButtonColour) * 2.3, green(heatmapOptionButtonColour) * 2.3, blue(heatmapOptionButtonColour) * 2.3, heatmapOptionButtonAlpha);    
       mouseOverHeatmapOptionButton = true;
     }
-    
+
     if (  (mouseX > weatherOptionPos.x) && (mouseX < weatherOptionPos.x + optionButtonDim.x)   && (mouseY > weatherOptionPos.y) && (mouseY < weatherOptionPos.y + optionButtonDim.y)  )
     {
       weatherOptionButtonColour = color(red(weatherOptionButtonColour) * 2.3, green(weatherOptionButtonColour) * 2.3, blue(weatherOptionButtonColour) * 2.3, weatherOptionButtonAlpha);    
@@ -129,8 +131,8 @@ class TweetSetManager {
 
     fill(heatmapOptionButtonColour);
     rrect(heatmapOptionPos.x, heatmapOptionPos.y, optionButtonDim.x, optionButtonDim.y, 10.0f*parent.scaleFactorX, 2.4f*parent.scaleFactorY, "");  
- 
-     fill(weatherOptionButtonColour);
+
+    fill(weatherOptionButtonColour);
     rrect(weatherOptionPos.x, weatherOptionPos.y, optionButtonDim.x, optionButtonDim.y, 10.0f*parent.scaleFactorX, 2.4f*parent.scaleFactorY, "");  
 
 
@@ -147,6 +149,7 @@ class TweetSetManager {
     fill(76, 86, 108);
     text("Options", pointsOptionPos.x, pointsOptionPos.y - 12*parent.scaleFactorY); 
     height = int(pointsOptionPos.y + optionButtonDim.y);
+    //println(height);
 
 
     // -------- Loop through tweetSets --------  
