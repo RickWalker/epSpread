@@ -316,7 +316,11 @@ class TwitterFilteringComponent {
     }
     else {
       //drawThumbnail();
-      image(thumbnail, x, y, width, height);
+      image(thumbnail, x, y);//, width, height);
+            stroke(255,0,0);
+            noFill();
+      rect(x, y, width, height);
+
     }
   }
 
