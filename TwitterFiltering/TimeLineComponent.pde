@@ -79,6 +79,7 @@ class TimeLineComponent {
       strokeWeight(1);
       line(tx, lineY, tx, lineY+minorTickHeight);
       //draw label
+      textFont(font);
       textSize(14*fontScale);
       tempdt = minDate.plus(Period.days(a));
       fill(0);
@@ -157,7 +158,7 @@ class TimeLineComponent {
     }
   }
   void fixOverlaps() {
-    for (TwitterFilteringComponent a: timePoints) {    
+    /*for (TwitterFilteringComponent a: timePoints) {    
       for (TwitterFilteringComponent b: timePoints) {
         if (a!=b) {
           if (a.contains(b.x, b.y) || a.contains(b.x+width, b.y) || a.contains(b.x+width, b.y+height) || a.contains(b.x, b.y+height)) {
@@ -171,7 +172,7 @@ class TimeLineComponent {
           }
         }
       }
-    }
+    }*/
   }
 
   void controlEvent(ControlEvent theControlEvent) {
@@ -187,8 +188,10 @@ class TimeLineComponent {
     if (currentLarge !=null) {
       if (mouseEvent.getClickCount()==2) {
         //shrink it back down!
+        //generate thumbnail
         currentLarge.setSize(int(smallVizSize.x), int(smallVizSize.y));
         moveToPosition(currentLarge);
+        currentLarge.currentTransitionState = MovementState.SHRINKING;
         currentLarge = null;
       }
       else {
@@ -203,6 +206,7 @@ class TimeLineComponent {
           a.moveTo(0, 0);
           a.setSize(width, height);
           currentLarge = a;
+          a.currentTransitionState = MovementState.GROWING;
           break;
         }
         else if (a.hasMouseOver()) {

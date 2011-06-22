@@ -18,7 +18,11 @@ class TwitterFilteringComponent {
   Interval previousDateSelection;
   String previousKeyword="";
   int oldWidth, oldHeight;
-  boolean doneResize = true;
+  MovementState currentTransitionState;
+  MovementState previousTransitionState;
+  PImage thumbnail;
+  PGraphics thumbnailBuffer;
+  //boolean doneResize = true;
 
   ArrayList<TweetNetwork> tweetNetworks = new ArrayList<TweetNetwork>();
   ArrayList<Integer> selectedTweetUserIds = new ArrayList<Integer>();
@@ -87,7 +91,6 @@ class TwitterFilteringComponent {
     widthIntegrator = new Integrator(width);
     heightIntegrator = new Integrator(height);
 
-
     componentID = componentCount++;
 
     calculateScale();
@@ -134,9 +137,10 @@ class TwitterFilteringComponent {
     //Create Streamgraph range
     streamGraphRange = new StreamGraphRange(this);
 
-    //wordCloud = new WordCloud(x+int((width-62.5)/scaleFactorX), y + int((height-135)/scaleFactorY), 250,250 );
-    wordCloud = new WordCloud(this, 275, 275, 250, 250);//, x+int((width-250.0/scaleFactorX)), y + int(tweetSetManager.height/scaleFactorY), 250, 250 );
+    wordCloud = new WordCloud(this, 275, 275, 250, 250);
     wordCloud.setRange(19, 20);
+    currentTransitionState = previousTransitionState = MovementState.SMALL;
+    thumbnailBuffer = createGraphics(int(parent.smallVizSize.x), int(parent.smallVizSize.y), JAVA2D);//P2D);//screenWidth, screenHeight, P2D);
   }
 
   void createP5Components() {
@@ -218,20 +222,43 @@ class TwitterFilteringComponent {
   void draw() {
     colorMode(RGB, 255);
     updateIntegrators();
-    if (!doneMoving()) {
+    //if (!doneMoving()) {
+    if (doneMoving()) {
+      if (currentTransitionState == MovementState.GROWING) {
+        previousTransitionState = currentTransitionState;
+        currentTransitionState = MovementState.LARGE;
+      }
+      else if (currentTransitionState == MovementState.SHRINKING) {
+        previousTransitionState = currentTransitionState;
+        currentTransitionState = MovementState.SMALL;
+        generateThumbnail();
+      }
+    }
+    //if we're resizing:
+    if (currentTransitionState == MovementState.GROWING || currentTransitionState == MovementState.SHRINKING) {
       updateSizes();
       calculateScale();
       setConstants();
       resizeP5Components();
     }
-    else if (!doneResize) {
+    else if (previousTransitionState != currentTransitionState) {
+      //check for just finished transition for controlp5
       //re-add p5 components?
-      println("Done resize!");
       removeP5Components();
       createP5Components();
-      //range.update();
-      doneResize=true;
+      previousTransitionState = currentTransitionState;
     }
+    if (currentTransitionState != MovementState.SMALL || thumbnail == null) {
+      //draw live unless small!
+      drawComponents();//x, y, width, height);
+    }
+    else {
+      //drawThumbnail();
+      image(thumbnail, x, y, width, height);
+    }
+  }
+
+  void drawComponents(){//int x, int y, int width, int height) {
     // ---- Border + Map ----
     stroke(0);
     noFill();
@@ -241,26 +268,18 @@ class TwitterFilteringComponent {
     fill(40);
     rect(x + (imgPos.x - 3)*scaleFactorX, y+ (imgPos.y - 3)*scaleFactorY, (imgX+6)*scaleFactorX, (imgY+6)*scaleFactorY);
     image(imgMap, x + imgPos.x*scaleFactorX, y + imgPos.y*scaleFactorY, imgX*scaleFactorX, imgY*scaleFactorY);  
-    //popMatrix();
+
     // ---- Filter terms text ----
     textSize(18*fontScale);
     fill(76, 86, 108);
     text("Filter Terms", filterTextField_x - 2*scaleFactorX, filterTextField_y - 10*scaleFactorY);
 
-    //pushMatrix();
-    //scale(scaleFactorX, scaleFactorY);
-    // ---- Border for Range slider ----
-
-    float rangeBorderSize = 2;
-    fill(80);
-    //rect(x + (imgPos.x - rangeBorderSize)*scaleFactorX, y+(imgY + 50 - rangeBorderSize)*scaleFactorY, (imgX + rangeBorderSize*2)*scaleFactorX, (30 + rangeBorderSize*2)*scaleFactorY);
-
     // ---- Draw all the TweetSet Buttons ----
     tweetSetManager.draw();
-    //popMatrix();
+
     // ---- Draw ControlP5 ----  
     controlP5.draw();
-    //popMatrix();
+
     // ---- Draw tweet network if selected / on ----  
     if (b_selection)
       drawTweetNetwork();
@@ -282,16 +301,29 @@ class TwitterFilteringComponent {
     //----- Draw streamgraph range -------
     streamGraphRange.draw();
 
-    // ---- Refresh weather applet ----    
-    //weatherApplet.redraw();
-    //pushMatrix();
-    //translate(x, y);
-    //scale(scaleFactorX, scaleFactorY);
     wordCloud.draw();
-    //popMatrix();
   }
 
-
+  void generateThumbnail() {
+    //take buffer into image!
+    println("Start");
+    PGraphics temp = g;
+    //g.endDraw();
+    g = thumbnailBuffer;
+    g.beginDraw();
+    background(225, 228, 233);
+    pushMatrix();
+    translate(-x, -y);
+    drawComponents();//0, 0, width, height);//int(parent.smallVizSize.x), int(parent.smallVizSize.y));
+    popMatrix();
+    g.endDraw();
+    //generateThumbnail();
+    g = temp;
+    //g.beginDraw();
+    println("Drew to offscreen, back now!");
+    thumbnail = thumbnailBuffer.get(0, 0, thumbnailBuffer.width, thumbnailBuffer.height);    
+    println("Done generating thumbnail!");
+  }
 
 
 
@@ -479,13 +511,11 @@ class TwitterFilteringComponent {
   void moveTo(int mx, int my) {
     xIntegrator.target(mx);
     yIntegrator.target(my);
-    doneResize = false;
   }
 
   void setSize(int sw, int sh) {
     widthIntegrator.target(sw);
     heightIntegrator.target(sh);
-    doneResize = false;
   }
 
 
@@ -647,61 +677,6 @@ class TwitterFilteringComponent {
         System.err.println(e);
       }
     }
-
-    //oh this is so messy: for now, I run the query once with the other driver to cache it, then leave the original code to re-run the query
-    //which is faster because it's already cached by the db
-    //biggest hack ever? Eventually, re-write code to use Xentus all the way through!
-    /*if ( db.connect() )
-     {
-     // list table names
-     db.query(sqlQuery);
-     Tweet newTweetToAdd;
-     DateTime thisDate;
-     
-     // -------- Go through data, storing them as tweets in a tweetset (if they pass optional RE match) --------   
-     
-     while (db.next ())
-     {
-     boolean passesRE = true;  //passes RE check?
-     
-     if (RESymbol != "") //if a symbol has been specified for this tweetSet
-     {
-     //check if it matches a RE      
-     if (!matchesRegularExpression( db.getString("message"), filterTerms[0], RESymbol))
-     passesRE = false;
-     }
-     
-     if (passesRE)
-     {
-     //we have a new record, create tweet object
-     newTweetToAdd = new Tweet();
-     
-     //set the text of this tweet            
-     newTweetToAdd.setText(db.getString("message"));
-     
-     //set the user id         
-     newTweetToAdd.setUserId(db.getInt("ID"));
-     
-     //get and set the location of this tweet
-     PVector tweetLocation = new PVector(0, 0);
-     tweetLocation.x = db.getFloat("lon");
-     tweetLocation.y = db.getFloat("lat");
-     thisDate =fmt.parseDateTime(db.getString("date"));
-     
-     newTweetToAdd.setTweetSetColour(setColour);
-     newTweetToAdd.setDate(thisDate);
-     
-     //convert to pixels and set
-     newTweetToAdd.setLocation(mapCoordinates(tweetLocation));
-     //newTweetToAdd.findAndSetRegion(tweetLocation); //find and set region by uncorrected coords?
-     
-     //add tweet to tweet set
-     newTweetSetToAdd.addTweet(newTweetToAdd);
-     }
-     }
-     
-     println("Created " + newTweetSetToAdd.tweets.size() + " tweet records");
-     }*/
 
     //add this finished tweet set to the array
     tweetSetManager.addTweetSet(newTweetSetToAdd);

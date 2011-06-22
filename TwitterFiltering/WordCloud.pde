@@ -15,7 +15,7 @@ class WordCloud {
     this.width = width;
     this.height = height;
     this.parent = parent;
-    buffer = createGraphics(450, 450, JAVA2D);
+    buffer = createGraphics(400, 400, JAVA2D);
     buffer.background(color(225, 228, 233));
     HashMap<Integer, ArrayList<Word>> wordCounts = new HashMap<Integer, ArrayList<Word>>();
           //load them all in!
