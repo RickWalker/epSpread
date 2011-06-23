@@ -22,7 +22,7 @@ class TimeLineComponent {
 
     scaleFactorX = width/originalSize.x;
     scaleFactorY = height/originalSize.y; //change eventually!
-    smallVizSize = new PVector(200*scaleFactorX, 150*scaleFactorY);
+    smallVizSize = new PVector(150*scaleFactorX, 100*scaleFactorY);
 
     lineStart = int(x + 150*scaleFactorX);
     lineStop = int(x + width - 150*scaleFactorX);
@@ -36,17 +36,19 @@ class TimeLineComponent {
   }
 
   void draw() {
-    background(225, 228, 233);
+    background(130, 130, 130);
     if (currentLarge == null) {
       //draw the actual timeline
-      drawTimeLine();
-      fixOverlaps();
-      //draw visualisations!
       for (TwitterFilteringComponent a: timePoints) {
         a.draw();
         drawLinksTo(a);
         //moveToPosition(a);
       }
+      
+      drawTimeLine();
+      fixOverlaps();
+      //draw visualisations!
+      
     }
     else {
       currentLarge.draw();
@@ -128,7 +130,7 @@ class TimeLineComponent {
   }
   void drawLinksTo(TwitterFilteringComponent t) {
     noStroke();
-    fill(128, 128);
+    fill(170,170,255, 130);
     int targetY;
 
     if (t.y < lineY) {

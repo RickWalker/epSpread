@@ -319,10 +319,12 @@ class TwitterFilteringComponent {
     }
     else {
       //drawThumbnail();
+
       image(thumbnail, x, y);//, width, height);
-            //stroke(255,0,0);
-            //noFill();
-      //rect(x, y, width, height);
+      stroke(100);
+      strokeWeight(2);
+      noFill();
+      rrect(x, y, width, height, 3.0f*scaleFactorX, 2.4f*scaleFactorY, "");    
 
     }
   }
@@ -330,12 +332,12 @@ class TwitterFilteringComponent {
   void drawComponents() {//int x, int y, int width, int height) {
     // ---- Border + Map ----
     stroke(0);
-    noFill();
+    fill(225, 228, 233);
     rect(x, y, width, height);
     //
     strokeWeight(0);
     fill(40);
-    rect(x + (imgPos.x - 3)*scaleFactorX, y+ (imgPos.y - 3)*scaleFactorY, (imgX+6)*scaleFactorX, (imgY+6)*scaleFactorY);
+   // rect(x + (imgPos.x - 3)*scaleFactorX, y+ (imgPos.y - 3)*scaleFactorY, (imgX+6)*scaleFactorX, (imgY+6)*scaleFactorY);
     image(imgMap, x + imgPos.x*scaleFactorX, y + imgPos.y*scaleFactorY, imgX*scaleFactorX, imgY*scaleFactorY);  
 
     // ---- Filter terms text ----
