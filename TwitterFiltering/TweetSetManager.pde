@@ -285,6 +285,9 @@ class TweetSetManager {
     if (mouseOverWeatherOptionButton)
     {
       b_weatherViewActive = !b_weatherViewActive;
+      
+     // if(b_weatherViewActive)
+      //  parent.streamGraphRange.createStreamGraph();
     }
 
     if (mouseOverRemoveBox >= 0) {

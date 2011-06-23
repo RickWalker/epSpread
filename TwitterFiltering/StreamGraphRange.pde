@@ -7,7 +7,8 @@ class StreamGraphRange {
   int mWidth = 0;
   int mHeight = 0;
   int sliderSize = 140;
-  int gapY = 40;
+  int gapY = 50;
+  int offsetX = 5;
 //  float DPI = 400;
   PGraphics buffer;
   PImage streamGraphImg;
@@ -289,7 +290,7 @@ class StreamGraphRange {
 
   void drawDayRects() {
     //Draw day rectangles
-
+    
     for (int k=0; k<20; k++) {
 
       buffer.stroke(0, 0, 0, 20);
@@ -301,22 +302,20 @@ class StreamGraphRange {
         buffer.fill(0, 0, 0, 5); //even
 
       buffer.rect((rectSize * k), 0, rectSize, sliderSize);
-      
-      /*
-      if(parent.tweetSetManager.isWeatherViewActive()) //cheeky!
-      {
-      sliderSize = 90; //amazing resize!
-      //draw weather!
-      PImage weatherImage = getWeatherImage(weatherInfo.get(k));
 
-      buffer.image(weatherImage, x + (rectSize * k) + (rectSize-weatherImage.width*parent.scaleFactorX)/2, y+sliderSize * parent.scaleFactorY, 1.1 * weatherImage.width*parent.scaleFactorX, 1.1 * weatherImage.height*parent.scaleFactorY);
-      }
-      else
-        sliderSize = 140; 
-        */
-      
   }
 
+  }
+  
+  void drawWeatherIcons(){
+    
+   for (int k=0; k<20; k++) {
+     println("Drawing");
+    float rectSize = float(buffer.width)/20.0f;
+    PImage weatherImage = getWeatherImage(weatherInfo.get(k));
+    image(weatherImage, x + ((rectSize * k) * parent.scaleFactorX) + (offsetX * parent.scaleFactorX), y+sliderSize * parent.scaleFactorY, weatherImage.width*parent.scaleFactorX * 1.1f, weatherImage.height*parent.scaleFactorY * 1.1f);
+   } 
+    
   }
 
 
@@ -329,7 +328,10 @@ void draw(){
       createStreamGraph();
    }
     
-  image(streamGraphImg, x, y, mWidth, mHeight);
+  image(streamGraphImg, x + (offsetX * parent.scaleFactorX), y, mWidth, mHeight);
+  
+  if(parent.tweetSetManager.isWeatherViewActive()) //cheeky!
+      drawWeatherIcons();
   
 }
 
@@ -401,7 +403,7 @@ void draw(){
    // println("Buffer Width : " + buffer.width);
    // println("Buffer Height : " + buffer.height);
     streamGraphImg = buffer.get(0, 0, buffer.width, buffer.height);
-    //image(streamGraphImg, x, y, mWidth, mHeight);
+        //image(streamGraphImg, x, y, mWidth, mHeight);
   }
   
   

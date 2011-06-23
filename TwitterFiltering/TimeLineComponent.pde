@@ -36,6 +36,7 @@ class TimeLineComponent {
   }
 
   void draw() {
+    background(225, 228, 233);
     if (currentLarge == null) {
       //draw the actual timeline
       drawTimeLine();

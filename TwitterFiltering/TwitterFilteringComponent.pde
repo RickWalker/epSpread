@@ -111,7 +111,7 @@ class TwitterFilteringComponent {
 
     //Load the map
     imgMap = loadImage("data/Vastopolis_Map_B&W_2.png");
-    imgPos = new PVector(10, 40);
+    imgPos = new PVector(20, 20);
 
     //Load the weather images
     rain= loadImage("data/rain.jpg");
@@ -156,7 +156,7 @@ class TwitterFilteringComponent {
   }
 
   void createP5Components() {
-    range = controlP5.addRange("Date"+componentID, 0, Hours.hoursIn(new Interval(minDate, maxDate)).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getStart())).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getEnd())).getHours(), int(x + (imgPos.x * scaleFactorX)), int(y + (imgY + 50)*scaleFactorY), int((imgX) * scaleFactorX), int(30*scaleFactorY));
+    range = controlP5.addRange("Date"+componentID, 0, Hours.hoursIn(new Interval(minDate, maxDate)).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getStart())).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getEnd())).getHours(), int(x + (imgPos.x * scaleFactorX)), int(y + (imgY + 30)*scaleFactorY), int((imgX) * scaleFactorX), int(30*scaleFactorY));
     //println("Range slider at" + int(imgY*scaleFactorY));
     range.setColorBackground(color(130, 130, 130));
     range.setLabelVisible(false);
@@ -203,7 +203,7 @@ class TwitterFilteringComponent {
   }
 
   void resizeP5Components() {
-    range.setPosition(int(x + ((imgPos.x-3) * scaleFactorX)), int(y + (imgY + 50)*scaleFactorY));
+    range.setPosition(int(x + ((imgPos.x-3) * scaleFactorX)), int(y + (imgY + 30)*scaleFactorY));
     range.setSize(int((imgX+6) * scaleFactorX), int(30*scaleFactorY)); //doesn't update the handles!
 
 
