@@ -6,10 +6,10 @@ class StreamGraphRange {
   int y = 0;
   int mWidth = 0;
   int mHeight = 0;
-  int sliderSize = 140;
+  int sliderSize = 90;
   int gapY = 50;
   int offsetX = 5;
-//  float DPI = 400;
+  //  float DPI = 400;
   PGraphics buffer;
   PImage streamGraphImg;
 
@@ -37,7 +37,6 @@ class StreamGraphRange {
     createStreamGraph();
     //currDay = 0;
     loadWeatherData();
-    
   }  
 
   void loadWeatherData() {
@@ -178,8 +177,8 @@ class StreamGraphRange {
       println("Coloring Method: " + layout.getName());
       println("Elapsed Time: " + layoutTime + "ms");
     }
-    
-  drawGraphToBuffer();
+
+    drawGraphToBuffer();
   }
 
   PImage getWeatherImage(String weatherType) {
@@ -195,7 +194,7 @@ class StreamGraphRange {
     if (weatherType.equals("clear")) 
       toReturn = clear;
     //image(clear, width/2 - imgDim.x/2, height/2 - imgDim.y/2, imgDim.x, imgDim.y);
-    
+
     return toReturn;
   }
 
@@ -203,11 +202,11 @@ class StreamGraphRange {
 
 
   void scaleLayers(Layer[] layers, int screenTop, int screenBottom) {
-    
+
     screenTop += 10 * parent.scaleFactorY;
     screenBottom -= 10 * parent.scaleFactorY;
-    
-    
+
+
     // Figure out max and min values of layers. 
     float min = Float.MAX_VALUE;
     float max = Float.MIN_VALUE;
@@ -243,15 +242,15 @@ class StreamGraphRange {
 
   void updateScaling() {
 
-     if(parent.tweetSetManager.isWeatherViewActive()) //cheeky!
-      {
-        sliderSize = 90;
-      }
-      else
-        sliderSize = 140;
-    
-    int imageOffsetX = parent.x + int(parent.imgPos.x-3 * parent.scaleFactorX);
-    int imageOffsetY = parent.y + int(parent.imgPos.y * parent.scaleFactorY) + int(imgY*parent.scaleFactorY) + int(gapY * parent.scaleFactorY);  
+    if (parent.tweetSetManager.isWeatherViewActive()) //cheeky!
+    {
+      sliderSize = 50;
+    }
+    else
+      sliderSize = 100;
+
+    int imageOffsetX = parent.x + int(parent.imgPos.x * parent.scaleFactorX);
+    int imageOffsetY = parent.y + int((parent.imgPos.y+imgY+gapY) * parent.scaleFactorY);  
 
     x=imageOffsetX;
     y=imageOffsetY;
@@ -261,7 +260,6 @@ class StreamGraphRange {
 
     if (numLayers > 0)
       scaleLayers(layers, 0, int(sliderSize));
-
   }
 
 
@@ -272,16 +270,16 @@ class StreamGraphRange {
 
     buffer.beginDraw();
     if (curve) {
-     //buffer.curveTightness(testVal);
-     // stroke(0);
-     // strokeWeight(3);
+      //buffer.curveTightness(testVal);
+      // stroke(0);
+      // strokeWeight(3);
       buffer.curveVertex(x, y);
     } 
     else {
       buffer.vertex(x, y);
     }
-    
-   buffer.endDraw();
+
+    buffer.endDraw();
   }
 
 
@@ -290,8 +288,8 @@ class StreamGraphRange {
 
   void drawDayRects() {
     //Draw day rectangles
-    
-    for (int k=0; k<20; k++) {
+
+      for (int k=0; k<20; k++) {
 
       buffer.stroke(0, 0, 0, 20);
       float rectSize = float(buffer.width)/20.0f;
@@ -302,52 +300,59 @@ class StreamGraphRange {
         buffer.fill(0, 0, 0, 5); //even
 
       buffer.rect((rectSize * k), 0, rectSize, sliderSize);
-
+    }
   }
 
+  void drawWeatherIcons() {
+    fill(color(115, 162, 192));
+    noStroke();
+    PImage weatherImage = getWeatherImage(weatherInfo.get(0));
+
+    rect(x, y+sliderSize*parent.scaleFactorY, mWidth, weatherImage.height*parent.scaleFactorY * 0.5f);   
+    for (int k=0; k<20; k++) {
+      //println("Drawing");
+      float rectSize = float(buffer.width)/20.0f;
+      weatherImage = getWeatherImage(weatherInfo.get(k));
+      imageMode(CORNER);
+      float imageOffset = (rectSize - (weatherImage.width/2))/2; 
+      image(weatherImage, x + ((rectSize * k + imageOffset) * parent.scaleFactorX) + (offsetX * parent.scaleFactorX), y + (sliderSize * parent.scaleFactorY), weatherImage.width*parent.scaleFactorX * 0.5f, weatherImage.height*parent.scaleFactorY * 0.5f);
+    } 
+
+    /*fill(color(255, 0, 0));
+     rect(x, y, mWidth, mHeight);
+     fill(color(0,255,0));
+     rect(x, y, sliderSize* parent.scaleFactorY, sliderSize* parent.scaleFactorY);*/
   }
-  
-  void drawWeatherIcons(){
-    
-   for (int k=0; k<20; k++) {
-     println("Drawing");
-    float rectSize = float(buffer.width)/20.0f;
-    PImage weatherImage = getWeatherImage(weatherInfo.get(k));
-    image(weatherImage, x + ((rectSize * k) * parent.scaleFactorX) + (offsetX * parent.scaleFactorX), y+sliderSize * parent.scaleFactorY, weatherImage.width*parent.scaleFactorX * 1.1f, weatherImage.height*parent.scaleFactorY * 1.1f);
-   } 
-    
-  }
 
 
 
-void draw(){
-  updateScaling();
-  
-   //check if a tweet set has recently been removed
-   if(layers.length > parent.tweetSetManager.getTweetSetListSize()) {
+  void draw() {
+    updateScaling();
+
+    //check if a tweet set has recently been removed
+    if (layers.length > parent.tweetSetManager.getTweetSetListSize()) {
       createStreamGraph();
-   }
-    
-  image(streamGraphImg, x + (offsetX * parent.scaleFactorX), y, mWidth, mHeight);
-  
-  if(parent.tweetSetManager.isWeatherViewActive()) //cheeky!
+    }
+
+    image(streamGraphImg, x + (offsetX * parent.scaleFactorX), y, mWidth, mHeight);
+
+    if (parent.tweetSetManager.isWeatherViewActive()) //cheeky!
       drawWeatherIcons();
-  
-}
+  }
 
 
 
 
   void drawGraphToBuffer() {
-    
+
     updateScaling();
     int n = layers.length;
 
 
-      buffer.beginDraw();
-      buffer.background(235, 238, 243);
-      buffer.noStroke();
-      buffer.smooth();
+    buffer.beginDraw();
+    buffer.background(235, 238, 243);
+    buffer.noStroke();
+    buffer.smooth();
 
     if (n > 0) {
       int m = layers[0].size.length;
@@ -381,31 +386,29 @@ void draw(){
           graphVertex(j, layers[i].yBottom, isGraphCurved, false);
         }
         graphVertex(start, layers[i].yBottom, isGraphCurved, false);
-        
-          // draw top edge, left to right
+
+        // draw top edge, left to right
         graphVertex(start, layers[i].yTop, isGraphCurved, i == lastLayer);
         for (int j = start; j <= end; j++) {
           graphVertex(j, layers[i].yTop, isGraphCurved, i == lastLayer);
         }
         graphVertex(end, layers[i].yTop, isGraphCurved, i == lastLayer);
-      
+
 
         buffer.endShape(CLOSE);
       }
     }
-      
+
 
 
     //rect(x, y, (imgX+6) * parent.scaleFactorX, (sliderSize * parent.scaleFactorY)); 
     drawDayRects();
     buffer.endDraw();
-    
-   // println("Buffer Width : " + buffer.width);
-   // println("Buffer Height : " + buffer.height);
+
+    // println("Buffer Width : " + buffer.width);
+    // println("Buffer Height : " + buffer.height);
     streamGraphImg = buffer.get(0, 0, buffer.width, buffer.height);
-        //image(streamGraphImg, x, y, mWidth, mHeight);
+    //image(streamGraphImg, x, y, mWidth, mHeight);
   }
-  
-  
 }
 

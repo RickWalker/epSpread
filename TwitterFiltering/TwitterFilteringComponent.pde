@@ -111,14 +111,14 @@ class TwitterFilteringComponent {
 
     //Load the map
     imgMap = loadImage("data/Vastopolis_Map_B&W_2.png");
-    imgPos = new PVector(20, 20);
+    imgPos = new PVector(20, 60);
 
     //Load the weather images
     rain= loadImage("data/rain.jpg");
     showers= loadImage("data/showers.jpg");
     cloudy= loadImage("data/cloudy.jpg");
     clear= loadImage("data/clear.jpg");
-    
+
     windArrow = loadImage("data/arrow.png");
 
     //Load font 
@@ -156,7 +156,11 @@ class TwitterFilteringComponent {
   }
 
   void createP5Components() {
-    range = controlP5.addRange("Date"+componentID, 0, Hours.hoursIn(new Interval(minDate, maxDate)).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getStart())).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getEnd())).getHours(), int(x + (imgPos.x * scaleFactorX)), int(y + (imgY + 30)*scaleFactorY), int((imgX) * scaleFactorX), int(30*scaleFactorY));
+    range = controlP5.addRange("Date"+componentID, 0, Hours.hoursIn(new Interval(minDate, maxDate)).getHours(), 
+    Hours.hoursIn(new Interval(minDate, dateSelection.getStart())).getHours(), 
+    Hours.hoursIn(new Interval(minDate, dateSelection.getEnd())).getHours(), 
+    int(x + (imgPos.x * scaleFactorX)), int(y + (imgY + imgPos.y + 10)*scaleFactorY), int((imgX) * scaleFactorX), int(30*scaleFactorY)
+      );
     //println("Range slider at" + int(imgY*scaleFactorY));
     range.setColorBackground(color(130, 130, 130));
     range.setLabelVisible(false);
@@ -203,8 +207,8 @@ class TwitterFilteringComponent {
   }
 
   void resizeP5Components() {
-    range.setPosition(int(x + ((imgPos.x-3) * scaleFactorX)), int(y + (imgY + 30)*scaleFactorY));
-    range.setSize(int((imgX+6) * scaleFactorX), int(30*scaleFactorY)); //doesn't update the handles!
+    range.setPosition(int(x + ((imgPos.x) * scaleFactorX)), int(y + (imgPos.y+imgY + 10)*scaleFactorY));
+    range.setSize(int((imgX) * scaleFactorX), int(30*scaleFactorY)); //doesn't update the handles!
 
 
     filterTextField.setSize(int(180*scaleFactorX), int(30*scaleFactorY));
@@ -324,8 +328,7 @@ class TwitterFilteringComponent {
       stroke(100);
       strokeWeight(2);
       noFill();
-      rrect(x, y, width, height, 3.0f*scaleFactorX, 2.4f*scaleFactorY, "");    
-
+      rrect(x, y, width, height, 3.0f*scaleFactorX, 2.4f*scaleFactorY, "");
     }
   }
 
@@ -337,7 +340,7 @@ class TwitterFilteringComponent {
     //
     strokeWeight(0);
     fill(40);
-   // rect(x + (imgPos.x - 3)*scaleFactorX, y+ (imgPos.y - 3)*scaleFactorY, (imgX+6)*scaleFactorX, (imgY+6)*scaleFactorY);
+    // rect(x + (imgPos.x - 3)*scaleFactorX, y+ (imgPos.y - 3)*scaleFactorY, (imgX+6)*scaleFactorX, (imgY+6)*scaleFactorY);
     image(imgMap, x + imgPos.x*scaleFactorX, y + imgPos.y*scaleFactorY, imgX*scaleFactorX, imgY*scaleFactorY);  
 
     // ---- Filter terms text ----
@@ -445,23 +448,22 @@ class TwitterFilteringComponent {
 
 
     for (int i=int(imgX * (1.0f - cov)); i<imgX * cov; i+=imgX/gridRes) { 
-           
+
       for (int j=int(imgY * (1.0f - cov)); j<(imgY * cov); j+=imgY/gridRes) { 
-                  
-      if (counter % 2 != 0){  
-        extra = (imgX/gridRes)/4;
-      }
-      else{
-        extra = 0;
-      }
+
+        if (counter % 2 != 0) {  
+          extra = (imgX/gridRes)/4;
+        }
+        else {
+          extra = 0;
+        }
         drawArrow(int(x + ((imgPos.x + i - 10) * scaleFactorX)) + extra, 
         int(y + ((imgPos.y + j) * scaleFactorY)), 
         0.8 * scaleFactorX * windSpeed_integrator.value, 
         0.8 * scaleFactorY * windSpeed_integrator.value, 
         windAngle_integrator.value);
-              counter++;
+        counter++;
       }
-
     }
   }
 
@@ -482,14 +484,14 @@ class TwitterFilteringComponent {
     tint(165, 165, 255, 230);
     stroke(0, 0, 0, 50);
     strokeWeight(2);
-    
+
     imageMode(CENTER);
-    image(windArrow, 0,0,windArrow.width, windArrow.height);
-   // triangle(0, 40, 25, 0, 50, 40);
-  //  quad(12.5, 40, 12.5, 100, 37.5, 100, 37.5, 40); 
+    image(windArrow, 0, 0, windArrow.width, windArrow.height);
+    // triangle(0, 40, 25, 0, 50, 40);
+    //  quad(12.5, 40, 12.5, 100, 37.5, 100, 37.5, 40); 
     popMatrix();
     imageMode(CORNER);
-    tint(255,255,255,255);
+    tint(255, 255, 255, 255);
   }
 
 

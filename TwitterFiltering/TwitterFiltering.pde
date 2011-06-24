@@ -64,7 +64,7 @@ TimeLineComponent storyboard;
 
 void setup()
 {
-  size( screenWidth, screenHeight, OPENGL);
+  size( 1024, 768, OPENGL);
   //textMode(SHAPE);
   smooth();
   createRegions();
