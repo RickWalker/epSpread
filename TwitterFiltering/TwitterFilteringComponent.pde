@@ -146,7 +146,7 @@ class TwitterFilteringComponent {
     streamGraphRange = new StreamGraphRange(this);
 
     wordCloud = new WordCloud(this, 275, 275, 250, 250);
-    wordCloud.setRange(19, 20);
+    wordCloud.setRange(0, 1);
 
     currentTransitionState = previousTransitionState = MovementState.SMALL;
     thumbnailBuffer = createGraphics(int(parent.smallVizSize.x), int(parent.smallVizSize.y), JAVA2D);//P2D);//screenWidth, screenHeight, P2D);
