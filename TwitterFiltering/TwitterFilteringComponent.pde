@@ -337,8 +337,8 @@ class TwitterFilteringComponent {
     fill(0);
     textSize(24*fontScale);
     int yval = int(y + (imgPos.y)/10.0);
-    int startX = int(x + textWidth(formatDate(dateSelection.getStart()))/2 + imgPos.x +0.1*imgX*scaleFactorX);
-    int endX = int(x +imgPos.x + imgX*scaleFactorX - 0.1*imgX*scaleFactorX - textWidth(formatDate(dateSelection.getEnd()))/2);
+    int startX = int(x + imgPos.x +0.2*imgX*scaleFactorX);
+    int endX = int(x +imgPos.x + imgX*scaleFactorX - 0.2*imgX*scaleFactorX);
     text(formatDate(dateSelection.getStart()), startX, yval);
     text("to", int(imgPos.x+(imgX*scaleFactorX)/2), yval);
     text(formatDate(dateSelection.getEnd()), endX, yval);
@@ -430,7 +430,7 @@ class TwitterFilteringComponent {
     dateString.append(" ");
     dateString.append(t.year().getAsText());
     dateString.append("\n");
-    dateString.append(t.hourOfDay().getAsText());
+    dateString.append(nf(t.hourOfDay().get(),2));
     dateString.append(":00");
 
     return dateString.toString();
