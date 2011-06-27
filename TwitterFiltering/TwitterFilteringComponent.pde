@@ -930,7 +930,7 @@ class TwitterFilteringComponent {
           a.updateHeatMap();
         previousDateSelection = new Interval(dateSelection);
         //update wordcloud
-        wordCloud.setRange( Days.daysBetween(minDate, dateSelection.getStart()).getDays(), 20);
+        wordCloud.setRange( Days.daysBetween(minDate, dateSelection.getStart()).getDays(), Days.daysBetween(minDate, dateSelection.getEnd()).getDays());
         //parent.moveToPosition(this);
       }
 
