@@ -332,12 +332,30 @@ class TwitterFilteringComponent {
     }
   }
 
+  void drawDateRange() {
+    textAlign(CENTER, TOP);
+    fill(0);
+    textSize(24*fontScale);
+    int yval = int(y + (imgPos.y)/10.0);
+    int startX = int(x + imgPos.x +0.2*imgX*scaleFactorX);
+    int endX = int(x +imgPos.x + imgX*scaleFactorX - 0.2*imgX*scaleFactorX);
+    text(formatDate(dateSelection.getStart()), startX, yval);
+    text("to", int(imgPos.x+(imgX*scaleFactorX)/2), yval);
+    text(formatDate(dateSelection.getEnd()), endX, yval);
+  }
+
   void drawComponents() {//int x, int y, int width, int height) {
+
     // ---- Border + Map ----
     stroke(0);
     fill(225, 228, 233);
     rect(x, y, width, height);
+    //draw date at the top!
+    drawDateRange();
     //
+    //----- Draw streamgraph range -------
+    streamGraphRange.draw();
+
     strokeWeight(0);
     fill(40);
     // rect(x + (imgPos.x - 3)*scaleFactorX, y+ (imgPos.y - 3)*scaleFactorY, (imgX+6)*scaleFactorX, (imgY+6)*scaleFactorY);
@@ -345,6 +363,7 @@ class TwitterFilteringComponent {
 
     // ---- Filter terms text ----
     textSize(18*fontScale);
+    textAlign(LEFT, BOTTOM);
     fill(76, 86, 108);
     text("Filter Terms", filterTextField_x - 2*scaleFactorX, filterTextField_y - 10*scaleFactorY);
 
@@ -359,8 +378,6 @@ class TwitterFilteringComponent {
       drawTweetNetwork();
 
 
-    // ---- Draw the tweets on the map ----  
-    drawTweetsOnce();
 
 
     // --- draw semi-transparent rectangle if click-dragging ---
@@ -372,13 +389,14 @@ class TwitterFilteringComponent {
       rect(mouseDragStart_x, mouseDragStart_y, constrain(mouseX, x + imgPos.x*scaleFactorX, x+(imgX + imgPos.x)*scaleFactorX) - mouseDragStart_x, constrain(mouseY, y+imgPos.y, y+(imgY + imgPos.y)*scaleFactorY) - mouseDragStart_y); //limit rectangle to image boundary
     }
 
-    //----- Draw streamgraph range -------
-    streamGraphRange.draw();
-
     wordCloud.draw();
 
     if (tweetSetManager.isWeatherViewActive())
       drawWindArrows();
+      
+      
+    // ---- Draw the tweets on the map ----  
+    drawTweetsOnce();
   }
 
   void generateThumbnail() {
@@ -402,6 +420,21 @@ class TwitterFilteringComponent {
     println("Done generating thumbnail!");
   }
   //popMatrix();
+  String formatDate(DateTime t) {
+    StringBuilder dateString = new StringBuilder();
+    dateString.append(t.dayOfWeek().getAsText());
+    dateString.append(" ");
+    dateString.append(t.dayOfMonth().getAsText());
+    dateString.append(" ");
+    dateString.append(t.monthOfYear().getAsText());
+    dateString.append(" ");
+    dateString.append(t.year().getAsText());
+    dateString.append("\n");
+    dateString.append(nf(t.hourOfDay().get(),2));
+    dateString.append(":00");
+
+    return dateString.toString();
+  }
 
 
   void drawWindArrows() {

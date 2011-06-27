@@ -6,7 +6,7 @@ class StreamGraphRange {
   int y = 0;
   int mWidth = 0;
   int mHeight = 0;
-  int sliderSize = 90;
+  int sliderSize = 100;
   int gapY = 50;
   int offsetX = 5;
   //  float DPI = 400;
