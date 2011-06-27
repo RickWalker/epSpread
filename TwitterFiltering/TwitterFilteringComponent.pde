@@ -328,7 +328,7 @@ class TwitterFilteringComponent {
       stroke(100);
       strokeWeight(2);
       noFill();
-      rrect(x, y, width, height, 3.0f*scaleFactorX, 2.4f*scaleFactorY, "");
+      //rrect(x, y, width, height, 3.0f*scaleFactorX, 2.4f*scaleFactorY, "");
     }
   }
 
@@ -337,8 +337,8 @@ class TwitterFilteringComponent {
     fill(0);
     textSize(24*fontScale);
     int yval = int(y + (imgPos.y)/10.0);
-    int startX = int(x + imgPos.x +0.2*imgX*scaleFactorX);
-    int endX = int(x +imgPos.x + imgX*scaleFactorX - 0.2*imgX*scaleFactorX);
+    int startX = int(x + imgPos.x +0.35*imgX*scaleFactorX);
+    int endX = int(x +imgPos.x + imgX*scaleFactorX - 0.35*imgX*scaleFactorX);
     text(formatDate(dateSelection.getStart()), startX, yval);
     text("to", int(imgPos.x+(imgX*scaleFactorX)/2), yval);
     text(formatDate(dateSelection.getEnd()), endX, yval);

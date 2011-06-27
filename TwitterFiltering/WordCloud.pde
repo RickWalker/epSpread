@@ -172,7 +172,7 @@ class WordCloud {
         // Now we've created our WordCram, we can draw it to the buffer
         wordcram.drawAll();
         //take the buffer as an image
-        img = buffer.get(0, 0, buffer.width-1, buffer.height-1);
+        img = buffer.get(0, 0, buffer.width, buffer.height);
         //write image to cache
         img.save(dataPath(start+"-"+end+".png"));
       }

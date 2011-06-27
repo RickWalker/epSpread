@@ -18,7 +18,7 @@ class TimeLineComponent {
     this.y = y;
     this.width = width;
     this.height = height;
-    originalSize = new PVector(1280, 800);
+    originalSize = new PVector(1280, 720);
 
     scaleFactorX = width/originalSize.x;
     scaleFactorY = height/originalSize.y; //change eventually!
