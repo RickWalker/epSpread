@@ -18,67 +18,83 @@ class WordCloud {
     buffer = createGraphics(450, 450, JAVA2D);
     buffer.background(color(225, 228, 233));
     HashMap<Integer, ArrayList<Word>> wordCounts = new HashMap<Integer, ArrayList<Word>>();
-          //load them all in!
+    //load them all in!
     ArrayList<Word> oneDayCount;
     // String start = 
     for (int k=1; k<= 20; k++) {
       oneDayCount = new ArrayList<Word>();
       int numLines = 0;
       int maxLines = 25;
+      //is it already cached?
+      File f = new File(dataPath(k+".png"));
+      println("looking for " + dataPath(k+".png"));
+      if (!f.exists())
+      {
+        // only count words if not already cached
 
-      String lines[] = loadStrings(k+".txt");
-      if (lines != null) {
 
-        numLines = lines.length;
-        if (numLines > maxLines) numLines = maxLines; 
+        String lines[] = loadStrings(k+".txt");
+        if (lines != null) {
+
+          numLines = lines.length;
+          if (numLines > maxLines) numLines = maxLines; 
 
 
-        println("there are " + lines.length + " lines");
-        for (int i=0; i < numLines; i++) {
-          String frequency = split(lines[i], " ")[0];
-          String name = split(lines[i], " ")[1];
+          println("there are " + lines.length + " lines");
+          for (int i=0; i < numLines; i++) {
+            String frequency = split(lines[i], " ")[0];
+            String name = split(lines[i], " ")[1];
 
-          println(name + " " + frequency);
-          oneDayCount.add(new Word(name, int(pow(2, parseFloat(frequency)))));
-          //wordcount.add(new Word(name, int(parseFloat(frequency))));
+            println(name + " " + frequency);
+            oneDayCount.add(new Word(name, int(pow(2, parseFloat(frequency)))));
+            //wordcount.add(new Word(name, int(parseFloat(frequency))));
+          }
         }
+        wordCounts.put(k-1, oneDayCount);
       }
-      wordCounts.put(k-1, oneDayCount);
     }
 
     imageCache = new HashMap<Integer, PImage>();
     for (int i = 0; i<20; i++) {
-      buffer.background(color(225, 228, 233));
-      WordCram wordcram = new WordCram(mainApplet)
+      if (wordCounts.containsKey(i)) { //not currently cached!
+        buffer.background(color(225, 228, 233));
+        WordCram wordcram = new WordCram(mainApplet)
 
-      // Pass in the words to draw.
-      .fromWords( wordCounts.get(i).toArray(new Word[wordCounts.get(i).size()]))
+          // Pass in the words to draw.
+          .fromWords( wordCounts.get(i).toArray(new Word[wordCounts.get(i).size()]))
 
-      //set canvas
-      .withCustomCanvas(buffer)
+            //set canvas
+            .withCustomCanvas(buffer)
 
-      .withSizer(Sizers.byWeight(30, 80))
-        .withAngler(Anglers.horiz())
+              .withSizer(Sizers.byWeight(30, 80))
+                .withAngler(Anglers.horiz())
 
-      .withPlacer(Placers.horizLine());
+                  .withPlacer(Placers.horizLine());
 
-      // Now we've created our WordCram, we can draw it to the buffer
-      wordcram.drawAll();
-      //take the buffer as an image
-      img = buffer.get(0, 0, buffer.width, buffer.height);
+        // Now we've created our WordCram, we can draw it to the buffer
+        wordcram.drawAll();
+        //take the buffer as an image
+        img = buffer.get(0, 0, buffer.width, buffer.height);
+        //save image for cache next time!
+        img.save(dataPath(i+".png"));
+      }
+      else {
+        println("Cache hit on " + i);
+        img = loadImage(dataPath(i+".png"));
+      }
       imageCache.put(i, img);
     }
   }
-  
+
   /*void writeToFiles(){ //writes the images out as jpgs!
-  
-  saveBytes("filename.jpg", bufferImage(buffer.get(0, 0, width, height)))
-  }*/
+   
+   saveBytes("filename.jpg", bufferImage(buffer.get(0, 0, width, height)))
+   }*/
 
   void setRange(int start, int stop) {
     //just do just day for now!
 
-    println("Asking for day " + start + " from cache!");
+    //println("Asking for day " + start + " from cache!");
     start = constrain(start, 0, 19);
     img = imageCache.get(start);
   }

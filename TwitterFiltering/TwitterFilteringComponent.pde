@@ -925,7 +925,7 @@ class TwitterFilteringComponent {
       dateSelection = new Interval(minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[0]))), 
       minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[1]))));
       if (!dateSelection.equals(previousDateSelection)) {
-        println("Selection is " + dateSelection);
+        //println("Selection is " + dateSelection);
         for (TweetSet a: tweetSetManager.getTweetSetList())
           a.updateHeatMap();
         previousDateSelection = new Interval(dateSelection);
