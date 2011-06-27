@@ -61,7 +61,7 @@ class WordCloud {
     for (int k=0; k<= 20; k++) {
 
       int numLines = 0;
-      int maxLines = 25;
+      int maxLines = 100;
 
       oneDayCount = new ArrayList<WordCount>();
 
@@ -149,8 +149,8 @@ class WordCloud {
         //println("Final weight for " +a.name + " is " + a.newnum);
       }
       Collections.sort(forCloud);
-      if (forCloud.size() > 10)
-        forCloud.subList(10, forCloud.size()).clear();
+      if (forCloud.size() > 25)
+        forCloud.subList(25, forCloud.size()).clear();
 
       println("Sorted version is " + forCloud);
 
@@ -164,7 +164,7 @@ class WordCloud {
             //set canvas
             .withCustomCanvas(buffer)
 
-              .withSizer(Sizers.byWeight(30, 80))
+              .withSizer(Sizers.byWeight(22, 74))
                 .withAngler(Anglers.horiz())
 
                   .withPlacer(Placers.horizLine());

@@ -11,7 +11,7 @@ class HeatmapOverlay {
 
   HeatmapOverlay(TwitterFilteringComponent parent) {
     this.parent = parent;
-    gridres = 50;
+    gridres = 100;
     overlay = new float[gridres*gridres];
     //values = new float[gridres][gridres];
   }
