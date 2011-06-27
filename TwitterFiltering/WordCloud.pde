@@ -2,7 +2,7 @@ import wordcram.*;
 import wordcram.text.*;
 
 
-class WordCount{
+class WordCount {
 
   String name;
   int freq;
@@ -56,12 +56,21 @@ class WordCloud {
     buffer = createGraphics(450, 450, JAVA2D);
     buffer.background(color(225, 228, 233));
 
-
     //load them all in!
 
     for (int k=0; k<= 20; k++) {
+
       int numLines = 0;
       int maxLines = 25;
+      //is it already cached?
+      File f = new File(dataPath(k+".png"));
+      println("looking for " + dataPath(k+".png"));
+
+
+      //if (!f.exists())
+      //{
+      // only count words if not already cached
+
 
       oneDayCount = new ArrayList<WordCount>();
 
@@ -72,7 +81,6 @@ class WordCloud {
         lines = loadStrings("5-0" + k + ".txt");
       else
         lines = loadStrings("5-" + k + ".txt");
-
 
       if (lines != null) {
 
@@ -91,8 +99,8 @@ class WordCloud {
 
           oneDayCount.add(  new WordCount(name, int(freq), float(codeLength)));
         }
+        wordCounts.put(k-1, oneDayCount);
       }
-      wordCounts.put(k-1, oneDayCount);
     }
   }
 
@@ -145,7 +153,7 @@ class WordCloud {
       //do the calculation!
       float cdash = -log2(a.freq/denom);
       a.newnum = abs(cdash - a.codeLength);
-      forCloud.add(new Word(a.name, int(pow(2,a.newnum))));
+      forCloud.add(new Word(a.name, int(pow(2, a.newnum))));
       //println("Final weight for " +a.name + " is " + a.newnum);
     }
     Collections.sort(forCloud);
@@ -176,8 +184,6 @@ class WordCloud {
     img = buffer.get(0, 0, buffer.width, buffer.height);
   }
 
-
-
   boolean contains(ArrayList<WordCount> theArray, String _name) {
 
     for (WordCount wc : theArray) {
@@ -206,11 +212,11 @@ class WordCloud {
     println("Asking for day range" + start + ", " + stop);
     start = constrain(start, 0, 20);
     stop = constrain(stop, 1, 21);
- if(pStart != start || pStop != stop){   
-    createWordCloud(start, stop);
-    pStart = start;
-    pStop = stop;
- }
+    if (pStart != start || pStop != stop) {   
+      createWordCloud(start, stop);
+      pStart = start;
+      pStop = stop;
+    }
   }
 
 
