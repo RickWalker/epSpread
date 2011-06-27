@@ -37,7 +37,7 @@ boolean b_generateNetwork = false;  //Generate network for selected tweets?
 // ---- Interval Range -----
 
 //Note : are intervals inclusive or exclusive?
-DateTime minDate = (new DateTime(2011, 4, 30, 0, 0, 0, 0)).minus(Period.hours(1));
+DateTime minDate =(new DateTime(2011, 4, 30, 0, 0, 0, 0)).minus(Period.hours(1));
 DateTime maxDate = (new DateTime(2011, 5, 20, 23, 59, 0, 0)).plus(Period.hours(1));
 DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
 DateTimeFormatter fmt2 = DateTimeFormat.forPattern("MMM dd              HH:mma"); 

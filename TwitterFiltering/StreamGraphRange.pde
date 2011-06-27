@@ -8,7 +8,7 @@ class StreamGraphRange {
   int mHeight = 0;
   int sliderSize = 100;
   int gapY = 50;
-  int offsetX = 5;
+  int offsetX = 0;
   //  float DPI = 400;
   PGraphics buffer;
   PImage streamGraphImg;
@@ -244,7 +244,7 @@ class StreamGraphRange {
 
     if (parent.tweetSetManager.isWeatherViewActive()) //cheeky!
     {
-      sliderSize = 50;
+      sliderSize = 100 - rain.height/2;
     }
     else
       sliderSize = 100;
