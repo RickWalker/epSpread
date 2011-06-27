@@ -50,7 +50,7 @@ class WordCloud {
     totalDayCounts = new Integer[tempC.length];
     for (int i = 0; i<tempC.length; i++) {
       totalDayCounts[i]=int(tempC[i]);
-      println("Count for "+i +" is " + totalDayCounts[i]);
+      //println("Count for "+i +" is " + totalDayCounts[i]);
     }
 
     buffer = createGraphics(450, 450, JAVA2D);
@@ -62,25 +62,13 @@ class WordCloud {
 
       int numLines = 0;
       int maxLines = 25;
-      //is it already cached?
-      File f = new File(dataPath(k+".png"));
-      println("looking for " + dataPath(k+".png"));
-
-
-      //if (!f.exists())
-      //{
-      // only count words if not already cached
-
 
       oneDayCount = new ArrayList<WordCount>();
 
       //String lines[] = loadStrings(k+".txt");
 
       String lines[];
-      if (k<10)
-        lines = loadStrings("5-0" + k + ".txt");
-      else
-        lines = loadStrings("5-" + k + ".txt");
+      lines = loadStrings("5-" + nf(k, 2) + ".txt");
 
       if (lines != null) {
 
@@ -95,7 +83,7 @@ class WordCloud {
           String codeLength = split(lines[i], " ")[2];
 
 
-          println(name + ", " + freq + ", " + codeLength);
+         //println(name + ", " + freq + ", " + codeLength);
 
           oneDayCount.add(  new WordCount(name, int(freq), float(codeLength)));
         }
@@ -117,71 +105,81 @@ class WordCloud {
     HashMap<String, Integer> keywordMap = new HashMap<String, Integer>();
 
     int daysInRange = end-start;
-    println("days in range : " + daysInRange);
+    //println("days in range : " + daysInRange);
 
+    //check if we've done this before:
+    File f = new File(dataPath(start+"-"+end+".png"));
+    println("looking for " + dataPath(start+"-"+end+".png"));
+    if (!f.exists()) {
+      //create the cloud!
+      //First pass - load all word counts in this range into tempList  
+      for (int i=start; i<end; i++) {
+        for (WordCount wc : wordCounts.get(i-1)) {
 
-    //First pass - load all word counts in this range into tempList  
-    for (int i=start; i<end; i++) {
-      for (WordCount wc : wordCounts.get(i-1)) {
+          //if keyword already processed
+          if (keywordMap.containsKey(wc.name)) {
+            //increment 
+            int index = keywordMap.get(wc.name);
 
-        //if keyword already processed
-        if (keywordMap.containsKey(wc.name)) {
-          //increment 
-          int index = keywordMap.get(wc.name);
+            tempList.get(index).freq += wc.freq;
 
-          tempList.get(index).freq += wc.freq;
-
-          println("****** Found keyword on multiple days : " + wc.name + " Freq : " + tempList.get(index).freq + " Code Length : " + tempList.get(index).codeLength );
-        }
-        else
-        {
-          tempList.add(wc); //add to temp list
-          keywordMap.put(wc.name, tempList.indexOf(wc)); //store index to this keyname
+            //println("****** Found keyword on multiple days : " + wc.name + " Freq : " + tempList.get(index).freq + " Code Length : " + tempList.get(index).codeLength );
+          }
+          else
+          {
+            tempList.add(wc); //add to temp list
+            keywordMap.put(wc.name, tempList.indexOf(wc)); //store index to this keyname
+          }
         }
       }
+
+      //now calculate denominator (n1 + n2 + n3)
+      float denom =0;
+      for (int i = start;i<end;i++) {
+        denom += totalDayCounts[i];
+      }
+
+      //work out new nos
+      ArrayList<Word> forCloud = new ArrayList<Word>();
+      for (WordCount a: tempList) {
+        //do the calculation!
+        float cdash = -log2(a.freq/denom);
+        a.newnum = abs(cdash - a.codeLength);
+        forCloud.add(new Word(a.name, int(pow(2, a.newnum))));
+        //println("Final weight for " +a.name + " is " + a.newnum);
+      }
+      Collections.sort(forCloud);
+      if (forCloud.size() > 10)
+        forCloud.subList(10, forCloud.size()).clear();
+
+      println("Sorted version is " + forCloud);
+
+      buffer.background(color(225, 228, 233));
+      if (forCloud.size()>0) {
+        WordCram wordcram = new WordCram(mainApplet)
+
+          // Pass in the words to draw.
+          .fromWords( forCloud.toArray(new Word[forCloud.size()]))
+
+            //set canvas
+            .withCustomCanvas(buffer)
+
+              .withSizer(Sizers.byWeight(30, 80))
+                .withAngler(Anglers.horiz())
+
+                  .withPlacer(Placers.horizLine());
+
+        // Now we've created our WordCram, we can draw it to the buffer
+        wordcram.drawAll();
+        //take the buffer as an image
+        img = buffer.get(0, 0, buffer.width-1, buffer.height-1);
+        //write image to cache
+        img.save(dataPath(start+"-"+end+".png"));
+      }
     }
-
-    //now calculate denominator (n1 + n2 + n3)
-    float denom =0;
-    for (int i = start;i<end;i++) {
-      denom += totalDayCounts[i];
+    else {
+      img = loadImage(dataPath(start+"-"+end+".png"));
     }
-
-    //work out new nos
-    ArrayList<Word> forCloud = new ArrayList<Word>();
-    for (WordCount a: tempList) {
-      //do the calculation!
-      float cdash = -log2(a.freq/denom);
-      a.newnum = abs(cdash - a.codeLength);
-      forCloud.add(new Word(a.name, int(pow(2, a.newnum))));
-      //println("Final weight for " +a.name + " is " + a.newnum);
-    }
-    Collections.sort(forCloud);
-    if (forCloud.size() > 10)
-      forCloud.subList(10, forCloud.size()).clear();
-
-    println("Sorted version is " + forCloud);
-
-    buffer.background(color(225, 228, 233));
-    if (forCloud.size()>0) {
-      WordCram wordcram = new WordCram(mainApplet)
-
-        // Pass in the words to draw.
-        .fromWords( forCloud.toArray(new Word[forCloud.size()]))
-
-          //set canvas
-          .withCustomCanvas(buffer)
-
-            .withSizer(Sizers.byWeight(30, 80))
-              .withAngler(Anglers.horiz())
-
-                .withPlacer(Placers.horizLine());
-
-      // Now we've created our WordCram, we can draw it to the buffer
-      wordcram.drawAll();
-      //take the buffer as an image
-    }
-    img = buffer.get(0, 0, buffer.width, buffer.height);
   }
 
   boolean contains(ArrayList<WordCount> theArray, String _name) {
@@ -209,10 +207,11 @@ class WordCloud {
 
 
   void setRange(int start, int stop) {
-    println("Asking for day range" + start + ", " + stop);
+   
     start = constrain(start, 0, 20);
     stop = constrain(stop, 1, 21);
     if (pStart != start || pStop != stop) {   
+       println("Asking for day range" + start + ", " + stop);
       createWordCloud(start, stop);
       pStart = start;
       pStop = stop;
