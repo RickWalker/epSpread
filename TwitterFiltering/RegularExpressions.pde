@@ -17,7 +17,10 @@ String optionalAdjectives = "(" + adjectiveString + "\\s)?";
 String regularExpression = "(that|just got|trouble|have been|these|case of the|caught|caught a|with the a|getting a|has a|has|have|caught a|I have a|I have|I cought a|I got a|I am|this|come down with a|come down with|come down with a|difficulty|difficult to)\\s" + optionalAdjectives + symptomString + "\\s*";    
 
 if(_RESymbol.equals("$"))
-  regularExpression = "(that|just got|trouble|these|with the a|getting a|have|I have a|I have|I cought a|I got a|I am|this|difficulty|difficult to)\\s" + optionalAdjectives + symptomString + "\\s*";    
+  regularExpression = "(that|just got|trouble|these|with the a|getting a|have|I have a|I have|I cought a|I got a|I am|this|difficulty|difficult to|I have come down with|I have come down with a|I have come down with a case of the|I cought a|I cought|I caught a|I caught|this case of the)\\s" + optionalAdjectives + symptomString + "\\s*";    
+
+if(_RESymbol.equals("!"))
+  regularExpression = "(have been|has a case of the|has caught|has cought a|with the a|has a|has|has come down with a|has come down with|has come down with a case of the|has caught a case of the)\\s" + optionalAdjectives + symptomString + "\\s*";    
 
 
 boolean found = PerformPatternMatch(_theText, regularExpression);
