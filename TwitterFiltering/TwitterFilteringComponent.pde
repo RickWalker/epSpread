@@ -391,12 +391,14 @@ class TwitterFilteringComponent {
 
     wordCloud.draw();
 
-    if (tweetSetManager.isWeatherViewActive())
+        if (tweetSetManager.isWeatherViewActive())
       drawWindArrows();
       
       
     // ---- Draw the tweets on the map ----  
     drawTweetsOnce();
+    
+
   }
 
   void generateThumbnail() {
@@ -514,7 +516,7 @@ class TwitterFilteringComponent {
     scale(w, h);
 
     //rotate(radians(angle));
-    tint(165, 165, 255, 230);
+    tint(165, 165, 255, 200);
     stroke(0, 0, 0, 50);
     strokeWeight(2);
 

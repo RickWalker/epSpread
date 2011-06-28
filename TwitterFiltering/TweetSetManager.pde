@@ -38,7 +38,7 @@ class TweetSetManager {
 
   void setConstants() {
     optionButtonsOffset = int(110*parent.scaleFactorY);
-    origin = new PVector(parent.x + (parent.imgPos.x + imgX + 50)*parent.scaleFactorX, parent.y+ 130*parent.scaleFactorY);
+    origin = new PVector(parent.x + (parent.imgPos.x + imgX + 40)*parent.scaleFactorX, parent.y+ 130*parent.scaleFactorY);
     buttonDim = new PVector(180*parent.scaleFactorX, 40*parent.scaleFactorY);
 
     removeCircleDim = new PVector(20*parent.scaleFactorX, 20*parent.scaleFactorY);
@@ -223,7 +223,7 @@ class TweetSetManager {
         float percentageMatch = (a.getNumberOfCrossoverMatches() / float(parent.numberSelected)) * 100.0f;
 
         fill(100, 100, 100, alphaCol);
-        text(nf(percentageMatch, 1, 1) + "%", buttonPos.x + buttonDim.x + 10*parent.scaleFactorX, buttonPos.y + (buttonDim.y / 2.0));
+        text(nf(percentageMatch, 1, 1) + "%", buttonPos.x + buttonDim.x + 5*parent.scaleFactorX, buttonPos.y + (buttonDim.y / 2.0));
       }
 
       // -------- Draw remove box --------
