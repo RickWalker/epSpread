@@ -19,8 +19,8 @@ class HeatmapOverlay {
   void draw() {
     //draw overlay!
     //createSurface(imgX, imgY, tweets);
-    float boxsize_x = imgX/float(gridres);
-    float boxsize_y = imgY/float(gridres);
+    float boxsize_x = imgX/float(gridres-1);
+    float boxsize_y = imgY/float(gridres-1);
     //println(max_intensity);
     colorMode(HSB, 50);
     for (int y = 0; y < gridres-1; y++) {
