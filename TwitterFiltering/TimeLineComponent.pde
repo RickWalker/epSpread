@@ -2,6 +2,7 @@ class TimeLineComponent {
   //idea is that we can 'stick' other visualisations to this timeline together with annotations to tell a story
   TwitterFiltering parent;
   int x, y, width, height;
+  //DateTime minDate; //ARGH HACK TO TWEAK TIMELINE ZOOM
   PVector originalSize; //for scaling!
   PVector smallVizSize;
   TwitterFilteringComponent currentLarge;
@@ -19,7 +20,7 @@ class TimeLineComponent {
     this.width = width;
     this.height = height;
     originalSize = new PVector(1280, 720);
-
+//minDate = (new DateTime(2011, 5, 16, 0, 0, 0, 0)).minus(Period.hours(1));
     scaleFactorX = width/originalSize.x;
     scaleFactorY = height/originalSize.y; //change eventually!
     smallVizSize = new PVector(150*scaleFactorX, 100*scaleFactorY);
@@ -114,8 +115,12 @@ class TimeLineComponent {
       if (key == 'r') {
         saveFrame("VASTMC2-####.png");
       }
-      else {
+      else if(key == 'n'){
         addNew();
+      }
+    }else{
+      if(key == 'S'){
+        saveFrame("VASTMC2-large-####.png");
       }
     }
   }
