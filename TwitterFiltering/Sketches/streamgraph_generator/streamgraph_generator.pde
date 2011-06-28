@@ -10,15 +10,15 @@
  * @author Martin Wattenberg
  */
 
-import processing.opengl.*;
+
 boolean     isGraphCurved = true; // catmull-rom interpolation
 int         seed          = 28;   // random seed
 
 float       DPI           = 400;
 float       widthInches   = 3.2;
 float       heightInches  = 2.4;
-int         numLayers     = 1;
-int         layerSize     = 20;
+int         numLayers     = 14;
+int         layerSize     = 21;
 
 int layerTop;
 int layerBottom;
@@ -61,7 +61,7 @@ void setup() {
   labelY = y + height - (height * 0.26) + 50;
 
   
-  size(int(widthInches*DPI), int(heightInches*DPI), OPENGL);
+  size(int(widthInches*DPI), int(heightInches*DPI));
   smooth();
   //noLoop();
 
@@ -86,44 +86,17 @@ void setup() {
 
     size = new float[layerSize];
 
-    size[0] = 6;
-    size[1] = 2;
-    size[2] = 4;
-    size[3] = 2;
-    size[4] = 4;
-    size[5] = 1;
-    size[6] = 1;
-    size[7] = 6;
-    size[8] = 3;
-    size[9] = 3;
-    size[10] = 6;
-    size[11] = 3;
-    size[12] = 4;
-    size[13] = 2;
-    size[14] = 2;
-    size[15] = 3;
-    size[16] = 2;
-    size[17] = 3;
-    size[18] = 771;
-    size[19] = 11;
-   
-
-
-
-
     for (int j=0; j<layerSize; j++)
     {    
       float normalized;
 
-     // normalized = (size[j] - tweetFrequencies[l].getMinTweets() ) / (tweetFrequencies[l].getMaxTweets() - tweetFrequencies[l].getMinTweets()); 
+      normalized = (tweetFrequencies[l].getData().get(j) - tweetFrequencies[l].getMinTweets() ) / (tweetFrequencies[l].getMaxTweets() - tweetFrequencies[l].getMinTweets()); 
       //normalized = normalized / float(getPopulationDensity(tweetFrequencies[l].getName()));
-      normalized = size[j];
+     // normalized = tweetFrequencies[l].getData().get(j);
 
 
       size[j] = normalized;
     }
-
-
 
     //println(tweetFrequencies[l].getName() + " " + float(tweetFrequencies[l].getMaxTweets()));
 
@@ -170,7 +143,7 @@ void setup() {
   //coloring.colorize(layers);
 
 
-  layerTop = 700;
+  layerTop = 400;
   layerBottom = height - 10;
 
   // fit graph to viewport
@@ -278,7 +251,7 @@ void draw() {
   // generate graph
   for (int i = 0; i < n; i++) {
     start = max(0, layers[i].onset - 1);
-    end   = min(m-1, layers[i].end);
+    end   = min(m - 1, layers[i].end);
     pxl   = i == lastLayer ? 0 : 1;
 
     // set fill color of layer
@@ -286,21 +259,17 @@ void draw() {
 
 
     // draw shape
-    beginShape(POLYGON);
+    beginShape();
 
- 
     // draw top edge, left to right
     graphVertex(start, layers[i].yTop, isGraphCurved, i == lastLayer);
-
     for (int j = start; j <= end; j++) {
       graphVertex(j, layers[i].yTop, isGraphCurved, i == lastLayer);       
     }
     graphVertex(end, layers[i].yTop, isGraphCurved, i == lastLayer);
 
-  
-   // draw bottom edge, right to left
+    // draw bottom edge, right to left
     graphVertex(end, layers[i].yBottom, isGraphCurved, false);
-
     for (int j = end; j >= start; j--) {
       graphVertex(j, layers[i].yBottom, isGraphCurved, false);
     }
@@ -350,8 +319,6 @@ void graphVertex(int point, float[] source, boolean curve, boolean pxl) {
   float x = map(point, 0, layerSize - 1, 0, width);
   float y = source[point] - (pxl ? 1 : 0);
   if (curve) {
-    stroke(0);
-    strokeWeight(3);
     curveVertex(x, y);
   } 
   else {
@@ -734,15 +701,13 @@ void generateNewStreamGraph(){
 
     size = new float[21];
 
-    for (int j=0; j<22000; j++)
+    for (int j=0; j<21; j++)
     {    
       float normalized;
 
       normalized = (tweetFrequencies[layerIndex].getData().get(j) - tweetFrequencies[layerIndex].getMinTweets() ) / (tweetFrequencies[layerIndex].getMaxTweets() - tweetFrequencies[layerIndex].getMinTweets()); 
-     // normalized = (
-      
       //normalized = normalized / float(getPopulationDensity(tweetFrequencies[l].getName()));
-     // normalized = tweetFrequencies[layerIndex].getData().get(j);
+     // normalized = tweetFrequencies[l].getData().get(j);
 
       size[j] = normalized;
     }
@@ -806,7 +771,7 @@ void drawOptionButtons(int _x, int _y)
       if(normalise)
         fill(100,100,255,alphaVal);
       else
-        fill(200,200,200,alphaVal);  
+        fill(100,100,255,alphaVal);  
   
     
     ellipse(offsetX, offsetY, buttonSize, buttonSize);
@@ -823,7 +788,7 @@ void drawOptionButtons(int _x, int _y)
   ellipse(offsetX, offsetY, buttonSize, buttonSize);
   
   fill(0);
-  text("Party", offsetX + 15, offsetY);
+  text("Select All", offsetX + 15, offsetY);
   
   
   
