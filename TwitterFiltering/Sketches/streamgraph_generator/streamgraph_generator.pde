@@ -16,7 +16,7 @@ int         seed          = 28;   // random seed
 
 float       DPI           = 400;
 float       widthInches   = 3.2;
-float       heightInches  = 2.4;
+float       heightInches  = 1.8;
 int         numLayers     = 14;
 int         layerSize     = 21;
 
@@ -62,6 +62,7 @@ void setup() {
 
   
   size(int(widthInches*DPI), int(heightInches*DPI));
+  println(int(widthInches*DPI) +" and" + int(heightInches*DPI));
   smooth();
   //noLoop();
 
@@ -298,6 +299,11 @@ void draw() {
   }
     
   rect(rectSize * k, layerTop, rectSize, layerBottom);
+  //draw some text!
+  textAlign(CENTER, BOTTOM);
+      fill(0,0,255,100);
+  String dateToDraw = ""+((k+29) % 30+1);
+  text(dateToDraw,rectSize * k + rectSize/2, layerBottom);
   }
 
 
