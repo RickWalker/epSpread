@@ -65,6 +65,7 @@ TimeLineComponent storyboard;
 
 void setup()
 {
+  //size( screenWidth, screenHeight, OPENGL);
   size( 1280, 720, OPENGL);
   //textMode(SHAPE);
   smooth();
