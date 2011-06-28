@@ -771,6 +771,13 @@ class TwitterFilteringComponent {
       RESymbol = "*";
       keywords = keywords.substring(1);
     }
+    
+        //Find out if we are processing this tweetSet using RE's, store symbol in RESymbol
+    if (keywords.indexOf("$") >= 0)
+    {
+      RESymbol = "$";
+      keywords = keywords.substring(1);
+    }
 
     //Create new tweet set
     TweetSet newTweetSetToAdd = new TweetSet(keywords, setColour, RESymbol, this);

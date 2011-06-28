@@ -15,7 +15,9 @@ String adjectiveString = createREMatchString(adjectivesDict);  //not used
 String optionalAdjectives = "(" + adjectiveString + "\\s)?";
 
 String regularExpression = "(that|just got|trouble|have been|these|case of the|caught|caught a|with the a|getting a|has a|has|have|caught a|I have a|I have|I cought a|I got a|I am|this|come down with a|come down with|come down with a|difficulty|difficult to)\\s" + optionalAdjectives + symptomString + "\\s*";    
-//String regularExpression = "(that|just got|trouble|have been|these|case of the|caught|caught a|with the a|getting a|has a|has|have|caught a|I have a|I have|I cought a|I got a|I am|this|come down with a|come down with|come down with a|difficulty|difficult to)\\s" + optionalAdjectives + keyword + "\\s*";    
+
+if(_RESymbol.equals("$"))
+  regularExpression = "(that|just got|trouble|these|with the a|getting a|have|I have a|I have|I cought a|I got a|I am|this|difficulty|difficult to)\\s" + optionalAdjectives + symptomString + "\\s*";    
 
 
 boolean found = PerformPatternMatch(_theText, regularExpression);

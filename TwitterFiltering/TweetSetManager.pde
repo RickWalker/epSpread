@@ -173,6 +173,12 @@ class TweetSetManager {
         buttonColour = color(210, 242, 210, alphaCol);
         removeCircleColour = color(210, 242, 210, alphaCol);
       }
+      
+       if (a.getRegularExpressionSymbol() == "$")
+      {
+        buttonColour = color(210, 210, 242, alphaCol);
+        removeCircleColour = color(210, 210, 242, alphaCol);
+      }
 
 
       // -------- If mouse is over remove box, process! --------
