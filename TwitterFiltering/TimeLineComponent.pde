@@ -25,7 +25,7 @@ class TimeLineComponent {
     timelineEndDate = (new DateTime(2011, 5, 21, 0, 0, 0, 0));
     scaleFactorX = width/originalSize.x;
     scaleFactorY = height/originalSize.y; //change eventually!
-    smallVizSize = new PVector(300*scaleFactorX, 200*scaleFactorY);
+    smallVizSize = new PVector(500*scaleFactorX, 300*scaleFactorY);
 
     lineStart = int(x + 150*scaleFactorX);
     lineStop = int(x + width - 150*scaleFactorX);
