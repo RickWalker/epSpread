@@ -150,6 +150,7 @@ class TwitterFilteringComponent {
 
     currentTransitionState = previousTransitionState = MovementState.SMALL;
     thumbnailBuffer = createGraphics(int(parent.smallVizSize.x), int(parent.smallVizSize.y), JAVA2D);//P2D);//screenWidth, screenHeight, P2D);
+    println("Buffer size is " + thumbnailBuffer.width + " and " + thumbnailBuffer.height);
 
 
     loadWeatherData();
@@ -221,7 +222,7 @@ class TwitterFilteringComponent {
   }
 
   boolean doneMoving() {
-    return width == int(widthIntegrator.value) && height == int(heightIntegrator.value) && x == int(xIntegrator.value) && y == int(yIntegrator.value);
+    return width == int(widthIntegrator.target) && height == int(heightIntegrator.target) && x == int(xIntegrator.target) && y == int(yIntegrator.target);
   }
 
 
@@ -310,6 +311,13 @@ class TwitterFilteringComponent {
       setConstants();
       resizeP5Components();
     }
+    else if (currentTransitionState == MovementState.MOVING) {
+      println("Moving it via transition state!");
+      updateSizes();
+      calculateScale();
+      setConstants();
+      resizeP5Components();
+    }    
     else if (previousTransitionState != currentTransitionState) {
       //check for just finished transition for controlp5
       //re-add p5 components?
@@ -325,9 +333,9 @@ class TwitterFilteringComponent {
       //drawThumbnail();
 
       image(thumbnail, x, y);//, width, height);
-      stroke(100);
-      strokeWeight(2);
-      noFill();
+      //stroke(100);
+      //strokeWeight(2);
+      //noFill();
       //rrect(x, y, width, height, 3.0f*scaleFactorX, 2.4f*scaleFactorY, "");
     }
   }
@@ -340,7 +348,7 @@ class TwitterFilteringComponent {
     int startX = int(x + imgPos.x +0.35*imgX*scaleFactorX);
     int endX = int(x +imgPos.x + imgX*scaleFactorX - 0.35*imgX*scaleFactorX);
     text(formatDate(dateSelection.getStart()), startX, yval);
-    text("to", int(imgPos.x+(imgX*scaleFactorX)/2), yval);
+    text("to", int(x+imgPos.x+(imgX*scaleFactorX)/2), yval);
     text(formatDate(dateSelection.getEnd()), endX, yval);
   }
 
@@ -391,14 +399,12 @@ class TwitterFilteringComponent {
 
     wordCloud.draw();
 
-        if (tweetSetManager.isWeatherViewActive())
+    if (tweetSetManager.isWeatherViewActive())
       drawWindArrows();
-      
-      
+
+
     // ---- Draw the tweets on the map ----  
     drawTweetsOnce();
-    
-
   }
 
   void generateThumbnail() {
@@ -418,7 +424,8 @@ class TwitterFilteringComponent {
     g = temp;
     //g.beginDraw();
     println("Drew to offscreen, back now!");
-    thumbnail = thumbnailBuffer.get(0, 0, thumbnailBuffer.width, thumbnailBuffer.height);    
+    thumbnail = thumbnailBuffer.get(0, 0, thumbnailBuffer.width, thumbnailBuffer.height);
+    thumbnail.save("temp.png");    
     println("Done generating thumbnail!");
   }
   //popMatrix();
@@ -432,7 +439,7 @@ class TwitterFilteringComponent {
     dateString.append(" ");
     dateString.append(t.year().getAsText());
     dateString.append("\n");
-    dateString.append(nf(t.hourOfDay().get(),2));
+    dateString.append(nf(t.hourOfDay().get(), 2));
     dateString.append(":00");
 
     return dateString.toString();
@@ -771,14 +778,14 @@ class TwitterFilteringComponent {
       RESymbol = "*";
       keywords = keywords.substring(1);
     }
-    
-        //Find out if we are processing this tweetSet using RE's, store symbol in RESymbol
+
+    //Find out if we are processing this tweetSet using RE's, store symbol in RESymbol
     if (keywords.indexOf("$") >= 0)
     {
       RESymbol = "$";
       keywords = keywords.substring(1);
     }
-    
+
     //Find out if we are processing this tweetSet using RE's, store symbol in RESymbol
     if (keywords.indexOf("!") >= 0)
     {

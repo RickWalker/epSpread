@@ -2,10 +2,11 @@ class TimeLineComponent {
   //idea is that we can 'stick' other visualisations to this timeline together with annotations to tell a story
   TwitterFiltering parent;
   int x, y, width, height;
-  //DateTime minDate; //ARGH HACK TO TWEAK TIMELINE ZOOM
+  DateTime timelineStartDate, timelineEndDate; //ARGH HACK TO TWEAK TIMELINE ZOOM
   PVector originalSize; //for scaling!
   PVector smallVizSize;
-  TwitterFilteringComponent currentLarge;
+  TwitterFilteringComponent currentLarge = null;
+  TwitterFilteringComponent currentDragging = null;
   PVector previousPos;
   int lineStart, lineStop, lineY;
   float scaleFactorX, scaleFactorY;
@@ -20,10 +21,11 @@ class TimeLineComponent {
     this.width = width;
     this.height = height;
     originalSize = new PVector(1280, 720);
-//minDate = (new DateTime(2011, 5, 16, 0, 0, 0, 0)).minus(Period.hours(1));
+    timelineStartDate = (new DateTime(2011, 5, 19, 0, 0, 0, 0)); //hack for screenshots for now
+    timelineEndDate = (new DateTime(2011, 5, 21, 0, 0, 0, 0));
     scaleFactorX = width/originalSize.x;
     scaleFactorY = height/originalSize.y; //change eventually!
-    smallVizSize = new PVector(150*scaleFactorX, 100*scaleFactorY);
+    smallVizSize = new PVector(300*scaleFactorX, 200*scaleFactorY);
 
     lineStart = int(x + 150*scaleFactorX);
     lineStop = int(x + width - 150*scaleFactorX);
@@ -45,11 +47,10 @@ class TimeLineComponent {
         drawLinksTo(a);
         //moveToPosition(a);
       }
-      
+
       drawTimeLine();
       fixOverlaps();
       //draw visualisations!
-      
     }
     else {
       currentLarge.draw();
@@ -66,44 +67,61 @@ class TimeLineComponent {
     stroke(0);
     line(lineStart, lineY, lineStop, lineY);
     //draw days
-    int maxDays = Days.daysBetween(minDate, maxDate).getDays();
+    //int maxDays = Days.daysBetween(timelineStartDate, timelineEndDate).getDays();
+    int maxHours = Hours.hoursBetween(timelineStartDate, timelineEndDate).getHours();
     //println("Interval  is " + fullTimeInterval);
     //println("Period is " + Days.daysBetween(minDate, maxDate).getDays());
     //println("Max days is " + maxDays);
 
-    DateTime tempdt = new DateTime(minDate);
-    String previousMonth = minDate.monthOfYear().getAsText();
+    DateTime tempdt = new DateTime(timelineStartDate);
+    String previousMonth = timelineStartDate.monthOfYear().getAsText();
+    int previousDay=-1;//=tempdt.dayOfYear().get();
     int monthStart = lineStart;
     textAlign(CENTER, TOP);
 
-    for (int a = 0; a<=maxDays; a++) {
+    for (int a = 0; a<maxHours; a++) {
       //println(a);
-      int tx = int(map(a, 0, maxDays, lineStart, lineStop));
-      //draw tick
-      strokeWeight(1);
-      line(tx, lineY, tx, lineY+minorTickHeight);
+
       //draw label
       textFont(font);
       textSize(14*fontScale);
-      tempdt = minDate.plus(Period.days(a));
-      fill(0);
-      if (tempdt.dayOfMonth().get() == 1) {
-        //special case!
-        text(tempdt.dayOfMonth().getAsString(), tx, lineY + majorTickHeight);
+
+      if (tempdt.dayOfYear().get() != previousDay) {
+        int tx = int(map(a, 0, maxHours, lineStart, lineStop));
+        //draw tick
+        strokeWeight(1);
+        line(tx, lineY, tx, lineY+minorTickHeight);
+        previousDay = tempdt.dayOfYear().get();
+        fill(0);
+        if (tempdt.dayOfMonth().get() == 1) {
+          //special case!
+          text(tempdt.dayOfMonth().getAsString(), tx, lineY + majorTickHeight);
+        }
+        else {
+          text(tempdt.dayOfMonth().getAsString(), tx, lineY + minorTickHeight);
+        }
+
+        //check if need to draw monthName
+        if (!previousMonth.equals(tempdt.monthOfYear().getAsText())) {
+          //draw some visual markers!
+          //line(monthStart, lineY, monthStart, lineY+majorTickHeight);
+          line(tx, lineY, tx, lineY+majorTickHeight);
+          //position halfway between monthStart and tx, draw monthname
+          textSize(18*fontScale);
+          text(previousMonth, (tx+monthStart)/2, lineY+minorTickHeight + 2*(textAscent() + textDescent()));
+          previousMonth = tempdt.monthOfYear().getAsText();
+        }
       }
-      else {
-        text(tempdt.dayOfMonth().getAsString(), tx, lineY + minorTickHeight);
-      }
-      //check if need to draw monthName
-      if (!previousMonth.equals(tempdt.monthOfYear().getAsText())) {
-        //draw some visual markers!
-        //line(monthStart, lineY, monthStart, lineY+majorTickHeight);
-        line(tx, lineY, tx, lineY+majorTickHeight);
-        //position halfway between monthStart and tx, draw monthname
-        textSize(18*fontScale);
-        text(previousMonth, (tx+monthStart)/2, lineY+minorTickHeight + 2*(textAscent() + textDescent()));
-        previousMonth = tempdt.monthOfYear().getAsText();
-      }
+      tempdt = tempdt.plus(Period.hours(1));
+    }
+    //draw final day!
+    line(lineStop, lineY, lineStop, lineY+minorTickHeight);
+    if (tempdt.dayOfMonth().get() == 1) {
+      //special case!
+      text(tempdt.dayOfMonth().getAsString(), lineStop, lineY + majorTickHeight);
+    }
+    else {
+      text(tempdt.dayOfMonth().getAsString(), lineStop, lineY + minorTickHeight);
     }
     //draw final month!
     textSize(18*fontScale);
@@ -115,11 +133,12 @@ class TimeLineComponent {
       if (key == 'r') {
         saveFrame("VASTMC2-####.png");
       }
-      else if(key == 'n'){
+      else if (key == 'n') {
         addNew();
       }
-    }else{
-      if(key == 'S'){
+    }
+    else {
+      if (key == 'S') {
         saveFrame("VASTMC2-large-####.png");
       }
     }
@@ -127,15 +146,15 @@ class TimeLineComponent {
 
   void moveToPosition(TwitterFilteringComponent t) {
     //moves component to a position above the middle of its range
-    float maxX = map(t.dateSelection.getEnd().getDayOfYear(), minDate.getDayOfYear(), maxDate.getDayOfYear(), lineStart, lineStop);
-    float minX = map(t.dateSelection.getStart().getDayOfYear(), minDate.getDayOfYear(), maxDate.getDayOfYear(), lineStart, lineStop);
+    float maxX = map(getHourOfYear(t.dateSelection.getEnd()), getHourOfYear(timelineStartDate), getHourOfYear(timelineEndDate), lineStart, lineStop);
+    float minX = map(getHourOfYear(t.dateSelection.getStart()), getHourOfYear(timelineStartDate), getHourOfYear(timelineEndDate), lineStart, lineStop);
     //if (t.x != int((maxX+minX)/2)-t.width/2) {
     t.moveTo(int((maxX+minX)/2-smallVizSize.x/2), int(previousPos.y));
     //}
   }
   void drawLinksTo(TwitterFilteringComponent t) {
     noStroke();
-    fill(170,170,255, 130);
+    fill(170, 170, 255, 130);
     int targetY;
 
     if (t.y < lineY) {
@@ -147,11 +166,15 @@ class TimeLineComponent {
     //println(t.y + " and " + targetY);
     //draw links from timeline to this component
     beginShape(POLYGON);
-    vertex(map(t.dateSelection.getStart().getDayOfYear(), minDate.getDayOfYear(), maxDate.getDayOfYear(), lineStart, lineStop), lineY);
+    vertex(map(getHourOfYear(t.dateSelection.getStart()), getHourOfYear(timelineStartDate), getHourOfYear(timelineEndDate), lineStart, lineStop), lineY);
     vertex(t.x, targetY);
     vertex(t.x+t.width, targetY);
-    vertex(map(t.dateSelection.getEnd().getDayOfYear(), minDate.getDayOfYear(), maxDate.getDayOfYear(), lineStart, lineStop), lineY);
+    vertex(map(getHourOfYear(t.dateSelection.getEnd()), getHourOfYear(timelineStartDate), getHourOfYear(timelineEndDate), lineStart, lineStop), lineY);
     endShape();
+  }
+
+  int getHourOfYear(DateTime t) {
+    return t.getDayOfYear()*24 + t.getHourOfDay();
   }
 
   void addNew() {
@@ -167,20 +190,20 @@ class TimeLineComponent {
   }
   void fixOverlaps() {
     /*for (TwitterFilteringComponent a: timePoints) {    
-      for (TwitterFilteringComponent b: timePoints) {
-        if (a!=b) {
-          if (a.contains(b.x, b.y) || a.contains(b.x+width, b.y) || a.contains(b.x+width, b.y+height) || a.contains(b.x, b.y+height)) {
-            if (a.doneResize && b.doneResize)
-              if (b.y <lineY) {
-                b.moveTo(b.x, int(b.y-smallVizSize.y-10));
-              }
-              else {
-                b.moveTo(b.x, int(b.y+smallVizSize.y+10));
-              }
-          }
-        }
-      }
-    }*/
+     for (TwitterFilteringComponent b: timePoints) {
+     if (a!=b) {
+     if (a.contains(b.x, b.y) || a.contains(b.x+width, b.y) || a.contains(b.x+width, b.y+height) || a.contains(b.x, b.y+height)) {
+     if (a.doneResize && b.doneResize)
+     if (b.y <lineY) {
+     b.moveTo(b.x, int(b.y-smallVizSize.y-10));
+     }
+     else {
+     b.moveTo(b.x, int(b.y+smallVizSize.y+10));
+     }
+     }
+     }
+     }
+     }*/
   }
 
   void controlEvent(ControlEvent theControlEvent) {
@@ -218,7 +241,11 @@ class TimeLineComponent {
           break;
         }
         else if (a.hasMouseOver()) {
-          a.mousePressed();
+          //move middle to where the mouse is?
+          println("Dragging " + a);
+          currentDragging = a;
+                currentDragging.currentTransitionState = MovementState.MOVING;
+          //a.mousePressed();
         }
       }
     }
@@ -226,11 +253,25 @@ class TimeLineComponent {
 
 
   void mouseReleased() {
+    if (currentDragging !=null){
+      currentDragging.currentTransitionState = MovementState.SMALL;
+      currentDragging = null;
+      println("Stopped dragging");
+    }
     for (TwitterFilteringComponent a: timePoints) {
       if (a.hasMouseOver()) {
         a.mouseReleased();
       }
     }
   }
-}
 
+  void mouseDragged() {
+    if (currentDragging != null) {
+      println("Moving!");
+      //currentDragging.x = mouseX;
+      //currentDragging.y = mouseY;//
+      currentDragging.moveTo(mouseX, mouseY);
+      println("x y are " + currentDragging.x + " and " + currentDragging.y);
+    }
+  }
+}

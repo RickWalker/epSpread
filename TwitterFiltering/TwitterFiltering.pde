@@ -141,3 +141,7 @@ void mouseReleased() {
   storyboard.mouseReleased();
 }
 
+void mouseDragged(){
+  storyboard.mouseDragged();
+}
+
