@@ -425,7 +425,7 @@ class TwitterFilteringComponent {
     //g.beginDraw();
     println("Drew to offscreen, back now!");
     thumbnail = thumbnailBuffer.get(0, 0, thumbnailBuffer.width, thumbnailBuffer.height);
-    thumbnail.save("temp.png");    
+    //thumbnail.save("temp.png");    
     println("Done generating thumbnail!");
   }
   //popMatrix();
