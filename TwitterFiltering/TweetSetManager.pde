@@ -299,11 +299,13 @@ class TweetSetManager {
       b_weatherViewActive = !b_weatherViewActive;
       
      // if(b_weatherViewActive)
-      //  parent.streamGraphRange.createStreamGraph();
+      //  parent..createStreamGraph();
     }
 
     if (mouseOverRemoveBox >= 0) {
+      
       println("Over remove box : " + mouseOverRemoveBox);  
+      b_weatherViewActive = false;  //switch weather off (bug fix)
 
       //loop through tweet sets, find the one that has id = mouseOverRemoveBox and remove it!
       for (TweetSet a: tweetSets)
@@ -313,6 +315,7 @@ class TweetSetManager {
           reallocateIds();  //tweetSet has been removed, reallocate id's for correct button drawing
           break;
         }
+                
     }
     else
       if (mouseOverBaseButton >= 0) {
