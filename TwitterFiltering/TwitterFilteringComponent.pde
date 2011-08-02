@@ -700,7 +700,7 @@ class TwitterFilteringComponent {
               }
 
               if (tweetSetManager.isPointsViewActive())
-                rect(x+(imgPos.x - tweetBoxSize/2   + loc.x)*scaleFactorX, y+(imgPos.y  + loc.y- tweetBoxSize/2)*scaleFactorY, tweetBoxSize, tweetBoxSize);
+                rect(x+(imgPos.x - tweetBoxSize   + loc.x)*scaleFactorX, y+(imgPos.y  + loc.y- tweetBoxSize)*scaleFactorY, tweetBoxSize, tweetBoxSize);
 
               if (dist(mouseX, mouseY, x+( loc.x + imgPos.x)*scaleFactorX, y+(loc.y + imgPos.y)*scaleFactorY) < 10) {
                 forMouseOver =a ;
