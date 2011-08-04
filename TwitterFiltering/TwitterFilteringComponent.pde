@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import org.sqlite.SQLiteJDBCLoader;
 
+import geomerative.*;
+
 class TwitterFilteringComponent {
   int x, y, width, height;
   TimeLineComponent parent;
@@ -71,7 +73,7 @@ class TwitterFilteringComponent {
 
 
   PImage imgMap;
-
+  RShape shp = new RShape();
 
   /* -----------------------------
    *
@@ -154,6 +156,7 @@ class TwitterFilteringComponent {
 
 
     loadWeatherData();
+    RG.init( parent.parent );
   }
 
   void createP5Components() {
@@ -338,6 +341,13 @@ class TwitterFilteringComponent {
       //noFill();
       //rrect(x, y, width, height, 3.0f*scaleFactorX, 2.4f*scaleFactorY, "");
     }
+    
+    //draw selection shape
+    fill(100,100,255,100);
+    strokeWeight(3);
+    shp.draw();
+    
+    
   }
 
   void drawDateRange() {
@@ -389,13 +399,18 @@ class TwitterFilteringComponent {
 
 
     // --- draw semi-transparent rectangle if click-dragging ---
-
+/*
     if (b_draggingMouse) {
       stroke(200, 200, 255, 100);
       strokeWeight(2*fontScale);
       fill(100, 100, 255, 50);
       rect(mouseDragStart_x, mouseDragStart_y, constrain(mouseX, x + imgPos.x*scaleFactorX, x+(imgX + imgPos.x)*scaleFactorX) - mouseDragStart_x, constrain(mouseY, y+imgPos.y, y+(imgY + imgPos.y)*scaleFactorY) - mouseDragStart_y); //limit rectangle to image boundary
     }
+*/
+
+  if(b_draggingMouse){
+        shp.addLineTo(mouseX, mouseY  );
+  }
 
     wordCloud.draw();
 
@@ -690,7 +705,7 @@ class TwitterFilteringComponent {
               //if there is a drag-select happening
               if (b_draggingMouse) {
                 //if this tweet point is inside the selection box
-                if (isInsideSelectionBox(x+(loc.x + imgPos.x)*scaleFactorX, y+(loc.y + imgPos.y)*scaleFactorY)) {
+                if (shp.contains(x+(loc.x + imgPos.x)*scaleFactorX, y+(loc.y + imgPos.y)*scaleFactorY)) {
                   fill(255);
                 }
               }
@@ -1256,7 +1271,21 @@ class TwitterFilteringComponent {
 
   void mousePressed() {
 
+    
+    if (  (mouseX > x+(imgPos.x*scaleFactorX)) && (mouseY > y+(imgPos.y*scaleFactorY)) && (mouseX < x+ (imgX + imgPos.x)*scaleFactorX) && (mouseY < y+(imgY + imgPos.y)*scaleFactorY) ) 
+      if (mouseButton == LEFT) {
+         b_draggingMouse = true;
+         shp = new RShape();
+         shp.addMoveTo( mouseX , mouseY  );
+      }
+    
 
+    
+    
+    
+    
+    
+/*
     //If mouse click / drag on image  
     if (  (mouseX > x+(imgPos.x*scaleFactorX)) && (mouseY > y+(imgPos.y*scaleFactorY)) && (mouseX < x+ (imgX + imgPos.x)*scaleFactorX) && (mouseY < y+(imgY + imgPos.y)*scaleFactorY) ) 
       if (mouseButton == LEFT) {
@@ -1268,14 +1297,20 @@ class TwitterFilteringComponent {
     if (mouseButton == RIGHT) {
       b_selection = false;
     }
+    */
   }
 
   boolean contains(int tx, int ty) {
     return (tx >= x && tx<=x+width) && (ty>=y && ty<=y+height);
   }
 
+
+
+
   void mouseReleased()
   {
+     shp.addClose();
+
     //mouse has clicked and released, let tweet set manager know!  
     tweetSetManager.processMouse();
 
@@ -1311,8 +1346,10 @@ class TwitterFilteringComponent {
             {      
               for (Tweet a: b.getTweets()) {
                 if (dateSelection.contains(a.mDate)) 
-                  if (isInsideSelectionBox(x+(a.getLocation().x + imgPos.x)*scaleFactorX, y+(a.getLocation().y + imgPos.y)*scaleFactorY))
+                {
+                  if (shp.contains(x+(a.getLocation().x + imgPos.x)*scaleFactorX, y+(a.getLocation().y + imgPos.y)*scaleFactorY))
                   {
+                    println("mouse");
                     a.setSelected(true);
 
                     //If user id doesn't exist in selected tweet username list 
@@ -1321,6 +1358,7 @@ class TwitterFilteringComponent {
 
                     numberSelected++;
                   }
+                }
               }
             }
           }
@@ -1353,6 +1391,9 @@ class TwitterFilteringComponent {
           }
         }
     }
+         shp = new RShape();
+    
   }
+
 }
 
