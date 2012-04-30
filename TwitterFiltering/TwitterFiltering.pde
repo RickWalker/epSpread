@@ -2,8 +2,6 @@ import geomerative.*;
 import org.apache.batik.svggen.font.table.*;
 import org.apache.batik.svggen.font.*;
 //import java.util.StringBuilder;
-
-
 /*
 *
  * Main Code
@@ -65,8 +63,8 @@ TimeLineComponent storyboard;
 
 void setup()
 {
-  //size( screenWidth, screenHeight, OPENGL);
-  size( 1280, 720, OPENGL);
+  size( screenWidth, screenHeight, OPENGL);
+  //size( 1280, 720, OPENGL);
   //textMode(SHAPE);
   smooth();
   createRegions();
@@ -82,40 +80,12 @@ void setup()
 }
 
 void keyPressed() {
-  
-    storyboard.keyPressed();
-    
-    if(key == 'i')
-    {
-      testVal += 1.0;
-      println(testVal);
-    }
-      
-    if(key == 'k')
-    {
-      testVal -= 1.0;  
-      println(testVal);
-    }
-    
-  /*
-  else if (key == 'q') {
-    timePoints.get(0).halveSize();
+
+  storyboard.keyPressed();
+
+  if (key == 'q') {
+    exit();
   }
-  else if (key == 'e') {
-    timePoints.get(0).doubleSize();
-  }
-  else if (key == 'd') {
-    timePoints.get(0).moveRight();
-  }
-  else if (key == 'a') {
-    timePoints.get(0).moveLeft();
-  }
-  else if (key == 'w') {
-    timePoints.get(0).moveUp();
-  }
-  else if (key == 's') {
-    timePoints.get(0).moveDown();
-  }*/
 }
 
 /* -----------------------------
@@ -130,7 +100,7 @@ void draw() {
 }
 
 void controlEvent(ControlEvent theControlEvent) {
-  storyboard.controlEvent(theControlEvent); 
+  storyboard.controlEvent(theControlEvent);
 }
 
 void mousePressed() {
@@ -141,7 +111,7 @@ void mouseReleased() {
   storyboard.mouseReleased();
 }
 
-void mouseDragged(){
+void mouseDragged() {
   storyboard.mouseDragged();
 }
 

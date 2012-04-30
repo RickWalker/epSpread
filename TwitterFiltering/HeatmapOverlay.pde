@@ -32,10 +32,10 @@ class HeatmapOverlay {
         if (v != 0.0) {
           //println("Drawing!");
           //stroke(map(v, 0, max_intensity, 37, 2), 50, 50, map(v, 0, max_intensity, 2, 40));
-          noStroke();
+          //noStroke();
           //old version
           //fill(map(v, 0, max_intensity, 37, 2), 50, 50, map(v, 0, max_intensity, 2, 40));
-          //rect(x*boxsize_x + imgPos.x, y*boxsize_y + imgPos.y, imgX/gridres-1, imgY/gridres-1);
+          //rect(x*boxsize_x + parent.imgPos.x, y*boxsize_y + parent.imgPos.y, imgX/gridres-1, imgY/gridres-1);
           //new version, attempts to shade
           beginShape(TRIANGLES);
           fill(map(v, 0, max_intensity, 37, 2), 50, 50, map(v, 0, max_intensity, 2, 40));

@@ -160,15 +160,17 @@ class TwitterFilteringComponent {
   }
 
   void createP5Components() {
+    println("Creating components!");
     range = controlP5.addRange("Date"+componentID, 0, Hours.hoursIn(new Interval(minDate, maxDate)).getHours(), 
     Hours.hoursIn(new Interval(minDate, dateSelection.getStart())).getHours(), 
     Hours.hoursIn(new Interval(minDate, dateSelection.getEnd())).getHours(), 
     int(x + (imgPos.x * scaleFactorX)), int(y + (imgY + imgPos.y + 10)*scaleFactorY), int((imgX) * scaleFactorX), int(30*scaleFactorY)
-      );
+      ).setBroadcast(false);
     //println("Range slider at" + int(imgY*scaleFactorY));
     range.setColorBackground(color(130, 130, 130));
     range.setLabelVisible(false);
     range.setCaptionLabel("");
+    range.setBroadcast(true);
     //Setup CP5 search field
     setupSearchField();
   }
@@ -211,21 +213,24 @@ class TwitterFilteringComponent {
   }
 
   void resizeP5Components() {
+    range.setBroadcast(false);
+    controlP5.setControlFont(font, int(18.0*fontScale)); //this is expensive - do it once stopped moving?
     range.setPosition(int(x + ((imgPos.x) * scaleFactorX)), int(y + (imgPos.y+imgY + 10)*scaleFactorY));
     range.setSize(int((imgX) * scaleFactorX), int(30*scaleFactorY)); //doesn't update the handles!
-
+    range.setRangeValues(Hours.hoursIn(new Interval(minDate, dateSelection.getStart())).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getEnd())).getHours());
+    range.update();
+    range.setBroadcast(true);
 
     filterTextField.setSize(int(180*scaleFactorX), int(30*scaleFactorY));
     filterTextField.setPosition(filterTextField_x, filterTextField_y);
     //controlP5.setControlFont(new ControlFont(createFont("FFScala", int(18.0*fontScale)), int(18.0*fontScale))); //this is expensive - do it once stopped moving?
-    controlP5.setControlFont(font, int(18.0*fontScale)); //this is expensive - do it once stopped moving?
+
 
     //filterTextField.update();
-    range.update();
   }
 
   boolean doneMoving() {
-    return width == int(widthIntegrator.target) && height == int(heightIntegrator.target) && x == int(xIntegrator.target) && y == int(yIntegrator.target);
+    return abs(width- int(widthIntegrator.target))<=1 && abs(height - int(heightIntegrator.target))<=1 && abs(x-int(xIntegrator.target))<=1 && abs(y- int(yIntegrator.target))<=1;
   }
 
 
@@ -299,14 +304,22 @@ class TwitterFilteringComponent {
     if (doneMoving()) {
       if (currentTransitionState == MovementState.GROWING) {
         previousTransitionState = currentTransitionState;
+        println("Done growing!");
         currentTransitionState = MovementState.LARGE;
       }
       else if (currentTransitionState == MovementState.SHRINKING) {
         previousTransitionState = currentTransitionState;
         currentTransitionState = MovementState.SMALL;
+        println("Done shrinking!");
         generateThumbnail();
       }
     }
+
+   /* if (currentTransitionState == MovementState.SHRINKING) {
+      println("Moving is " + doneMoving());
+
+      System.out.printf("%d %d %d %d %d %d %d %d", width, int(widthIntegrator.target), height, int(heightIntegrator.target), x, int(xIntegrator.target), y, int(yIntegrator.target));
+    }*/
     //if we're resizing:
     if (currentTransitionState == MovementState.GROWING || currentTransitionState == MovementState.SHRINKING) {
       updateSizes();
@@ -324,6 +337,7 @@ class TwitterFilteringComponent {
     else if (previousTransitionState != currentTransitionState) {
       //check for just finished transition for controlp5
       //re-add p5 components?
+      println("New transition state!");
       removeP5Components();
       createP5Components();
       previousTransitionState = currentTransitionState;
@@ -341,13 +355,11 @@ class TwitterFilteringComponent {
       //noFill();
       //rrect(x, y, width, height, 3.0f*scaleFactorX, 2.4f*scaleFactorY, "");
     }
-    
+
     //draw selection shape
-    fill(100,100,255,100);
+    fill(100, 100, 255, 100);
     strokeWeight(3);
     shp.draw();
-    
-    
   }
 
   void drawDateRange() {
@@ -399,18 +411,18 @@ class TwitterFilteringComponent {
 
 
     // --- draw semi-transparent rectangle if click-dragging ---
-/*
+    /*
     if (b_draggingMouse) {
-      stroke(200, 200, 255, 100);
-      strokeWeight(2*fontScale);
-      fill(100, 100, 255, 50);
-      rect(mouseDragStart_x, mouseDragStart_y, constrain(mouseX, x + imgPos.x*scaleFactorX, x+(imgX + imgPos.x)*scaleFactorX) - mouseDragStart_x, constrain(mouseY, y+imgPos.y, y+(imgY + imgPos.y)*scaleFactorY) - mouseDragStart_y); //limit rectangle to image boundary
-    }
-*/
+     stroke(200, 200, 255, 100);
+     strokeWeight(2*fontScale);
+     fill(100, 100, 255, 50);
+     rect(mouseDragStart_x, mouseDragStart_y, constrain(mouseX, x + imgPos.x*scaleFactorX, x+(imgX + imgPos.x)*scaleFactorX) - mouseDragStart_x, constrain(mouseY, y+imgPos.y, y+(imgY + imgPos.y)*scaleFactorY) - mouseDragStart_y); //limit rectangle to image boundary
+     }
+     */
 
-  if(b_draggingMouse){
-        shp.addLineTo(mouseX, mouseY  );
-  }
+    if (b_draggingMouse) {
+      shp.addLineTo(mouseX, mouseY  );
+    }
 
     wordCloud.draw();
 
@@ -960,6 +972,7 @@ class TwitterFilteringComponent {
       // min and max values are stored in an array.
       // access this array with controller().arrayValue().
       // min is at index 0, max is at index 1.
+      println("Range event!");
       dateSelection = new Interval(minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[0]))), 
       minDate.plus(Period.hours(int(theControlEvent.controller().arrayValue()[1]))));
       if (!dateSelection.equals(previousDateSelection)) {
@@ -1271,33 +1284,33 @@ class TwitterFilteringComponent {
 
   void mousePressed() {
 
-    
-    if (  (mouseX > x+(imgPos.x*scaleFactorX)) && (mouseY > y+(imgPos.y*scaleFactorY)) && (mouseX < x+ (imgX + imgPos.x)*scaleFactorX) && (mouseY < y+(imgY + imgPos.y)*scaleFactorY) ) 
-      if (mouseButton == LEFT) {
-         b_draggingMouse = true;
-         shp = new RShape();
-         shp.addMoveTo( mouseX , mouseY  );
-      }
-    
 
-    
-    
-    
-    
-    
-/*
-    //If mouse click / drag on image  
     if (  (mouseX > x+(imgPos.x*scaleFactorX)) && (mouseY > y+(imgPos.y*scaleFactorY)) && (mouseX < x+ (imgX + imgPos.x)*scaleFactorX) && (mouseY < y+(imgY + imgPos.y)*scaleFactorY) ) 
       if (mouseButton == LEFT) {
-        mouseDragStart_x = mouseX;
-        mouseDragStart_y = mouseY;
         b_draggingMouse = true;
+        shp = new RShape();
+        shp.addMoveTo( mouseX, mouseY  );
       }
 
-    if (mouseButton == RIGHT) {
-      b_selection = false;
-    }
-    */
+
+
+
+
+
+
+    /*
+    //If mouse click / drag on image  
+     if (  (mouseX > x+(imgPos.x*scaleFactorX)) && (mouseY > y+(imgPos.y*scaleFactorY)) && (mouseX < x+ (imgX + imgPos.x)*scaleFactorX) && (mouseY < y+(imgY + imgPos.y)*scaleFactorY) ) 
+     if (mouseButton == LEFT) {
+     mouseDragStart_x = mouseX;
+     mouseDragStart_y = mouseY;
+     b_draggingMouse = true;
+     }
+     
+     if (mouseButton == RIGHT) {
+     b_selection = false;
+     }
+     */
   }
 
   boolean contains(int tx, int ty) {
@@ -1309,7 +1322,7 @@ class TwitterFilteringComponent {
 
   void mouseReleased()
   {
-     shp.addClose();
+    shp.addClose();
 
     //mouse has clicked and released, let tweet set manager know!  
     tweetSetManager.processMouse();
@@ -1391,9 +1404,7 @@ class TwitterFilteringComponent {
           }
         }
     }
-         shp = new RShape();
-    
+    shp = new RShape();
   }
-
 }
 

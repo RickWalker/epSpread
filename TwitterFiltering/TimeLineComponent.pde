@@ -21,11 +21,11 @@ class TimeLineComponent {
     this.width = width;
     this.height = height;
     originalSize = new PVector(1280, 720);
-    timelineStartDate = (new DateTime(2011, 5, 19, 0, 0, 0, 0)); //hack for screenshots for now
+    timelineStartDate = (new DateTime(2011, 4, 29, 0, 0, 0, 0)); //hack for screenshots for now
     timelineEndDate = (new DateTime(2011, 5, 21, 0, 0, 0, 0));
     scaleFactorX = width/originalSize.x;
     scaleFactorY = height/originalSize.y; //change eventually!
-    smallVizSize = new PVector(500*scaleFactorX, 300*scaleFactorY);
+    smallVizSize = new PVector(250*scaleFactorX, 150*scaleFactorY);
 
     lineStart = int(x + 150*scaleFactorX);
     lineStop = int(x + width - 150*scaleFactorX);
@@ -55,6 +55,7 @@ class TimeLineComponent {
     else {
       currentLarge.draw();
     }
+    //controlP5.draw();
   }
 
   void drawTimeLine() {
