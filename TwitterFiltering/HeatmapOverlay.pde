@@ -19,6 +19,7 @@ class HeatmapOverlay {
   void draw() {
     //draw overlay!
     //createSurface(imgX, imgY, tweets);
+    noStroke();
     float boxsize_x = imgX/float(gridres-1);
     float boxsize_y = imgY/float(gridres-1);
     //println(max_intensity);
