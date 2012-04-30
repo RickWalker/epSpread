@@ -1,6 +1,6 @@
 import geomerative.*;
-import org.apache.batik.svggen.font.table.*;
-import org.apache.batik.svggen.font.*;
+//import org.apache.batik.svggen.font.table.*;
+//import org.apache.batik.svggen.font.*;
 //import java.util.StringBuilder;
 /*
 *
@@ -83,9 +83,9 @@ void keyPressed() {
 
   storyboard.keyPressed();
 
-  if (key == 'q') {
-    exit();
-  }
+  //if (key == 'q') {
+  //  exit();
+  //}
 }
 
 /* -----------------------------
