@@ -153,7 +153,7 @@ class TwitterFilteringComponent {
     currentTransitionState = previousTransitionState = MovementState.SMALL;
     thumbnailBuffer = createGraphics(int(parent.smallVizSize.x), int(parent.smallVizSize.y), JAVA2D);//P2D);//screenWidth, screenHeight, P2D);
     println("Buffer size is " + thumbnailBuffer.width + " and " + thumbnailBuffer.height);
-
+    generateThumbnail();
 
     loadWeatherData();
     RG.init( parent.parent );
@@ -218,7 +218,7 @@ class TwitterFilteringComponent {
     range.setPosition(int(x + ((imgPos.x) * scaleFactorX)), int(y + (imgPos.y+imgY + 10)*scaleFactorY));
     range.setSize(int((imgX) * scaleFactorX), int(30*scaleFactorY)); //doesn't update the handles!
     range.setRangeValues(Hours.hoursIn(new Interval(minDate, dateSelection.getStart())).getHours(), Hours.hoursIn(new Interval(minDate, dateSelection.getEnd())).getHours());
-    range.update();
+    //range.update();
     range.setBroadcast(true);
 
     filterTextField.setSize(int(180*scaleFactorX), int(30*scaleFactorY));
@@ -227,6 +227,16 @@ class TwitterFilteringComponent {
 
 
     //filterTextField.update();
+  }
+
+  void hideP5Components() {
+    filterTextField.hide();
+    range.hide();
+  }
+
+  void showP5Components() {
+    filterTextField.show();
+    range.show();
   }
 
   boolean doneMoving() {
@@ -306,20 +316,22 @@ class TwitterFilteringComponent {
         previousTransitionState = currentTransitionState;
         println("Done growing!");
         currentTransitionState = MovementState.LARGE;
+        //showP5Components();
       }
       else if (currentTransitionState == MovementState.SHRINKING) {
         previousTransitionState = currentTransitionState;
         currentTransitionState = MovementState.SMALL;
         println("Done shrinking!");
         generateThumbnail();
+        //hideP5Components();
       }
     }
 
-   /* if (currentTransitionState == MovementState.SHRINKING) {
-      println("Moving is " + doneMoving());
-
-      System.out.printf("%d %d %d %d %d %d %d %d", width, int(widthIntegrator.target), height, int(heightIntegrator.target), x, int(xIntegrator.target), y, int(yIntegrator.target));
-    }*/
+    /* if (currentTransitionState == MovementState.SHRINKING) {
+     println("Moving is " + doneMoving());
+     
+     System.out.printf("%d %d %d %d %d %d %d %d", width, int(widthIntegrator.target), height, int(heightIntegrator.target), x, int(xIntegrator.target), y, int(yIntegrator.target));
+     }*/
     //if we're resizing:
     if (currentTransitionState == MovementState.GROWING || currentTransitionState == MovementState.SHRINKING) {
       updateSizes();
@@ -340,6 +352,12 @@ class TwitterFilteringComponent {
       println("New transition state!");
       removeP5Components();
       createP5Components();
+      if (currentTransitionState == MovementState.SMALL) {
+        hideP5Components();
+      }
+      else {
+        showP5Components();
+      }
       previousTransitionState = currentTransitionState;
     }
     if (currentTransitionState != MovementState.SMALL || thumbnail == null) {
@@ -454,6 +472,7 @@ class TwitterFilteringComponent {
     thumbnail = thumbnailBuffer.get(0, 0, thumbnailBuffer.width, thumbnailBuffer.height);
     //thumbnail.save("temp.png");    
     println("Done generating thumbnail!");
+    //hide controlp5 components
   }
   //popMatrix();
   String formatDate(DateTime t) {
@@ -580,7 +599,7 @@ class TwitterFilteringComponent {
     filterTextField = controlP5.addTextfield("Filters"+componentID, filterTextField_x, filterTextField_y, filterTextField_width, filterTextField_height);
     filterTextField.setColorBackground(250);
     filterTextField.setColorForeground(0);
-    filterTextField.setColorValue(50);
+    //filterTextField.setColorValue(50);
     filterTextField.setColorActive(0);
     filterTextField.setColorLabel(0);
     controlP5.setControlFont(new ControlFont(createFont("FFScala", int(18.0*fontScale)), int(18.0*fontScale)));
@@ -991,6 +1010,7 @@ class TwitterFilteringComponent {
 
     // -------- Typing something in and hitting return will trigger this code, creating a new tweet set --------
     if (theControlEvent.controller().name().equals("Filters"+componentID)) {
+      println("Typing in textfield!");
       String keywords = theControlEvent.controller().stringValue();
       if (!keywords.equals(previousKeyword)) {
         if (tweetSetManager.getTweetSetListSize() < tweetSetManager.getMaxTweetSets())

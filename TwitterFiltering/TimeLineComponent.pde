@@ -11,6 +11,7 @@ class TimeLineComponent {
   int lineStart, lineStop, lineY;
   float scaleFactorX, scaleFactorY;
   float fontScale;
+  int draggingOffsetX, draggingOffsetY;
 
   List<TwitterFilteringComponent> timePoints;// llyrComponent;
 
@@ -245,7 +246,9 @@ class TimeLineComponent {
           //move middle to where the mouse is?
           println("Dragging " + a);
           currentDragging = a;
-                currentDragging.currentTransitionState = MovementState.MOVING;
+          draggingOffsetX = mouseX - a.x;
+          draggingOffsetY = mouseY -a.y;
+          currentDragging.currentTransitionState = MovementState.MOVING;
           //a.mousePressed();
         }
       }
@@ -254,7 +257,7 @@ class TimeLineComponent {
 
 
   void mouseReleased() {
-    if (currentDragging !=null){
+    if (currentDragging !=null) {
       currentDragging.currentTransitionState = MovementState.SMALL;
       currentDragging = null;
       println("Stopped dragging");
@@ -271,8 +274,9 @@ class TimeLineComponent {
       println("Moving!");
       //currentDragging.x = mouseX;
       //currentDragging.y = mouseY;//
-      currentDragging.moveTo(mouseX, mouseY);
+      currentDragging.moveTo(mouseX - draggingOffsetX, mouseY - draggingOffsetY);
       println("x y are " + currentDragging.x + " and " + currentDragging.y);
     }
   }
 }
+

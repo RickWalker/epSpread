@@ -100,6 +100,7 @@ void draw() {
 }
 
 void controlEvent(ControlEvent theControlEvent) {
+  System.err.println("p5 control event!");
   storyboard.controlEvent(theControlEvent);
 }
 
