@@ -11,7 +11,7 @@ class HeatmapOverlay {
 
   HeatmapOverlay(TwitterFilteringComponent parent) {
     this.parent = parent;
-    gridres = 100;
+    gridres = 200;
     overlay = new float[gridres*gridres];
     //values = new float[gridres][gridres];
   }
@@ -254,6 +254,12 @@ class HeatmapOverlay {
     }
     double zmin = 0;
     double zmax = max_intensity;
+    
+    //for better scale: do log of everything!
+    for(int i =0; i<overlay.length; i++){
+      overlay[i] = log(overlay[i]+1.0);
+    }
+    max_intensity = log(max_intensity+1.0);
 
     //now that we have the grid, generate contours!
     //mangle array back into 2D
