@@ -1,3 +1,5 @@
-To get this to run, you'll need various libraries (TODO: WHICH ONES?) and also the data file, which is available at:
-http://dl.dropbox.com/u/26547095/VAST2011_MC1.sqlite.zip
-It needs to be unzipped and placed in the TwitterFiltering directory. It's just the tweets imported and nicely (hah!) formatted in terms of date and so on.
+To get this to run, you'll need:
+- Processing (not the 2.0 beta, 1.5.1 works great)
+- A couple of libraries: geomerative and controlp5 (the others that it needs are included in the code folder)
+
+You'll also need to unzip the data file (VAST2011_MC1.sqlite.zip) to the same directory it's currently in. That's an sqlite database of the microblogging messages with the dates formatted as dates.
