@@ -321,13 +321,13 @@ class TwitterFilteringComponent {
       if (currentTransitionState == MovementState.GROWING) {
         println("Done growing!");
         currentTransitionState = MovementState.LARGE;
-        //showP5Components();
+        showP5Components();
       }
       else if (currentTransitionState == MovementState.SHRINKING) {
         currentTransitionState = MovementState.SMALL;
         println("Done shrinking!");
         generateThumbnail();
-        //hideP5Components();
+        hideP5Components();
       }
     }
 

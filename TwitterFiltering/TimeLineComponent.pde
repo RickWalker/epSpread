@@ -151,6 +151,7 @@ class TimeLineComponent {
     if (currentLarge == null) {
       if (key == 'r') {
         saveFrame("VASTMC2-####.png");
+        record = true;
       }
       else if (key == 'n') {
         addNew();

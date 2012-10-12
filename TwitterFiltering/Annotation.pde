@@ -104,11 +104,11 @@ public class Annotation {
 
   void hide() {
     println("Hiding note!");
-    note.hide();
+    wholeNote.hide();
   }
 
   void show() {
-    note.show();
+    wholeNote.show();
   }
 }
 
