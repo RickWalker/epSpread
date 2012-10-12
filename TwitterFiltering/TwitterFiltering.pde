@@ -1,3 +1,5 @@
+import processing.pdf.*;
+
 import geomerative.*;
 //import org.apache.batik.svggen.font.table.*;
 //import org.apache.batik.svggen.font.*;
@@ -20,7 +22,8 @@ float testVal = 0.028f;
 
 //String[] keywordList;
 ///de.bezier.data.sql.SQLite db;
-PFont font = createFont("FFScala", 18);
+PFont font = createFont("Verdana", 18);
+ControlFont cFont = new ControlFont(font, 18);
 PApplet mainApplet;
 
 

@@ -1,5 +1,9 @@
 import java.lang.Math.*;
 
+//Makes use of some code from the github download of Byron and Wattenberg's Streamgraph,  
+//https://github.com/leebyron/streamgraph_generator
+//to produce a streamgraph.
+//most of it's wrapped in a library now
 class StreamGraphRange {
 
   int x = 0;

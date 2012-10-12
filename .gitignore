@@ -8,3 +8,5 @@ TwitterFiltering/VAST2011_MC1.sqlite
 TwitterFiltering/.DS_Store
 
 TwitterFiltering/Sketches/.DS_Store
+*.png
+*.pdf

@@ -1,3 +1,5 @@
+
+
 class TimeLineComponent {
   //idea is that we can 'stick' other visualisations to this timeline together with annotations to tell a story
   TwitterFiltering parent;
@@ -12,6 +14,8 @@ class TimeLineComponent {
   float scaleFactorX, scaleFactorY;
   float fontScale;
   int draggingOffsetX, draggingOffsetY;
+
+  boolean record = false; //to try writing to pdf!
 
   List<TwitterFilteringComponent> timePoints;// llyrComponent;
 
@@ -40,6 +44,13 @@ class TimeLineComponent {
   }
 
   void draw() {
+    if (record) {
+      // Note that #### will be replaced with the frame number. Fancy!
+      beginRecord(PDF, "frame-####.pdf");
+      textMode(SHAPE);
+      font = createFont("Verdana", 18); //recreate as a shape
+      textFont(font);
+    }
     background(130, 130, 130);
     if (currentLarge == null) {
       //draw the actual timeline
@@ -56,10 +67,16 @@ class TimeLineComponent {
     else {
       currentLarge.draw();
     }
+    if (record) {
+      endRecord();
+      textMode(MODEL);
+      record = false;
+    }
     //controlP5.draw();
   }
 
   void drawTimeLine() {
+
     //draw the base timeline
 
 
@@ -142,6 +159,7 @@ class TimeLineComponent {
     else {
       if (key == 'S') {
         saveFrame("VASTMC2-large-####.png");
+        record = true;
       }
     }
   }

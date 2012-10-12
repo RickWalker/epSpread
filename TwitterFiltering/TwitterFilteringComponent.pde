@@ -7,6 +7,9 @@ import org.sqlite.SQLiteJDBCLoader;
 
 import geomerative.*;
 
+
+//storyboard panel
+
 class TwitterFilteringComponent {
   int x, y, width, height;
   TimeLineComponent parent;
@@ -32,6 +35,7 @@ class TwitterFilteringComponent {
 
   ArrayList<String> windDirection = new ArrayList<String>() ;
   ArrayList<String> windSpeed = new ArrayList<String>() ;
+  ArrayList<Annotation> annotations = new ArrayList<Annotation>();
 
   // ---- Mouse Drag/Selection ----
 
@@ -224,7 +228,7 @@ class TwitterFilteringComponent {
     filterTextField.setSize(int(180*scaleFactorX), int(30*scaleFactorY));
     filterTextField.setPosition(filterTextField_x, filterTextField_y);
     //controlP5.setControlFont(new ControlFont(createFont("FFScala", int(18.0*fontScale)), int(18.0*fontScale))); //this is expensive - do it once stopped moving?
-
+    for (Annotation a: annotations) a.resize();
 
     //filterTextField.update();
   }
@@ -232,11 +236,13 @@ class TwitterFilteringComponent {
   void hideP5Components() {
     filterTextField.hide();
     range.hide();
+    for (Annotation a: annotations) a.hide();
   }
 
   void showP5Components() {
     filterTextField.show();
     range.show();
+    for (Annotation a: annotations) a.show();
   }
 
   boolean doneMoving() {
@@ -313,13 +319,11 @@ class TwitterFilteringComponent {
     //if (!doneMoving()) {
     if (doneMoving()) {
       if (currentTransitionState == MovementState.GROWING) {
-        previousTransitionState = currentTransitionState;
         println("Done growing!");
         currentTransitionState = MovementState.LARGE;
         //showP5Components();
       }
       else if (currentTransitionState == MovementState.SHRINKING) {
-        previousTransitionState = currentTransitionState;
         currentTransitionState = MovementState.SMALL;
         println("Done shrinking!");
         generateThumbnail();
@@ -327,7 +331,12 @@ class TwitterFilteringComponent {
       }
     }
 
-    /* if (currentTransitionState == MovementState.SHRINKING) {
+    if (currentTransitionState == MovementState.SHRINKING && previousTransitionState == MovementState.LARGE) {
+      generateThumbnail();
+    }
+    previousTransitionState = currentTransitionState;
+
+    /*if (currentTransitionState == MovementState.SHRINKING) {
      println("Moving is " + doneMoving());
      
      System.out.printf("%d %d %d %d %d %d %d %d", width, int(widthIntegrator.target), height, int(heightIntegrator.target), x, int(xIntegrator.target), y, int(yIntegrator.target));
@@ -351,6 +360,10 @@ class TwitterFilteringComponent {
       //re-add p5 components?
       println("New transition state!");
       removeP5Components();
+      for (Annotation a: annotations) { 
+        a.removeNote(); 
+        a.createNote();
+      }
       createP5Components();
       if (currentTransitionState == MovementState.SMALL) {
         hideP5Components();
@@ -384,12 +397,14 @@ class TwitterFilteringComponent {
     textAlign(CENTER, TOP);
     fill(0);
     textSize(24*fontScale);
-    int yval = int(y + (imgPos.y)/10.0);
+    int yval = int(y+3*scaleFactorY);// + (imgPos.y)/15.0);
     int startX = int(x + imgPos.x +0.35*imgX*scaleFactorX);
     int endX = int(x +imgPos.x + imgX*scaleFactorX - 0.35*imgX*scaleFactorX);
     text(formatDate(dateSelection.getStart()), startX, yval);
+    text(formatTime(dateSelection.getStart()), startX, yval+textAscent()+textDescent());
     text("to", int(x+imgPos.x+(imgX*scaleFactorX)/2), yval);
     text(formatDate(dateSelection.getEnd()), endX, yval);
+    text(formatTime(dateSelection.getEnd()), endX, yval+(textAscent()+textDescent()));
   }
 
   void drawComponents() {//int x, int y, int width, int height) {
@@ -418,8 +433,6 @@ class TwitterFilteringComponent {
     // ---- Draw all the TweetSet Buttons ----
     tweetSetManager.draw();
 
-    // ---- Draw ControlP5 ----  
-    controlP5.draw();
 
     // ---- Draw tweet network if selected / on ----  
     if (b_selection)
@@ -450,6 +463,11 @@ class TwitterFilteringComponent {
 
     // ---- Draw the tweets on the map ----  
     drawTweetsOnce();
+
+    // ---- Draw ControlP5 ----  
+    controlP5.draw();
+    //draw annotations!
+    for (Annotation a: annotations) a.draw();
   }
 
   void generateThumbnail() {
@@ -484,13 +502,20 @@ class TwitterFilteringComponent {
     dateString.append(t.monthOfYear().getAsText());
     dateString.append(" ");
     dateString.append(t.year().getAsText());
-    dateString.append("\n");
-    dateString.append(nf(t.hourOfDay().get(), 2));
-    dateString.append(":00");
+    //dateString.append("\n");
+    //dateString.append(nf(t.hourOfDay().get(), 2));
+    //dateString.append(":00");
 
     return dateString.toString();
   }
 
+  String formatTime(DateTime t) {
+    //need this for pdf output, line breaks are handled poorly
+    StringBuilder dateString = new StringBuilder();
+    dateString.append(nf(t.hourOfDay().get(), 2));
+    dateString.append(":00");
+    return dateString.toString();
+  }
 
   void drawWindArrows() {
 
@@ -597,12 +622,13 @@ class TwitterFilteringComponent {
     int filterTextField_height = int(30*scaleFactorY);
 
     filterTextField = controlP5.addTextfield("Filters"+componentID, filterTextField_x, filterTextField_y, filterTextField_width, filterTextField_height);
-    filterTextField.setColorBackground(250);
-    filterTextField.setColorForeground(0);
+    filterTextField.setColorBackground(color(250));
+    filterTextField.setColorForeground(color(250));
     //filterTextField.setColorValue(50);
-    filterTextField.setColorActive(0);
-    filterTextField.setColorLabel(0);
-    controlP5.setControlFont(new ControlFont(createFont("FFScala", int(18.0*fontScale)), int(18.0*fontScale)));
+
+    //filterTextField.setColorLabel(0);
+    controlP5.setControlFont(new ControlFont(font, int(18.0*fontScale)));
+    filterTextField.setColor(color(0));
     filterTextField.setLabel("");
     filterTextField.setFocus(true);
   }
@@ -1006,20 +1032,31 @@ class TwitterFilteringComponent {
 
       //weatherApplet.setDate(minDate, int(theControlEvent.controller().arrayValue()[1]));
     }
+    else
 
 
-    // -------- Typing something in and hitting return will trigger this code, creating a new tweet set --------
-    if (theControlEvent.controller().name().equals("Filters"+componentID)) {
-      println("Typing in textfield!");
-      String keywords = theControlEvent.controller().stringValue();
-      if (!keywords.equals(previousKeyword)) {
-        if (tweetSetManager.getTweetSetListSize() < tweetSetManager.getMaxTweetSets())
-          generateTweetSet(keywords);
-        else
-          println("**** Too many tweetSets! Please remove before requesting another ***");
+        // -------- Typing something in and hitting return will trigger this code, creating a new tweet set --------
+      if (theControlEvent.controller().name().equals("Filters"+componentID)) {
+        println("Typing in textfield!");
+        String keywords = theControlEvent.controller().stringValue();
+        if (!keywords.equals(previousKeyword)) {
+          if (tweetSetManager.getTweetSetListSize() < tweetSetManager.getMaxTweetSets())
+            generateTweetSet(keywords);
+          else
+            println("**** Too many tweetSets! Please remove before requesting another ***");
+        }
+        previousKeyword = new String(keywords);
       }
-      previousKeyword = new String(keywords);
-    }
+      else {
+        //must be an event from an annotation:
+        println("Annotation event!");
+        //based on the name, work out which annotation it is!
+        String n = theControlEvent.controller().name();
+        println(n);
+        int controllerIndex = int(n.substring(4, n.length()));
+        //now look up the right annotation and update the note!
+        annotations.get(controllerIndex).updateNote();
+      }
     //}
   }
 
@@ -1303,15 +1340,26 @@ class TwitterFilteringComponent {
 
 
   void mousePressed() {
+    //first check if we're over an annotation!
+    for (Annotation a: annotations) {
+      if (a.mouseOver()) {
+        println("Annotation has mouseover!");
+        return;
+      }
+    }
 
-
-    if (  (mouseX > x+(imgPos.x*scaleFactorX)) && (mouseY > y+(imgPos.y*scaleFactorY)) && (mouseX < x+ (imgX + imgPos.x)*scaleFactorX) && (mouseY < y+(imgY + imgPos.y)*scaleFactorY) ) 
+    if (  (mouseX > x+(imgPos.x*scaleFactorX)) && (mouseY > y+(imgPos.y*scaleFactorY)) && (mouseX < x+ (imgX + imgPos.x)*scaleFactorX) && (mouseY < y+(imgY + imgPos.y)*scaleFactorY) ) {
       if (mouseButton == LEFT) {
         b_draggingMouse = true;
         shp = new RShape();
         shp.addMoveTo( mouseX, mouseY  );
       }
-
+    }
+    if (mouseButton == RIGHT) {
+      println("RIGHT BUTTON!");
+      println("Added annotation!");
+      annotations.add(new Annotation(this, mouseX, mouseY, 100, 100, annotations.size()));
+    }
 
 
 
