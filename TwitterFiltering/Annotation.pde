@@ -28,8 +28,8 @@ public class Annotation {
   }
 
   boolean mouseOver() {
-    if ((parent.x + x*parent.scaleFactorX)<=mouseX && (parent.x + x*parent.scaleFactorX)+width*parent.scaleFactorX>=mouseX) {
-      if ((parent.y+y*parent.scaleFactorY)<=mouseY && (parent.y+y*parent.scaleFactorY)+height*parent.scaleFactorY>=mouseY) {
+    if ((x + parent.x*parent.scaleFactorX)<=mouseX && (x + parent.x*parent.scaleFactorX)+width*parent.scaleFactorX>=mouseX) {
+      if ((y + parent.y*parent.scaleFactorY)<=mouseY && (y+parent.y*parent.scaleFactorY)+height*parent.scaleFactorY>=mouseY) {
         return true;
       }
     }
@@ -60,15 +60,15 @@ public class Annotation {
     //because controlp5 doesn't support multiline text input, we have a textfield for input over a textarea for display
     //and we use a group to keep them moving together!
     wholeNote = controlP5.addGroup("g"+index)
-      .setPosition(int(parent.x + x*parent.scaleFactorX), int(parent.y+y*parent.scaleFactorY))
+      .setPosition(int(x+parent.x*parent.scaleFactorX), int(y+parent.y*parent.scaleFactorY))
         .setSize(int(width*parent.scaleFactorX), int(height*parent.scaleFactorY))
           .setColorBackground(color(255, 255, 0, 200)) //background color transparent
             .setColorForeground(color(255, 255, 0, 250)) //color for eg scroll bars etc
-            .setColorActive(color(255, 255, 0, 250))
-              .addCloseButton()
+              .setColorActive(color(255, 255, 0, 250))
+                //.addCloseButton()
                 .hideArrow()
-                .disableCollapse()
-                  .setLabel("");
+                  .disableCollapse()
+                    .setLabel("");
 
     //the actual note part
     note = controlP5.addTextarea("fullnote"+index)
@@ -92,13 +92,13 @@ public class Annotation {
           .setSize(int(width*parent.scaleFactorX), int(30*parent.scaleFactorY))
             .setText("")
               .setFont(new ControlFont(font, 18))
-              //.setLineHeight(14)
-              .setColor(color(0)) //TEXTCOLOR
-                .setColorActive(color(255, 255, 0, 200))
-                  .setColorBackground(color(255, 255, 0, 200)) //background color transparent
-                    .setColorForeground(color(255, 255, 0, 100)) //color for eg scroll bars etc
-                      .setMoveable(false)
-                        .setGroup(wholeNote);
+                //.setLineHeight(14)
+                .setColor(color(0)) //TEXTCOLOR
+                  .setColorActive(color(255, 255, 0, 200))
+                    .setColorBackground(color(255, 255, 0, 200)) //background color transparent
+                      .setColorForeground(color(255, 255, 0, 100)) //color for eg scroll bars etc
+                        .setMoveable(false)
+                          .setGroup(wholeNote);
   }
 
 
