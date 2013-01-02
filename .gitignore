@@ -10,3 +10,8 @@ TwitterFiltering/.DS_Store
 TwitterFiltering/Sketches/.DS_Store
 *.png
 *.pdf
+epSpread/bin/data/5-00.txt
+
+epSpread/bin/data/5-01.txt
+epSpread/bin
+*.class

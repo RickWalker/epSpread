@@ -1,7 +1,0 @@
-festival 3638 14.4355
-oprah 2 15.7448
-ache 2 15.9465
-egt 2 16.0205
-whn 2 16.0985
-meth 2 16.1809
-launched 2 16.1809

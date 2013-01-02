@@ -1,9 +1,0 @@
-runnin 2 15.4104
-dt 2 15.568
-rouge 2 15.7448
-moulin 2 15.9465
-tasting 2 16.0985
-matches 2 16.0985
-khan 2 16.0985
-indo 2 16.0985
-appreciation 2 16.0985

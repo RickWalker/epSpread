@@ -1,0 +1,13 @@
+baseball 790 14.461
+sink 2 15.809
+crucial 2 15.8761
+beatles 46 17.9465
+makers 2 15.9465
+aussie 2 15.9465
+wo 2 16.0205
+policies 2 16.0205
+inc 2 16.0205
+announcement 2 16.0985
+northman 2 16.1809
+madd 2 16.1809
+badd 2 16.1809

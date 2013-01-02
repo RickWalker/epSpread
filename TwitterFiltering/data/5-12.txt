@@ -1,6 +1,0 @@
-irrepairable 66 17.2684
-elliot 2 16.0985
-bells 2 16.0985
-destruction 288 15.059
-tide 2 16.1809
-hwy 2 16.1809
