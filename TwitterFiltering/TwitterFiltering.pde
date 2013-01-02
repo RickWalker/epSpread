@@ -10,7 +10,7 @@ import geomerative.*;
  *
  */
 
-import processing.opengl.*;
+//import processing.opengl.*;
 
 //import de.bezier.data.sql.SQLite;
 import controlP5.*;
@@ -41,7 +41,7 @@ boolean b_generateNetwork = false;  //Generate network for selected tweets?
 DateTime minDate =(new DateTime(2011, 4, 30, 0, 0, 0, 0)).minus(Period.hours(1));
 DateTime maxDate = (new DateTime(2011, 5, 20, 23, 59, 0, 0)).plus(Period.hours(1));
 DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
-DateTimeFormatter fmt2 = DateTimeFormat.forPattern("MMM dd              HH:mma"); 
+DateTimeFormatter fmt2 = DateTimeFormat.forPattern("MMM dd              HH:mm"); 
 Interval fullTimeInterval = new Interval(minDate, maxDate);
 
 
@@ -66,7 +66,7 @@ TimeLineComponent storyboard;
 
 void setup()
 {
-  size( screenWidth, screenHeight, OPENGL);
+  size( displayWidth, displayHeight);
   //size( 1280, 720, OPENGL);
   //textMode(SHAPE);
   smooth();

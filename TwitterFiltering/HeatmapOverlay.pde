@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 class HeatmapOverlay {
 
   float[] overlay;

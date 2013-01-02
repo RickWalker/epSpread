@@ -1,4 +1,4 @@
-
+import java.util.List;
 
 class TimeLineComponent {
   //idea is that we can 'stick' other visualisations to this timeline together with annotations to tell a story

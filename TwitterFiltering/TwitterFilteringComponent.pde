@@ -78,6 +78,7 @@ class TwitterFilteringComponent {
 
   PImage imgMap;
   RShape shp = new RShape();
+  RFont rfont = new RFont("Verdana.ttf", 18);
 
   /* -----------------------------
    *
@@ -400,6 +401,7 @@ class TwitterFilteringComponent {
     int yval = int(y+3*scaleFactorY);// + (imgPos.y)/15.0);
     int startX = int(x + imgPos.x +0.35*imgX*scaleFactorX);
     int endX = int(x +imgPos.x + imgX*scaleFactorX - 0.35*imgX*scaleFactorX);
+    rfont.draw(formatDate(dateSelection.getStart()));
     text(formatDate(dateSelection.getStart()), startX, yval);
     text(formatTime(dateSelection.getStart()), startX, yval+textAscent()+textDescent());
     text("to", int(x+imgPos.x+(imgX*scaleFactorX)/2), yval);
@@ -771,8 +773,10 @@ class TwitterFilteringComponent {
                 stroke(255);
               }
 
-              if (tweetSetManager.isPointsViewActive())
+              if (tweetSetManager.isPointsViewActive()){
                 rect(x+(imgPos.x - tweetBoxSize   + loc.x)*scaleFactorX, y+(imgPos.y  + loc.y- tweetBoxSize)*scaleFactorY, tweetBoxSize, tweetBoxSize);
+                
+              }
 
               if (dist(mouseX, mouseY, x+( loc.x + imgPos.x)*scaleFactorX, y+(loc.y + imgPos.y)*scaleFactorY) < 10) {
                 forMouseOver =a ;
@@ -1264,7 +1268,7 @@ class TwitterFilteringComponent {
         stroke(0);
         strokeWeight(0);
 
-        ellipse(loc.x + imgPos.x, loc.y + imgPos.y, nodeSize, nodeSize);
+        ellipse(x+(loc.x + imgPos.x)*scaleFactorX, y+(loc.y + imgPos.y)*scaleFactorY, nodeSize, nodeSize);
 
         counter++;
       }

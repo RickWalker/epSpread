@@ -1,4 +1,4 @@
-
+import java.awt.Frame;
 
 
 public class WeatherFrame extends Frame {
