@@ -30,13 +30,13 @@ class TweetSetManager {
 	boolean b_weatherViewActive = false;
 
 	TwitterFilteringComponent parent;
-	TwitterFiltering gp;
+	TwitterFiltering papplet;
 
 	int optionButtonsOffset = 0;
 
-	TweetSetManager(TwitterFiltering gp, TwitterFilteringComponent parent) {
+	TweetSetManager(TwitterFiltering papplet, TwitterFilteringComponent parent) {
 		this.parent = parent;
-		this.gp = gp;
+		this.papplet = papplet;
 
 		tweetSets = new ArrayList<TweetSet>();
 		setConstants();
@@ -75,8 +75,8 @@ class TweetSetManager {
 
 	void draw() {
 
-		gp.textSize(18 * parent.fontScale);
-		gp.text("Results", origin.x - 1 * parent.scaleFactorX, origin.y - 12
+		papplet.textSize(18 * parent.fontScale);
+		papplet.text("Results", origin.x - 1 * parent.scaleFactorX, origin.y - 12
 				* parent.scaleFactorY);
 		float alphaCol = 255;
 		mouseOverRemoveBox = -1;
@@ -87,14 +87,14 @@ class TweetSetManager {
 
 		// -------- Draw the background pane --------
 
-		gp.strokeWeight(1 * parent.fontScale);
-		gp.stroke(200);
-		gp.fill(225 - 5, 228 - 5, 233 - 5);
+		papplet.strokeWeight(1 * parent.fontScale);
+		papplet.stroke(200);
+		papplet.fill(225 - 5, 228 - 5, 233 - 5);
 
 		for (int i = 0; i < maxTweetSets; i++)
-			gp.rrect(origin.x, origin.y + (buttonDim.y * i) + (buttonDist * i),
+			papplet.rect(origin.x, origin.y + (buttonDim.y * i) + (buttonDist * i),
 					buttonDim.x, buttonDim.y, 10.0f * parent.scaleFactorX,
-					2.4f * parent.scaleFactorY, "");
+					2.4f * parent.scaleFactorY);
 
 		pointsOptionPos = new PVector(origin.x, optionButtonsOffset + origin.y
 				+ (optionButtonDim.y * maxTweetSets + 1)
@@ -122,81 +122,81 @@ class TweetSetManager {
 		if (b_weatherViewActive == false)
 			weatherOptionButtonAlpha = 255 * 0.3f;
 
-		int pointsOptionButtonColour = gp.color(247, 247, 247,
+		int pointsOptionButtonColour = papplet.color(247, 247, 247,
 				pointsOptionButtonAlpha);
-		int heatmapOptionButtonColour = gp.color(247, 247, 247,
+		int heatmapOptionButtonColour = papplet.color(247, 247, 247,
 				heatmapOptionButtonAlpha);
-		int weatherOptionButtonColour = gp.color(247, 247, 247,
+		int weatherOptionButtonColour = papplet.color(247, 247, 247,
 				weatherOptionButtonAlpha);
 
-		if ((gp.mouseX > pointsOptionPos.x)
-				&& (gp.mouseX < pointsOptionPos.x + optionButtonDim.x)
-				&& (gp.mouseY > pointsOptionPos.y)
-				&& (gp.mouseY < pointsOptionPos.y + optionButtonDim.y)) {
-			pointsOptionButtonColour = gp.color(
-					gp.red(pointsOptionButtonColour) * 2.3f,
-					gp.green(pointsOptionButtonColour) * 2.3f,
-					gp.blue(pointsOptionButtonColour) * 2.3f,
+		if ((papplet.mouseX > pointsOptionPos.x)
+				&& (papplet.mouseX < pointsOptionPos.x + optionButtonDim.x)
+				&& (papplet.mouseY > pointsOptionPos.y)
+				&& (papplet.mouseY < pointsOptionPos.y + optionButtonDim.y)) {
+			pointsOptionButtonColour = papplet.color(
+					papplet.red(pointsOptionButtonColour) * 2.3f,
+					papplet.green(pointsOptionButtonColour) * 2.3f,
+					papplet.blue(pointsOptionButtonColour) * 2.3f,
 					pointsOptionButtonAlpha);
 			mouseOverPointsOptionButton = true;
 		}
 
-		if ((gp.mouseX > heatmapOptionPos.x)
-				&& (gp.mouseX < heatmapOptionPos.x + optionButtonDim.x)
-				&& (gp.mouseY > heatmapOptionPos.y)
-				&& (gp.mouseY < heatmapOptionPos.y + optionButtonDim.y)) {
-			heatmapOptionButtonColour = gp.color(
-					gp.red(heatmapOptionButtonColour) * 2.3f,
-					gp.green(heatmapOptionButtonColour) * 2.3f,
-					gp.blue(heatmapOptionButtonColour) * 2.3f,
+		if ((papplet.mouseX > heatmapOptionPos.x)
+				&& (papplet.mouseX < heatmapOptionPos.x + optionButtonDim.x)
+				&& (papplet.mouseY > heatmapOptionPos.y)
+				&& (papplet.mouseY < heatmapOptionPos.y + optionButtonDim.y)) {
+			heatmapOptionButtonColour = papplet.color(
+					papplet.red(heatmapOptionButtonColour) * 2.3f,
+					papplet.green(heatmapOptionButtonColour) * 2.3f,
+					papplet.blue(heatmapOptionButtonColour) * 2.3f,
 					heatmapOptionButtonAlpha);
 			mouseOverHeatmapOptionButton = true;
 		}
 
-		if ((gp.mouseX > weatherOptionPos.x)
-				&& (gp.mouseX < weatherOptionPos.x + optionButtonDim.x)
-				&& (gp.mouseY > weatherOptionPos.y)
-				&& (gp.mouseY < weatherOptionPos.y + optionButtonDim.y)) {
-			weatherOptionButtonColour = gp.color(
-					gp.red(weatherOptionButtonColour) * 2.3f,
-					gp.green(weatherOptionButtonColour) * 2.3f,
-					gp.blue(weatherOptionButtonColour) * 2.3f,
+		if ((papplet.mouseX > weatherOptionPos.x)
+				&& (papplet.mouseX < weatherOptionPos.x + optionButtonDim.x)
+				&& (papplet.mouseY > weatherOptionPos.y)
+				&& (papplet.mouseY < weatherOptionPos.y + optionButtonDim.y)) {
+			weatherOptionButtonColour = papplet.color(
+					papplet.red(weatherOptionButtonColour) * 2.3f,
+					papplet.green(weatherOptionButtonColour) * 2.3f,
+					papplet.blue(weatherOptionButtonColour) * 2.3f,
 					weatherOptionButtonAlpha);
 			mouseOverWeatherOptionButton = true;
 		}
 
-		gp.strokeWeight(1.5f * parent.fontScale);
-		gp.stroke(181, 184, 188, alphaCol);
+		papplet.strokeWeight(1.5f * parent.fontScale);
+		papplet.stroke(181, 184, 188, alphaCol);
 
-		gp.fill(pointsOptionButtonColour);
-		gp.rrect(pointsOptionPos.x, pointsOptionPos.y, optionButtonDim.x,
+		papplet.fill(pointsOptionButtonColour);
+		papplet.rect(pointsOptionPos.x, pointsOptionPos.y, optionButtonDim.x,
 				optionButtonDim.y, 10.0f * parent.scaleFactorX,
-				2.4f * parent.scaleFactorY, "");
+				2.4f * parent.scaleFactorY);
 
-		gp.fill(heatmapOptionButtonColour);
-		gp.rrect(heatmapOptionPos.x, heatmapOptionPos.y, optionButtonDim.x,
+		papplet.fill(heatmapOptionButtonColour);
+		papplet.rect(heatmapOptionPos.x, heatmapOptionPos.y, optionButtonDim.x,
 				optionButtonDim.y, 10.0f * parent.scaleFactorX,
-				2.4f * parent.scaleFactorY, "");
+				2.4f * parent.scaleFactorY);
 
-		gp.fill(weatherOptionButtonColour);
-		gp.rrect(weatherOptionPos.x, weatherOptionPos.y, optionButtonDim.x,
+		papplet.fill(weatherOptionButtonColour);
+		papplet.rect(weatherOptionPos.x, weatherOptionPos.y, optionButtonDim.x,
 				optionButtonDim.y, 10.0f * parent.scaleFactorX,
-				2.4f * parent.scaleFactorY, "");
+				2.4f * parent.scaleFactorY);
 
-		gp.textAlign(PConstants.CENTER, PConstants.CENTER);
-		gp.fill(50, 50, 50, pointsOptionButtonAlpha);
-		gp.text("Points", pointsOptionPos.x + (optionButtonDim.x / 2.0f),
+		papplet.textAlign(PConstants.CENTER, PConstants.CENTER);
+		papplet.fill(50, 50, 50, pointsOptionButtonAlpha);
+		papplet.text("Points", pointsOptionPos.x + (optionButtonDim.x / 2.0f),
 				pointsOptionPos.y + (optionButtonDim.y / 2.0f));
-		gp.fill(50, 50, 50, heatmapOptionButtonAlpha);
-		gp.text("Heatmap", heatmapOptionPos.x + (optionButtonDim.x / 2.0f),
+		papplet.fill(50, 50, 50, heatmapOptionButtonAlpha);
+		papplet.text("Heatmap", heatmapOptionPos.x + (optionButtonDim.x / 2.0f),
 				heatmapOptionPos.y + (optionButtonDim.y / 2.0f));
-		gp.fill(50, 50, 50, weatherOptionButtonAlpha);
-		gp.text("Weather", weatherOptionPos.x + (optionButtonDim.x / 2.0f),
+		papplet.fill(50, 50, 50, weatherOptionButtonAlpha);
+		papplet.text("Weather", weatherOptionPos.x + (optionButtonDim.x / 2.0f),
 				weatherOptionPos.y + (optionButtonDim.y / 2.0f));
-		gp.textAlign(PConstants.LEFT, PConstants.LEFT);
+		papplet.textAlign(PConstants.LEFT, PConstants.LEFT);
 
-		gp.fill(76, 86, 108);
-		gp.text("Options", pointsOptionPos.x, pointsOptionPos.y - 12
+		papplet.fill(76, 86, 108);
+		papplet.text("Options", pointsOptionPos.x, pointsOptionPos.y - 12
 				* parent.scaleFactorY);
 		height = (int) (pointsOptionPos.y + optionButtonDim.y);
 		// println(height);
@@ -213,77 +213,77 @@ class TweetSetManager {
 			PVector removeCirclePos = new PVector(buttonPos.x + buttonDim.x
 					- 12 * parent.scaleFactorX, buttonPos.y + 13
 					* parent.scaleFactorY);
-			int buttonColour = gp.color(247, 247, 247, alphaCol);
-			int removeCircleColour = gp.color(247, 247, 247, alphaCol);
+			int buttonColour = papplet.color(247, 247, 247, alphaCol);
+			int removeCircleColour = papplet.color(247, 247, 247, alphaCol);
 
 			a.getButtonPosY().update(); // update the tweetSet's interpolator (y
 										// pos of button)
 
 			if (a.getRegularExpressionSymbol() == "*") {
-				buttonColour = gp.color(210, 242, 210, alphaCol);
-				removeCircleColour = gp.color(210, 242, 210, alphaCol);
+				buttonColour = papplet.color(210, 242, 210, alphaCol);
+				removeCircleColour = papplet.color(210, 242, 210, alphaCol);
 			}
 
 			if (a.getRegularExpressionSymbol() == "$") {
-				buttonColour = gp.color(210, 210, 242, alphaCol);
-				removeCircleColour = gp.color(210, 210, 242, alphaCol);
+				buttonColour = papplet.color(210, 210, 242, alphaCol);
+				removeCircleColour = papplet.color(210, 210, 242, alphaCol);
 			}
 
 			if (a.getRegularExpressionSymbol() == "!") {
-				buttonColour = gp.color(240, 240, 200, alphaCol);
-				removeCircleColour = gp.color(240, 240, 200, alphaCol);
+				buttonColour = papplet.color(240, 240, 200, alphaCol);
+				removeCircleColour = papplet.color(240, 240, 200, alphaCol);
 			}
 
 			// -------- If mouse is over remove box, process! --------
 
-			if ((PApplet.abs(gp.mouseX - removeCirclePos.x) < 10 * parent.scaleFactorX)
-					&& (PApplet.abs(gp.mouseY - removeCirclePos.y) < 10 * parent.scaleFactorY)) {
-				removeCircleColour = gp.color(
-						gp.red(removeCircleColour) * 2.3f,
-						gp.green(removeCircleColour) * 2.3f,
-						gp.blue(removeCircleColour) * 2.3f, 255 * 0.6f);
+			if ((PApplet.abs(papplet.mouseX - removeCirclePos.x) < 10 * parent.scaleFactorX)
+					&& (PApplet.abs(papplet.mouseY - removeCirclePos.y) < 10 * parent.scaleFactorY)) {
+				removeCircleColour = papplet.color(
+						papplet.red(removeCircleColour) * 2.3f,
+						papplet.green(removeCircleColour) * 2.3f,
+						papplet.blue(removeCircleColour) * 2.3f, 255 * 0.6f);
 				mouseOverRemoveBox = a.getId();
 			}
 
 			// -------- If mouse is over button in general, process! --------
 
-			else if ((gp.mouseX > buttonPos.x)
-					&& (gp.mouseX < buttonPos.x + buttonDim.x)
-					&& (gp.mouseY > buttonPos.y)
-					&& (gp.mouseY < buttonPos.y + buttonDim.y)) {
-				buttonColour = gp.color(gp.red(buttonColour) * 1.05f,
-						gp.green(buttonColour) * 1.05f,
-						gp.blue(buttonColour) * 1.05f, alphaCol);
-				removeCircleColour = gp.color(
-						gp.red(removeCircleColour) * 1.05f,
-						gp.green(removeCircleColour) * 1.05f,
-						gp.blue(removeCircleColour) * 1.05f, alphaCol);
+			else if ((papplet.mouseX > buttonPos.x)
+					&& (papplet.mouseX < buttonPos.x + buttonDim.x)
+					&& (papplet.mouseY > buttonPos.y)
+					&& (papplet.mouseY < buttonPos.y + buttonDim.y)) {
+				buttonColour = papplet.color(papplet.red(buttonColour) * 1.05f,
+						papplet.green(buttonColour) * 1.05f,
+						papplet.blue(buttonColour) * 1.05f, alphaCol);
+				removeCircleColour = papplet.color(
+						papplet.red(removeCircleColour) * 1.05f,
+						papplet.green(removeCircleColour) * 1.05f,
+						papplet.blue(removeCircleColour) * 1.05f, alphaCol);
 				mouseOverBaseButton = a.getId();
 			}
 
 			// -------- Draw the button outline --------
-			gp.stroke(181, 184, 188, alphaCol);
-			gp.strokeWeight(1.5f * parent.fontScale);
-			gp.fill(buttonColour);
+			papplet.stroke(181, 184, 188, alphaCol);
+			papplet.strokeWeight(1.5f * parent.fontScale);
+			papplet.fill(buttonColour);
 			// rect(buttonPos.x, buttonPos.y, buttonDim.x, buttonDim.y);
-			gp.rrect(buttonPos.x, buttonPos.y, buttonDim.x, buttonDim.y,
-					10.0f * parent.scaleFactorX, 2.4f * parent.scaleFactorY, "");
+			papplet.rect(buttonPos.x, buttonPos.y, buttonDim.x, buttonDim.y,
+					10.0f * parent.scaleFactorX, 2.4f * parent.scaleFactorY);
 
 			// -------- Draw the tweet box colour --------
 
-			gp.stroke(150, 150, 150, alphaCol);
-			gp.strokeWeight(1 * parent.fontScale);
+			papplet.stroke(150, 150, 150, alphaCol);
+			papplet.strokeWeight(1 * parent.fontScale);
 			int tweetSetColour = a.getColour();
-			gp.fill(gp.red(tweetSetColour), gp.green(tweetSetColour),
-					gp.blue(tweetSetColour), alphaCol);
-			gp.rect(buttonPos.x + 8 * parent.scaleFactorX, buttonPos.y + 8
+			papplet.fill(papplet.red(tweetSetColour), papplet.green(tweetSetColour),
+					papplet.blue(tweetSetColour), alphaCol);
+			papplet.rect(buttonPos.x + 8 * parent.scaleFactorX, buttonPos.y + 8
 					* parent.scaleFactorY, 11 * parent.scaleFactorX,
 					11 * parent.scaleFactorY);
 
 			// -------- Draw the button text --------
-			gp.textAlign(PConstants.LEFT, PConstants.CENTER);
-			gp.fill(40, 40, 40, (int) alphaCol);
-			gp.text(a.getSearchTerms(), buttonPos.x + 30 * parent.scaleFactorX,
+			papplet.textAlign(PConstants.LEFT, PConstants.CENTER);
+			papplet.fill(40, 40, 40, (int) alphaCol);
+			papplet.text(a.getSearchTerms(), buttonPos.x + 30 * parent.scaleFactorX,
 					buttonPos.y + (buttonDim.y / 2.0f));
 
 			// ------- Draw the crossover percentage ----------
@@ -291,36 +291,36 @@ class TweetSetManager {
 			if (a.getNumberOfCrossoverMatches() > 0) {
 				float percentageMatch = (a.getNumberOfCrossoverMatches() / (float) (parent.numberSelected)) * 100.0f;
 
-				gp.fill(100, 100, 100, (int) alphaCol);
-				gp.text(PApplet.nf(percentageMatch, 1, 1) + "%", buttonPos.x
+				papplet.fill(100, 100, 100, (int) alphaCol);
+				papplet.text(PApplet.nf(percentageMatch, 1, 1) + "%", buttonPos.x
 						+ buttonDim.x + 5 * parent.scaleFactorX, buttonPos.y
 						+ (buttonDim.y / 2.0f));
 			}
 
 			// -------- Draw remove box --------
 
-			gp.stroke(220, 220, 200, alphaCol);
+			papplet.stroke(220, 220, 200, alphaCol);
 
-			gp.strokeWeight(0);
+			papplet.strokeWeight(0);
 			if (mouseOverRemoveBox == a.getId()) // if mouse over, add outline
-				gp.strokeWeight(1 * parent.fontScale);
+				papplet.strokeWeight(1 * parent.fontScale);
 
-			gp.fill(removeCircleColour);
+			papplet.fill(removeCircleColour);
 			// rect(removeBoxPos.x, removeBoxPos.y, removeBoxDim.x,
 			// removeBoxDim.y);
-			gp.ellipse(removeCirclePos.x, removeCirclePos.y, removeCircleDim.x,
+			papplet.ellipse(removeCirclePos.x, removeCirclePos.y, removeCircleDim.x,
 					removeCircleDim.y);
 
-			gp.fill(0, 0, 0, alphaCol);
-			gp.text("x", removeCirclePos.x - 4.0f * parent.scaleFactorX,
+			papplet.fill(0, 0, 0, alphaCol);
+			papplet.text("x", removeCirclePos.x - 4.0f * parent.scaleFactorX,
 					removeCirclePos.y - 1.0f * parent.scaleFactorY);
 
-			gp.textAlign(PConstants.LEFT, PConstants.LEFT);
+			papplet.textAlign(PConstants.LEFT, PConstants.LEFT);
 		}
 
 		// reset for other draw functions
-		gp.strokeWeight(1 * parent.fontScale);
-		gp.stroke(181, 184, 188);
+		papplet.strokeWeight(1 * parent.fontScale);
+		papplet.stroke(181, 184, 188);
 	}
 
 	boolean isHeatmapViewActive() {
@@ -366,7 +366,7 @@ class TweetSetManager {
 			for (TweetSet a : tweetSets)
 				if (a.getId() == mouseOverRemoveBox) {
 					tweetSets.remove(a);
-					gp.colours.add(a.getColour());
+					papplet.colours.add(a.getColour());
 					reallocateIds(); // tweetSet has been removed, reallocate
 										// id's for correct button drawing
 					break;

@@ -35,13 +35,21 @@ import processing.core.PVector;
 import geomerative.*;
 import org.gicentre.utils.text.*;
 
+//import codeanticode.glgraphics.GLConstants;
+
+import de.fhpotsdam.unfolding.UnfoldingMap;
+import de.fhpotsdam.unfolding.geo.Location;
+import de.fhpotsdam.unfolding.mapdisplay.AbstractMapDisplay;
+import de.fhpotsdam.unfolding.utils.MapUtils;
+
 //storyboard panel
 
 class TwitterFilteringComponent {
 	int x, y, width, height;
 	TimeLineComponent parent;
-	TwitterFiltering grandparent; // PApplet class for methods!
+	TwitterFiltering papplet; // PApplet class for methods! eventually just PApplet
 	int componentID;
+	boolean enableThumbnails = false;
 	// SQLite db;
 
 	TweetSetManager tweetSetManager;
@@ -96,7 +104,7 @@ class TwitterFilteringComponent {
 
 	StreamGraphRange streamGraphRange;
 
-	//UnfoldingMap map;
+	UnfoldingMap map;
 
 	PVector imgPos; // pos offset of image
 
@@ -121,10 +129,10 @@ class TwitterFilteringComponent {
 	float tweetBoxSize;// = 10; //size of tweet map icon
 	Integrator xIntegrator, yIntegrator, widthIntegrator, heightIntegrator;
 
-	TwitterFilteringComponent(TwitterFiltering grandparent,
+	TwitterFilteringComponent(TwitterFiltering papplet,
 			TimeLineComponent parent, int x, int y, int width, int height) {
 		this.parent = parent;
-		this.grandparent = grandparent;
+		this.papplet = papplet;
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -136,7 +144,7 @@ class TwitterFilteringComponent {
 		widthIntegrator = new Integrator(width);
 		heightIntegrator = new Integrator(height);
 
-		componentID = grandparent.componentCount++;
+		//componentID = papplet.componentCount++;
 
 		calculateScale();
 
@@ -152,57 +160,72 @@ class TwitterFilteringComponent {
 		// file
 
 		// Load the map
-		imgMap = grandparent.loadImage("data/Vastopolis_Map_B&W_2.png");
+		imgMap = papplet.loadImage("data/Vastopolis_Map_B&W_2.png");
 		imgPos = new PVector(20, 60);
-		//map = new UnfoldingMap(grandparent, imgPos.x, imgPos.y,
-		// TwitterFiltering.imgX * scaleFactorX, TwitterFiltering.imgY*
-		// scaleFactorY
-		//		TwitterFiltering.imgX, TwitterFiltering.imgY);
-		//map.zoomAndPanTo(new Location(52.5f, 13.4f), 10);
+		map = new UnfoldingMap(papplet, x + imgPos.x * scaleFactorX, y
+				+ imgPos.y * scaleFactorY,
+		//TwitterFiltering.imgX, TwitterFiltering.imgY);
+				TwitterFiltering.imgX * scaleFactorX, TwitterFiltering.imgY
+						* scaleFactorY);
+		PApplet.println("Graphics for applet is " + papplet.g + " and for map is " + map.mapDisplay.getInnerPG());
+		PApplet.println("Graphics size is "+papplet.g.width + " and " + papplet.g.height);
+		PApplet.println("Graphics size for map is  "+map.mapDisplay.getInnerPG().width + " and " + map.mapDisplay.getInnerPG().height);
+		
+		map.zoomAndPanTo(new Location(51.6f, -0.6f), 10);
+		MapUtils.createDefaultEventDispatcher(papplet, map);
 
 		// Load the weather images
-		rain = grandparent.loadImage("data/rain.jpg");
-		showers = grandparent.loadImage("data/showers.jpg");
-		cloudy = grandparent.loadImage("data/cloudy.jpg");
-		clear = grandparent.loadImage("data/clear.jpg");
+		rain = papplet.loadImage("data/rain.jpg");
+		showers = papplet.loadImage("data/showers.jpg");
+		cloudy = papplet.loadImage("data/cloudy.jpg");
+		clear = papplet.loadImage("data/clear.jpg");
 
-		windArrow = grandparent.loadImage("data/arrow.png");
+		windArrow = papplet.loadImage("data/arrow.png");
 
 		// Load font
-		grandparent.textFont(grandparent.font);
+		papplet.textFont(papplet.font);
 
 		// setup tweetSetManager
-		tweetSetManager = new TweetSetManager(grandparent, this);
+		tweetSetManager = new TweetSetManager(papplet, this);
 		setConstants();
 		// Setup Weather frame
 		// WeatherFrame weatherFrame = new WeatherFrame();
 
 		// Setup Time Slider
 
-		dateSelection = new Interval(grandparent.minDate,
-				grandparent.minDate.plus(Period.hours(24)));
+		dateSelection = new Interval(TwitterFiltering.minDate,
+				TwitterFiltering.minDate.plus(Period.hours(24)));
 
 		createP5Components();
 		// Add horizontal range slider
 
-		previousDateSelection = new Interval(grandparent.minDate,
-				grandparent.minDate.plus(Period.hours(24)));
+		previousDateSelection = new Interval(TwitterFiltering.minDate,
+				TwitterFiltering.minDate.plus(Period.hours(24)));
 		// Setup Colours
-		grandparent.setupColours();
+		papplet.setupColours();
 
 		// Create Streamgraph range
-		streamGraphRange = new StreamGraphRange(this, grandparent);
+		streamGraphRange = new StreamGraphRange(this, papplet);
 
-		wordCloud = new WordCloud(grandparent, this, 275, 275, 250, 250);
+		wordCloud = new WordCloud(papplet, this, 275, 275, 250, 250);
 		wordCloud.setRange(0, 1);
 
 		currentTransitionState = previousTransitionState = MovementState.SMALL;
-		thumbnailBuffer = grandparent.createGraphics(
-				(int) (parent.smallVizSize.x), (int) (parent.smallVizSize.y),
-				PConstants.JAVA2D);// P2D);//screenWidth, screenHeight, P2D);
-		PApplet.println("Buffer size is " + thumbnailBuffer.width + " and "
-				+ thumbnailBuffer.height);
-		generateThumbnail();
+		if (enableThumbnails) {
+			thumbnailBuffer = papplet.createGraphics(
+					(int) (parent.smallVizSize.x),
+					(int) (parent.smallVizSize.y),
+					// GLConstants.GLGRAPHICS);
+					PConstants.JAVA2D);//
+			// P2D);//screenWidth, screenHeight,
+			// P2D);
+
+			PApplet.println("Buffer size is " + thumbnailBuffer.width + " and "
+					+ thumbnailBuffer.height);
+			generateThumbnail();
+		}
+
+		
 
 		loadWeatherData();
 		RG.init(parent.parent);
@@ -210,17 +233,17 @@ class TwitterFilteringComponent {
 
 	void createP5Components() {
 		PApplet.println("Creating components!");
-		range = grandparent.controlP5.addRange(
+		range = papplet.controlP5.addRange(
 				"Date" + componentID,
 				0,
 				Hours.hoursIn(
-						new Interval(grandparent.minDate, grandparent.maxDate))
+						new Interval(TwitterFiltering.minDate, TwitterFiltering.maxDate))
 						.getHours(),
 				Hours.hoursIn(
-						new Interval(grandparent.minDate, dateSelection
+						new Interval(TwitterFiltering.minDate, dateSelection
 								.getStart())).getHours(),
 				Hours.hoursIn(
-						new Interval(grandparent.minDate, dateSelection
+						new Interval(TwitterFiltering.minDate, dateSelection
 								.getEnd())).getHours(),
 				(int) (x + (imgPos.x * scaleFactorX)),
 				(int) (y + (TwitterFiltering.imgY + imgPos.y + 10)
@@ -228,7 +251,7 @@ class TwitterFilteringComponent {
 				(int) ((TwitterFiltering.imgX) * scaleFactorX),
 				(int) (30 * scaleFactorY)).setBroadcast(false);
 		// println("Range slider at" + int(imgY*scaleFactorY));
-		range.setColorBackground(grandparent.color(130, 130, 130));
+		range.setColorBackground(papplet.color(130, 130, 130));
 		range.setLabelVisible(false);
 		range.setCaptionLabel("");
 		range.setBroadcast(true);
@@ -237,13 +260,13 @@ class TwitterFilteringComponent {
 	}
 
 	void removeP5Components() { // /aaaargh
-		grandparent.controlP5.remove("Date" + componentID);
-		grandparent.controlP5.remove("Filters" + componentID);
+		papplet.controlP5.remove("Date" + componentID);
+		papplet.controlP5.remove("Filters" + componentID);
 	}
 
 	boolean hasMouseOver() {
-		return grandparent.mouseX > x && grandparent.mouseX < (x + width)
-				&& grandparent.mouseY > y && grandparent.mouseY < (y + height);
+		return papplet.mouseX > x && papplet.mouseX < (x + width)
+				&& papplet.mouseY > y && papplet.mouseY < (y + height);
 	}
 
 	void calculateScale() {
@@ -276,7 +299,7 @@ class TwitterFilteringComponent {
 
 	void resizeP5Components() {
 		range.setBroadcast(false);
-		grandparent.controlP5.setControlFont(grandparent.font,
+		papplet.controlP5.setFont(papplet.font,
 				(int) (18.0 * fontScale)); // this is expensive - do it once
 											// stopped moving?
 		range.setPosition((int) (x + ((imgPos.x) * scaleFactorX)),
@@ -286,10 +309,10 @@ class TwitterFilteringComponent {
 				(int) (30 * scaleFactorY)); // doesn't update the handles!
 		range.setRangeValues(
 				Hours.hoursIn(
-						new Interval(grandparent.minDate, dateSelection
+						new Interval(TwitterFiltering.minDate, dateSelection
 								.getStart())).getHours(),
 				Hours.hoursIn(
-						new Interval(grandparent.minDate, dateSelection
+						new Interval(TwitterFiltering.minDate, dateSelection
 								.getEnd())).getHours());
 		// range.update();
 		range.setBroadcast(true);
@@ -302,8 +325,9 @@ class TwitterFilteringComponent {
 		// it once stopped moving?
 		for (Annotation a : annotations)
 			a.resize();
-
+		resizeUnfoldingMap();
 		// filterTextField.update();
+
 	}
 
 	void hideP5Components() {
@@ -311,6 +335,7 @@ class TwitterFilteringComponent {
 		range.hide();
 		for (Annotation a : annotations)
 			a.hide();
+		resizeUnfoldingMap();
 	}
 
 	void showP5Components() {
@@ -318,6 +343,21 @@ class TwitterFilteringComponent {
 		range.show();
 		for (Annotation a : annotations)
 			a.show();
+		resizeUnfoldingMap();
+	}
+
+	void resizeUnfoldingMap() {
+		AbstractMapDisplay ref = map.mapDisplay;
+		ref.resize(TwitterFiltering.imgX * scaleFactorX,
+				TwitterFiltering.imgY * scaleFactorY);
+		
+		//ref.getInnerPG().width = (int) (TwitterFiltering.imgX * scaleFactorX);
+		ref.offsetX = x + imgPos.x * scaleFactorX;
+		ref.offsetY = y + imgPos.y * scaleFactorY;
+		
+		//map.mapDisplay.getDefaultMarkerManager()..drawOuter();
+		
+		//PApplet.println("Map has size " + map.mapDisplay.getInnerPG().width + " and " + map.mapDisplay.getInnerPG().height);
 	}
 
 	boolean doneMoving() {
@@ -339,9 +379,9 @@ class TwitterFilteringComponent {
 		Connection connection = null;
 		try {
 			// create a database connection
-			PApplet.println("Sketch path is " + grandparent.sketchPath(""));
+			PApplet.println("Sketch path is " + papplet.sketchPath(""));
 			connection = DriverManager.getConnection("jdbc:sqlite:"
-					+ grandparent.sketchPath("VAST2011_MC1.sqlite"));
+					+ papplet.sketchPath("VAST2011_MC1.sqlite"));
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30); // set timeout to 30 sec.
 
@@ -375,7 +415,7 @@ class TwitterFilteringComponent {
 	 */
 
 	void draw() {
-		grandparent.colorMode(PConstants.RGB, 255);
+		papplet.colorMode(PConstants.RGB, 255);
 		updateIntegrators();
 		// if (!doneMoving()) {
 		if (doneMoving()) {
@@ -413,11 +453,12 @@ class TwitterFilteringComponent {
 			setConstants();
 			resizeP5Components();
 		} else if (currentTransitionState == MovementState.MOVING) {
-			//PApplet.println("Moving it via transition state!");
+			// PApplet.println("Moving it via transition state!");
 			updateSizes();
 			calculateScale();
 			setConstants();
 			resizeP5Components();
+			//resizeUnfoldingMap();
 		} else if (previousTransitionState != currentTransitionState) {
 			// check for just finished transition for controlp5
 			// re-add p5 components?
@@ -441,7 +482,7 @@ class TwitterFilteringComponent {
 		} else {
 			// drawThumbnail();
 
-			grandparent.image(thumbnail, x, y);// , width, height);
+			papplet.image(thumbnail, x, y);// , width, height);
 			// stroke(100);
 			// strokeWeight(2);
 			// noFill();
@@ -450,60 +491,77 @@ class TwitterFilteringComponent {
 		}
 
 		// draw selection shape
-		grandparent.fill(100, 100, 255, 100);
-		grandparent.strokeWeight(3);
+		papplet.fill(100, 100, 255, 100);
+		papplet.strokeWeight(3);
 		shp.draw();
 	}
 
 	void drawDateRange() {
-		grandparent.textAlign(PConstants.CENTER, PConstants.TOP);
-		grandparent.fill(0);
-		grandparent.textFont(grandparent.font);
-		grandparent.textSize(24 * fontScale);
+		papplet.textAlign(PConstants.CENTER, PConstants.TOP);
+		papplet.fill(0);
+		papplet.textFont(papplet.font);
+		papplet.textSize(24 * fontScale);
 		int yval = (int) (y + 3 * scaleFactorY);// + (imgPos.y)/15.0);
 		int startX = (int) (x + imgPos.x + 0.35 * TwitterFiltering.imgX
 				* scaleFactorX);
 		int endX = (int) (x + imgPos.x + TwitterFiltering.imgX * scaleFactorX - 0.35
 				* TwitterFiltering.imgX * scaleFactorX);
 		// rfont.draw(formatDate(dateSelection.getStart()));
-		grandparent.text(formatDate(dateSelection.getStart()), startX, yval);
-		grandparent.text(formatTime(dateSelection.getStart()), startX, yval
-				+ grandparent.textAscent() + grandparent.textDescent());
-		grandparent
+		papplet.text(formatDate(dateSelection.getStart()), startX, yval);
+		papplet.text(formatTime(dateSelection.getStart()), startX, yval
+				+ papplet.textAscent() + papplet.textDescent());
+		papplet
 				.text("to",
 						(int) (x + imgPos.x + (TwitterFiltering.imgX * scaleFactorX) / 2),
 						yval);
-		grandparent.text(formatDate(dateSelection.getEnd()), endX, yval);
-		grandparent.text(formatTime(dateSelection.getEnd()), endX, yval
-				+ (grandparent.textAscent() + grandparent.textDescent()));
+		papplet.text(formatDate(dateSelection.getEnd()), endX, yval);
+		papplet.text(formatTime(dateSelection.getEnd()), endX, yval
+				+ (papplet.textAscent() + papplet.textDescent()));
 	}
 
 	void drawComponents() {// int x, int y, int width, int height) {
 
 		// ---- Border + Map ----
-		grandparent.stroke(0);
-		grandparent.fill(225, 228, 233);
-		grandparent.rect(x, y, width, height);
+		papplet.stroke(0);
+		papplet.fill(225, 228, 233);
+		papplet.rect(x, y, width, height);
 		// draw date at the top!
 		drawDateRange();
 		//
 		// ----- Draw streamgraph range -------
 		streamGraphRange.draw();
 
-		grandparent.strokeWeight(0);
-		grandparent.fill(40);
+		papplet.strokeWeight(0);
+		papplet.fill(40);
 		// rect(x + (imgPos.x - 3)*scaleFactorX, y+ (imgPos.y - 3)*scaleFactorY,
 		// (imgX+6)*scaleFactorX, (imgY+6)*scaleFactorY);
 		// grandparent.image(imgMap, x + imgPos.x * scaleFactorX, y + imgPos.y
 		// * scaleFactorY, TwitterFiltering.imgX * scaleFactorX,
 		// TwitterFiltering.imgY * scaleFactorY);
-		//map.draw();
+
+		// grandparent.pushMatrix();
+		// grandparent.translate(x, y);
+		// grandparent.scale(scaleFactorX, scaleFactorY);
+		//grandparent.resetMatrix();
+		//AbstractMapDisplay ref = map.mapDisplay;
+		//ref.getInnerPG().background(255,0,0);
+		//PApplet.println("Applet graphics is " + grandparent.g.width + " and "+grandparent.g.height);
+		//PApplet.println("Map graphics is " + ref.getInnerPG().width + " and " +ref.getInnerPG().height);
+		
+		map.draw();
+		
+		/*grandparent.stroke(0);
+		grandparent.fill(0, 100);
+		grandparent.rect(ref.offsetX, ref.offsetY, ref.getWidth(), ref.getHeight());
+		ref.getInnerPG().fill(255,0,0,255);
+		ref.getInnerPG().rect(ref.offsetX, ref.offsetY, ref.getWidth(), ref.getHeight());*/
+		// grandparent.popMatrix();
 
 		// ---- Filter terms text ----
-		grandparent.textSize(18 * fontScale);
-		grandparent.textAlign(PConstants.LEFT, PConstants.BOTTOM);
-		grandparent.fill(76, 86, 108);
-		grandparent.text("Filter Terms", filterTextField_x - 2 * scaleFactorX,
+		papplet.textSize(18 * fontScale);
+		papplet.textAlign(PConstants.LEFT, PConstants.BOTTOM);
+		papplet.fill(76, 86, 108);
+		papplet.text("Filter Terms", filterTextField_x - 2 * scaleFactorX,
 				filterTextField_y - 10 * scaleFactorY);
 
 		// ---- Draw all the TweetSet Buttons ----
@@ -525,7 +583,7 @@ class TwitterFilteringComponent {
 		 */
 
 		if (b_draggingMouse) {
-			shp.addLineTo(grandparent.mouseX, grandparent.mouseY);
+			shp.addLineTo(papplet.mouseX, papplet.mouseY);
 		}
 
 		wordCloud.draw();
@@ -537,41 +595,45 @@ class TwitterFilteringComponent {
 		drawTweetsOnce();
 
 		// ---- Draw ControlP5 ----
-		grandparent.controlP5.draw();
+		papplet.controlP5.draw();
 		// draw annotations!
-		grandparent.pushMatrix();
-		grandparent.translate(x, y);
-		grandparent.scale(scaleFactorX, scaleFactorY);
+		papplet.pushMatrix();
+		papplet.translate(x, y);
+		papplet.scale(scaleFactorX, scaleFactorY);
 
 		for (Annotation a : annotations) {
 			a.draw();
 		}
-		grandparent.popMatrix();
+		papplet.popMatrix();
 
 	}
 
 	void generateThumbnail() {
-		// take buffer into image!
-		PApplet.println("Start");
-		PGraphics temp = grandparent.g;
-		// g.endDraw();
-		grandparent.g = thumbnailBuffer;
-		grandparent.g.beginDraw();
-		grandparent.background(225, 228, 233);
-		grandparent.pushMatrix();
-		grandparent.translate(-x, -y);
-		drawComponents();// 0, 0, width, height);//int(parent.smallVizSize.x),
-							// int(parent.smallVizSize.y));
-		grandparent.popMatrix();
-		grandparent.g.endDraw();
-		// generateThumbnail();
-		grandparent.g = temp;
-		// g.beginDraw();
-		PApplet.println("Drew to offscreen, back now!");
-		thumbnail = thumbnailBuffer.get(0, 0, thumbnailBuffer.width,
-				thumbnailBuffer.height);
-		// thumbnail.save("temp.png");
-		PApplet.println("Done generating thumbnail!");
+		if (thumbnailBuffer != null) { // if we've disabled thumbnails, don't
+										// use!
+			// take buffer into image!
+			PApplet.println("Start");
+			PGraphics temp = papplet.g;
+			// g.endDraw();
+			papplet.g = thumbnailBuffer;
+			papplet.g.beginDraw();
+			papplet.background(225, 228, 233);
+			papplet.pushMatrix();
+			papplet.translate(-x, -y);
+			drawComponents();// 0, 0, width,
+								// height);//int(parent.smallVizSize.x),
+								// int(parent.smallVizSize.y));
+			papplet.popMatrix();
+			papplet.g.endDraw();
+			// generateThumbnail();
+			papplet.g = temp;
+			// g.beginDraw();
+			PApplet.println("Drew to offscreen, back now!");
+			thumbnail = thumbnailBuffer.get(0, 0, thumbnailBuffer.width,
+					thumbnailBuffer.height);
+			// thumbnail.save("temp.png");
+			PApplet.println("Done generating thumbnail!");
+		}
 		// hide controlp5 components
 	}
 
@@ -606,7 +668,7 @@ class TwitterFilteringComponent {
 		windSpeed_integrator.update();
 
 		int dayOfTweet = Days.daysIn(
-				new Interval(grandparent.minDate, dateSelection.getEnd()))
+				new Interval(TwitterFiltering.minDate, dateSelection.getEnd()))
 				.getDays();
 		dayOfTweet = PApplet.constrain(dayOfTweet, 0, 20);
 
@@ -668,28 +730,28 @@ class TwitterFilteringComponent {
 
 	void drawArrow(int x, int y, float w, float h, float angle) {
 
-		grandparent.pushMatrix();
-		grandparent.translate(x, y);
+		papplet.pushMatrix();
+		papplet.translate(x, y);
 
-		grandparent.fill(255, 0, 0);
+		papplet.fill(255, 0, 0);
 
 		// translate(-26,24);
-		grandparent.rotate(PApplet.radians(angle));
+		papplet.rotate(PApplet.radians(angle));
 
-		grandparent.scale(w, h);
+		papplet.scale(w, h);
 
 		// rotate(radians(angle));
-		grandparent.tint(165, 165, 255, 200);
-		grandparent.stroke(0, 0, 0, 50);
-		grandparent.strokeWeight(2);
+		papplet.tint(165, 165, 255, 200);
+		papplet.stroke(0, 0, 0, 50);
+		papplet.strokeWeight(2);
 
-		grandparent.imageMode(PConstants.CENTER);
-		grandparent.image(windArrow, 0, 0, windArrow.width, windArrow.height);
+		papplet.imageMode(PConstants.CENTER);
+		papplet.image(windArrow, 0, 0, windArrow.width, windArrow.height);
 		// triangle(0, 40, 25, 0, 50, 40);
 		// quad(12.5, 40, 12.5, 100, 37.5, 100, 37.5, 40);
-		grandparent.popMatrix();
-		grandparent.imageMode(PConstants.CORNER);
-		grandparent.tint(255, 255, 255, 255);
+		papplet.popMatrix();
+		papplet.imageMode(PConstants.CORNER);
+		papplet.tint(255, 255, 255, 255);
 	}
 
 	/*
@@ -705,18 +767,18 @@ class TwitterFilteringComponent {
 		int filterTextField_width = (int) (180 * scaleFactorX);
 		int filterTextField_height = (int) (30 * scaleFactorY);
 
-		filterTextField = grandparent.controlP5.addTextfield("Filters"
+		filterTextField = papplet.controlP5.addTextfield("Filters"
 				+ componentID, filterTextField_x, filterTextField_y,
 				filterTextField_width, filterTextField_height);
-		filterTextField.setColorBackground(grandparent.color(250));
-		filterTextField.setColorForeground(grandparent.color(250));
+		filterTextField.setColorBackground(papplet.color(250));
+		filterTextField.setColorForeground(papplet.color(250));
 		// filterTextField.setColorValue(50);
 
 		// filterTextField.setColorLabel(0);
-		grandparent.controlP5.setControlFont(new ControlFont(grandparent.font,
+		papplet.controlP5.setFont(new ControlFont(papplet.font,
 				(int) (18.0 * fontScale)));
-		filterTextField.setColor(grandparent.color(0));
-		filterTextField.setLabel("");
+		filterTextField.setColor(papplet.color(0));
+		filterTextField.setCaptionLabel("");
 		filterTextField.setFocus(true);
 	}
 
@@ -753,17 +815,17 @@ class TwitterFilteringComponent {
 
 		String s = t.getText();
 		DateTime date = t.getDate();
-		String d = grandparent.fmt2.print(date);
+		String d = papplet.fmt2.print(date);
 		// date.month().getText();
 		int sLength = s.length();
 		float gap = 20;
 		float info_header_size = 30;
-		grandparent.textSize(18 * fontScale);
+		papplet.textSize(18 * fontScale);
 		int textBoxSize = sLength * 2;
 		float headerWidth = 220;
 		List<String> lines = WordWrapper.wordWrap(s,
-				(int) (headerWidth - gap * 2), grandparent);
-		float lineHeight = grandparent.textAscent() + grandparent.textDescent();
+				(int) (headerWidth - gap * 2), papplet);
+		float lineHeight = papplet.textAscent() + papplet.textDescent();
 
 		textBoxSize = (int) ((lines.size() + 1) * (lineHeight) + gap * 2);
 		float shadowOffset = 4;
@@ -772,51 +834,50 @@ class TwitterFilteringComponent {
 		// TwitterFiltering.imgY * scaleFactorY
 
 		// if (!b_draggingMouse) {
-		grandparent.pushMatrix();
-		grandparent.translate(x, y);
-		grandparent.scale(scaleFactorX, scaleFactorY);
+		papplet.pushMatrix();
+		papplet.translate(x, y);
+		papplet.scale(scaleFactorX, scaleFactorY);
 		// make sure we stay on the map!
 		if ((loc.x + imgPos.x + shadowOffset + shadowOffset + headerWidth) > (imgPos.x + TwitterFiltering.imgX)) {
 			// bump it across a bit more!
 			// PApplet.println("Would overhang x - translating back by "+(shadowOffset
 			// + shadowOffset+headerWidth));
-			grandparent.translate(-(shadowOffset + shadowOffset + headerWidth),
+			papplet.translate(-(shadowOffset + shadowOffset + headerWidth),
 					0);
 		}
 		if ((loc.y + imgPos.y + info_header_size + textBoxSize) > (imgPos.y + TwitterFiltering.imgY)) {
 			// PApplet.println("Would overhang y - translating back by " +
 			// (info_header_size+textBoxSize));
-			grandparent.translate(0, -(info_header_size + textBoxSize));
+			papplet.translate(0, -(info_header_size + textBoxSize));
 		}
 
 		// shadow
-		grandparent.strokeWeight(0);
-		grandparent.fill(0, 0, 0, 100);
-		grandparent.rect(shadowOffset + loc.x + imgPos.x, shadowOffset + loc.y
+		papplet.strokeWeight(0);
+		papplet.fill(0, 0, 0, 100);
+		papplet.rect(shadowOffset + loc.x + imgPos.x, shadowOffset + loc.y
 				+ imgPos.y, shadowOffset + headerWidth, shadowOffset
 				+ textBoxSize + info_header_size);
 
-		grandparent.stroke(0, 0, 0, 200);
-		grandparent.strokeWeight(4 * fontScale);
+		papplet.stroke(0, 0, 0, 200);
+		papplet.strokeWeight(4 * fontScale);
 
-		grandparent.fill(230, 230, 250, 200);
-		grandparent.rect(loc.x + imgPos.x, loc.y + imgPos.y + info_header_size,
+		papplet.fill(230, 230, 250, 200);
+		papplet.rect(loc.x + imgPos.x, loc.y + imgPos.y + info_header_size,
 				(headerWidth), textBoxSize);
 
-		grandparent.fill(130, 180, 130, 200);
-		grandparent.rect(loc.x + imgPos.x, loc.y + imgPos.y, headerWidth,
+		papplet.fill(130, 180, 130, 200);
+		papplet.rect(loc.x + imgPos.x, loc.y + imgPos.y, headerWidth,
 				info_header_size);
 
-		grandparent.fill(255, 255, 255, 255);
-		grandparent.text(d, loc.x + imgPos.x + 10, loc.y + imgPos.y
+		papplet.fill(255, 255, 255, 255);
+		papplet.text(d, loc.x + imgPos.x + 10, loc.y + imgPos.y
 				+ info_header_size - 8);
 
-		grandparent.fill(0, 50, 100);
-		grandparent.text(s, loc.x + gap + imgPos.x, loc.y + gap + imgPos.y
+		papplet.fill(0, 50, 100);
+		papplet.text(s, loc.x + gap + imgPos.x, loc.y + gap + imgPos.y
 				+ info_header_size, headerWidth - gap * 2, 300 - gap * 2);
 
-		grandparent.fill(t.getTweetSetColour());
-		grandparent.popMatrix();
+		papplet.fill(t.getTweetSetColour());
 		// }
 	}
 
@@ -830,8 +891,8 @@ class TwitterFilteringComponent {
 
 	void drawTweetsOnce()// int mini, int maxi)
 	{
-		grandparent.textFont(grandparent.font);
-		grandparent.strokeWeight(2 * fontScale);
+		papplet.textFont(papplet.font);
+		papplet.strokeWeight(2 * fontScale);
 		Tweet forMouseOver = null;
 
 		// Draw all the tweets
@@ -840,11 +901,11 @@ class TwitterFilteringComponent {
 				if (b.isActive()) // if this tweetset is active
 				{
 					if (tweetSetManager.isHeatmapViewActive()) {
-						grandparent.pushMatrix();
-						grandparent.translate(x, y);
-						grandparent.scale(scaleFactorX, scaleFactorY);
+						papplet.pushMatrix();
+						papplet.translate(x, y);
+						papplet.scale(scaleFactorX, scaleFactorY);
 						b.heatmap.draw();
-						grandparent.popMatrix();
+						papplet.popMatrix();
 					}
 
 					for (Tweet a : b.getTweets()) {
@@ -854,14 +915,14 @@ class TwitterFilteringComponent {
 							int c = b.getColour();
 							a.setAlphaTarget(255);
 
-							grandparent.fill(grandparent.red(c),
-									grandparent.green(c), grandparent.blue(c),
+							papplet.fill(papplet.red(c),
+									papplet.green(c), papplet.blue(c),
 									a.getAlpha());
 
-							grandparent.stroke(0, 0, 0, a.getAlpha());
-							grandparent.strokeWeight(2 * fontScale);
+							papplet.stroke(0, 0, 0, a.getAlpha());
+							papplet.strokeWeight(2 * fontScale);
 							if ((2 * fontScale) < 1.0)
-								grandparent.noStroke();
+								papplet.noStroke();
 
 							PVector loc = a.getLocation();
 
@@ -872,11 +933,11 @@ class TwitterFilteringComponent {
 								if (shp.contains(x + (loc.x + imgPos.x)
 										* scaleFactorX, y + (loc.y + imgPos.y)
 										* scaleFactorY)) {
-									grandparent.fill(255);
+									papplet.fill(255);
 								}
 							} else { // mouseover disabled when dragging
-								if (PApplet.dist(grandparent.mouseX,
-										grandparent.mouseY, x
+								if (PApplet.dist(papplet.mouseX,
+										papplet.mouseY, x
 												+ (loc.x + imgPos.x)
 												* scaleFactorX, y
 												+ (loc.y + imgPos.y)
@@ -886,11 +947,11 @@ class TwitterFilteringComponent {
 							}
 
 							if (a.isSelected()) {
-								grandparent.stroke(255);
+								papplet.stroke(255);
 							}
 
 							if (tweetSetManager.isPointsViewActive()) {
-								grandparent.rect(x
+								papplet.rect(x
 										+ (imgPos.x - tweetBoxSize + loc.x)
 										* scaleFactorX, y
 										+ (imgPos.y + loc.y - tweetBoxSize)
@@ -929,16 +990,16 @@ class TwitterFilteringComponent {
 
 	boolean isInsideSelectionBox(float x, float y) {
 		if ((x > mouseDragStart_x) && (y > mouseDragStart_y)
-				&& (x < grandparent.mouseX) && (y < grandparent.mouseY))
+				&& (x < papplet.mouseX) && (y < papplet.mouseY))
 			return true;
 		else if ((x < mouseDragStart_x) && (y > mouseDragStart_y)
-				&& (x > grandparent.mouseX) && (y < grandparent.mouseY))
+				&& (x > papplet.mouseX) && (y < papplet.mouseY))
 			return true;
 		else if ((x < mouseDragStart_x) && (y < mouseDragStart_y)
-				&& (x > grandparent.mouseX) && (y > grandparent.mouseY))
+				&& (x > papplet.mouseX) && (y > papplet.mouseY))
 			return true;
 		else if ((x > mouseDragStart_x) && (y < mouseDragStart_y)
-				&& (x < grandparent.mouseX) && (y > grandparent.mouseY))
+				&& (x < papplet.mouseX) && (y > papplet.mouseY))
 			return true;
 		else
 			return false;
@@ -954,12 +1015,12 @@ class TwitterFilteringComponent {
 
 	void generateTweetSet(String keywords) {
 		// Get a fresh and exciting colour for this set
-		int setColour = grandparent.colours.get(grandparent.colourTracker);
+		int setColour = papplet.colours.get(papplet.colourTracker);
 
-		if (grandparent.colourTracker < grandparent.colours.size())
-			grandparent.colourTracker++;
+		if (papplet.colourTracker < papplet.colours.size())
+			papplet.colourTracker++;
 		else
-			grandparent.colourTracker = 0;
+			papplet.colourTracker = 0;
 
 		String RESymbol = "";
 
@@ -986,7 +1047,7 @@ class TwitterFilteringComponent {
 
 		// Create new tweet set
 		TweetSet newTweetSetToAdd = new TweetSet(keywords, setColour, RESymbol,
-				this, grandparent);
+				this, papplet);
 
 		PApplet.println("Creating new tweet set...");
 		String[] filterTerms = PApplet.splitTokens(keywords, ",");
@@ -1024,7 +1085,7 @@ class TwitterFilteringComponent {
 		try {
 			// create a database connection
 			connection = DriverManager.getConnection("jdbc:sqlite:"
-					+ grandparent.sketchPath("VAST2011_MC1.sqlite"));// "+sketchPath("sample.db");
+					+ papplet.sketchPath("VAST2011_MC1.sqlite"));// "+sketchPath("sample.db");
 			Statement statement = connection.createStatement();
 			ResultSet rs = statement.executeQuery(sqlQuery);
 			Tweet newTweetToAdd;
@@ -1057,7 +1118,7 @@ class TwitterFilteringComponent {
 					PVector tweetLocation = new PVector(0, 0);
 					tweetLocation.x = rs.getFloat("lon");
 					tweetLocation.y = rs.getFloat("lat");
-					thisDate = grandparent.fmt.parseDateTime(rs
+					thisDate = papplet.fmt.parseDateTime(rs
 							.getString("date"));
 
 					newTweetToAdd.setTweetSetColour(setColour);
@@ -1120,18 +1181,18 @@ class TwitterFilteringComponent {
 		 * tweetSetListBox { int index = int(theControlEvent.group().value());
 		 * println("Removing : " + theControlEvent.group().name()); } } else {
 		 */
-		if (theControlEvent.controller().name().equals("Date" + componentID)) {
+		if (theControlEvent.getController().getName().equals("Date" + componentID)) {
 			// min and max values are stored in an array.
 			// access this array with controller().arrayValue().
 			// min is at index 0, max is at index 1.
 			PApplet.println("Range event!");
 			dateSelection = new Interval(
-					grandparent.minDate.plus(Period
-							.hours((int) (theControlEvent.controller()
-									.arrayValue()[0]))),
-					grandparent.minDate.plus(Period
-							.hours((int) (theControlEvent.controller()
-									.arrayValue()[1]))));
+					TwitterFiltering.minDate.plus(Period
+							.hours((int) (theControlEvent.getController()
+									.getArrayValue(0)))),
+					TwitterFiltering.minDate.plus(Period
+							.hours((int) (theControlEvent.getController()
+									.getArrayValue(1)))));
 			if (!dateSelection.equals(previousDateSelection)) {
 				// println("Selection is " + dateSelection);
 				for (TweetSet a : tweetSetManager.getTweetSetList())
@@ -1139,9 +1200,9 @@ class TwitterFilteringComponent {
 				previousDateSelection = new Interval(dateSelection);
 				// update wordcloud
 				wordCloud.setRange(
-						Days.daysBetween(grandparent.minDate,
+						Days.daysBetween(TwitterFiltering.minDate,
 								dateSelection.getStart()).getDays(),
-						Days.daysBetween(grandparent.minDate,
+						Days.daysBetween(TwitterFiltering.minDate,
 								dateSelection.getEnd()).getDays());
 				// parent.moveToPosition(this);
 			}
@@ -1152,9 +1213,9 @@ class TwitterFilteringComponent {
 
 		// -------- Typing something in and hitting return will trigger this
 		// code, creating a new tweet set --------
-		if (theControlEvent.controller().name().equals("Filters" + componentID)) {
+		if (theControlEvent.getController().getName().equals("Filters" + componentID)) {
 			PApplet.println("Typing in textfield!");
-			String keywords = theControlEvent.controller().stringValue();
+			String keywords = theControlEvent.getController().getStringValue();
 			if (!keywords.equals(previousKeyword)) {
 				if (tweetSetManager.getTweetSetListSize() < tweetSetManager
 						.getMaxTweetSets())
@@ -1222,7 +1283,7 @@ class TwitterFilteringComponent {
 		try {
 			// create a database connection
 			connection = DriverManager.getConnection("jdbc:sqlite:"
-					+ grandparent.sketchPath("VAST2011_MC1.sqlite"));// "+sketchPath("sample.db");
+					+ papplet.sketchPath("VAST2011_MC1.sqlite"));// "+sketchPath("sample.db");
 			Statement statement = connection.createStatement();
 			ResultSet rs = statement.executeQuery(sqlQuery);
 			// Tweet newTweetToAdd;
@@ -1235,7 +1296,7 @@ class TwitterFilteringComponent {
 
 				boolean found = false;
 				TweetNetwork thisNetwork = new TweetNetwork(0, this,
-						grandparent); // blank
+						papplet); // blank
 
 				// look to see if we have a tweetNetwork for this user
 				for (TweetNetwork n : tweetNetworks) {
@@ -1245,7 +1306,7 @@ class TwitterFilteringComponent {
 				}
 
 				if (found == false) {
-					thisNetwork = new TweetNetwork(userId, this, grandparent);
+					thisNetwork = new TweetNetwork(userId, this, papplet);
 					tweetNetworks.add(thisNetwork);
 				}
 
@@ -1327,21 +1388,21 @@ class TwitterFilteringComponent {
 
 				// if tweet is in past
 				if (t.getDate().isBefore(dateSelection.getStart())) {
-					grandparent.fill(100, 100, 200);
-					grandparent.stroke(100, 100, 200, 200);
-					grandparent.strokeWeight(4 * fontScale);
+					papplet.fill(100, 100, 200);
+					papplet.stroke(100, 100, 200, 200);
+					papplet.strokeWeight(4 * fontScale);
 				}
 				// if tweet is in future
 				else if (t.getDate().isAfter(dateSelection.getEnd())) {
-					grandparent.fill(100, 200, 100);
-					grandparent.stroke(100, 200, 100, 200);
-					grandparent.strokeWeight(4 * fontScale);
+					papplet.fill(100, 200, 100);
+					papplet.stroke(100, 200, 100, 200);
+					papplet.strokeWeight(4 * fontScale);
 				}
 				// tweet is inside range
 				else {
-					grandparent.fill(200, 100, 100);
-					grandparent.stroke(200, 100, 100, 200);
-					grandparent.strokeWeight(4 * fontScale);
+					papplet.fill(200, 100, 100);
+					papplet.stroke(200, 100, 100, 200);
+					papplet.strokeWeight(4 * fontScale);
 				}
 
 				// if we are at the second point+, draw line
@@ -1353,10 +1414,10 @@ class TwitterFilteringComponent {
 				// lastLocation = loc;
 
 				// draw ellipse at this tweet position
-				grandparent.stroke(0);
-				grandparent.strokeWeight(0);
+				papplet.stroke(0);
+				papplet.strokeWeight(0);
 
-				grandparent
+				papplet
 						.ellipse(x + (loc.x + imgPos.x) * scaleFactorX, y
 								+ (loc.y + imgPos.y) * scaleFactorY, nodeSize,
 								nodeSize);
@@ -1432,20 +1493,24 @@ class TwitterFilteringComponent {
 		 * for (Annotation a : annotations) { if (a.mouseOver()) {
 		 * PApplet.println("Annotation has mouseover!"); return; } }
 		 */
-
-		if ((grandparent.mouseX > x + (imgPos.x * scaleFactorX))
-				&& (grandparent.mouseY > y + (imgPos.y * scaleFactorY))
-				&& (grandparent.mouseX < x + (TwitterFiltering.imgX + imgPos.x)
+		// if we're over the map...
+		if ((papplet.mouseX > x + (imgPos.x * scaleFactorX))
+				&& (papplet.mouseY > y + (imgPos.y * scaleFactorY))
+				&& (papplet.mouseX < x + (TwitterFiltering.imgX + imgPos.x)
 						* scaleFactorX)
-				&& (grandparent.mouseY < y + (TwitterFiltering.imgY + imgPos.y)
+				&& (papplet.mouseY < y + (TwitterFiltering.imgY + imgPos.y)
 						* scaleFactorY)) {
-			if (grandparent.mouseButton == PConstants.LEFT) {
+			// if we're shift-dragging, start selecting stuff
+			if (papplet.mouseButton == PConstants.LEFT
+					&& papplet.keyPressed
+					&& papplet.keyCode == PConstants.SHIFT) {
 				b_draggingMouse = true;
 				shp = new RShape();
-				shp.addMoveTo(grandparent.mouseX, grandparent.mouseY);
+				shp.addMoveTo(papplet.mouseX, papplet.mouseY);
 			}
 		}
-		if (grandparent.mouseButton == PConstants.RIGHT) {
+		// if we're right-clicking, that's annotation
+		if (papplet.mouseButton == PConstants.RIGHT) {
 			PApplet.println("RIGHT BUTTON!");
 			// two cases: over an existing annotation, and over nothing!
 			boolean editing = false;
@@ -1459,8 +1524,8 @@ class TwitterFilteringComponent {
 			if (!editing) {
 				PApplet.println("Added annotation!");
 				PVector newPos = getLocalCoordinate(new PVector(
-						grandparent.mouseX, grandparent.mouseY));
-				Annotation a = new Annotation(grandparent, this,
+						papplet.mouseX, papplet.mouseY));
+				Annotation a = new Annotation(papplet, this,
 						(int) newPos.x, (int) newPos.y,
 						Annotation.DEFAULT_WIDTH, 100, annotations.size());
 				// grandparent.registerKeyEvent(a); //so that we can listen for
@@ -1469,15 +1534,6 @@ class TwitterFilteringComponent {
 			}
 		}
 
-		/*
-		 * //If mouse click / drag on image if ( (mouseX >
-		 * x+(imgPos.x*scaleFactorX)) && (mouseY > y+(imgPos.y*scaleFactorY)) &&
-		 * (mouseX < x+ (imgX + imgPos.x)*scaleFactorX) && (mouseY < y+(imgY +
-		 * imgPos.y)*scaleFactorY) ) if (mouseButton == LEFT) { mouseDragStart_x
-		 * = mouseX; mouseDragStart_y = mouseY; b_draggingMouse = true; }
-		 * 
-		 * if (mouseButton == RIGHT) { b_selection = false; }
-		 */
 	}
 
 	boolean contains(int tx, int ty) {
@@ -1492,7 +1548,7 @@ class TwitterFilteringComponent {
 
 		// click dragging
 		if (b_draggingMouse == true)
-			if (grandparent.mouseButton == PConstants.LEFT) {
+			if (papplet.mouseButton == PConstants.LEFT) {
 				numberSelected = 0;
 				selectedTweetUserIds.clear();
 				tweetNetworks.clear();
@@ -1510,9 +1566,9 @@ class TwitterFilteringComponent {
 
 				b_draggingMouse = false;
 
-				mouseDragEnd_x = PApplet.max(grandparent.mouseX, x
+				mouseDragEnd_x = PApplet.max(papplet.mouseX, x
 						+ TwitterFiltering.imgX * scaleFactorX);
-				mouseDragEnd_y = PApplet.min(grandparent.mouseY, y
+				mouseDragEnd_y = PApplet.min(papplet.mouseY, y
 						+ TwitterFiltering.imgY * scaleFactorY);
 
 				// finished dragging, so set any tweets within drag box to
@@ -1546,7 +1602,7 @@ class TwitterFilteringComponent {
 
 				if (numberSelected > 0) {
 					b_selection = true;
-					if (grandparent.b_generateNetwork)
+					if (papplet.b_generateNetwork)
 						generateTweetNetwork();
 				}
 
@@ -1557,7 +1613,7 @@ class TwitterFilteringComponent {
 			} else
 				b_draggingMouse = false;
 
-		if (grandparent.mouseButton == PConstants.RIGHT) {
+		if (papplet.mouseButton == PConstants.RIGHT) {
 			numberSelected = 0;
 			selectedTweetUserIds.clear();
 			tweetNetworks.clear();

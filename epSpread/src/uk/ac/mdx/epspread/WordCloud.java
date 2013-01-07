@@ -1,7 +1,7 @@
 package uk.ac.mdx.epspread;
 
 import wordcram.*;
-import wordcram.text.*;
+//import wordcram.text.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -114,7 +114,7 @@ public class WordCloud {
 		ArrayList<WordCount> tempList = new ArrayList<WordCount>();
 		HashMap<String, Integer> keywordMap = new HashMap<String, Integer>();
 
-		int daysInRange = end - start;
+		//int daysInRange = end - start;
 		// println("days in range : " + daysInRange);
 
 		// check if we've done this before:

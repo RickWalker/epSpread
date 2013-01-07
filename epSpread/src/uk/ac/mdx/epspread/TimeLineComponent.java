@@ -1,5 +1,4 @@
 package uk.ac.mdx.epspread;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -129,7 +128,7 @@ public class TimeLineComponent {
 			parent.textSize(14 * fontScale);
 
 			if (tempdt.dayOfYear().get() != previousDay) {
-				int tx = (int) (parent.map(a, 0, maxHours, lineStart, lineStop));
+				int tx = (int) (PApplet.map(a, 0, maxHours, lineStart, lineStop));
 				// draw tick
 				parent.strokeWeight(1);
 				parent.line(tx, lineY, tx, lineY + minorTickHeight);
@@ -297,7 +296,7 @@ public class TimeLineComponent {
 		} else {
 			for (TwitterFilteringComponent a : timePoints) {
 				if (parent.mouseEvent.getClickCount() == 2 && a.hasMouseOver()) {
-					parent.println("<double click> on " + a);
+					PApplet.println("<double click> on " + a);
 					previousPos = new PVector(a.x, a.y);
 					a.moveTo(0, 0);
 					a.setSize(width, height);
@@ -306,7 +305,7 @@ public class TimeLineComponent {
 					break;
 				} else if (a.hasMouseOver()) {
 					// move middle to where the mouse is?
-					parent.println("Dragging " + a);
+					PApplet.println("Dragging " + a);
 					currentDragging = a;
 					draggingOffsetX = parent.mouseX - a.x;
 					draggingOffsetY = parent.mouseY - a.y;
@@ -321,7 +320,7 @@ public class TimeLineComponent {
 		if (currentDragging != null) {
 			currentDragging.currentTransitionState = MovementState.SMALL;
 			currentDragging = null;
-			parent.println("Stopped dragging");
+			PApplet.println("Stopped dragging");
 		}
 		for (TwitterFilteringComponent a : timePoints) {
 			if (a.hasMouseOver()) {
@@ -332,12 +331,12 @@ public class TimeLineComponent {
 
 	void mouseDragged() {
 		if (currentDragging != null) {
-			parent.println("Moving!");
+			PApplet.println("Moving!");
 			// currentDragging.x = mouseX;
 			// currentDragging.y = mouseY;//
 			currentDragging.moveTo(parent.mouseX - draggingOffsetX,
 					parent.mouseY - draggingOffsetY);
-			parent.println("x y are " + currentDragging.x + " and "
+			PApplet.println("x y are " + currentDragging.x + " and "
 					+ currentDragging.y);
 		}
 	}

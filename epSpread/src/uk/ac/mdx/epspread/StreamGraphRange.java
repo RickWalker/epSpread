@@ -1,7 +1,7 @@
 package uk.ac.mdx.epspread;
 import byron.streamgraph.*;
 
-import java.lang.Math.*;
+//import java.lang.Math.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -131,8 +131,8 @@ class StreamGraphRange {
 				frequencies = tweetSets.get(l).getTweetDayFrequencies().clone();
 
 				Arrays.sort(frequencies);
-				int minDayFreq = frequencies[0];
-				int maxDayFreq = frequencies[frequencies.length - 1];
+				//int minDayFreq = frequencies[0];
+				//int maxDayFreq = frequencies[frequencies.length - 1];
 
 				// normalize and store data
 				// normalized = float(freqOnDay - minDayFreq ) /
@@ -362,18 +362,18 @@ class StreamGraphRange {
 			int m = layers[0].size.length;
 			int start;
 			int end;
-			int lastIndex = m - 1;
+			//int lastIndex = m - 1;
 			int lastLayer = n - 1;
-			int pxl;
+			//int pxl;
 
 			// calculate time to draw graph
-			long time = System.currentTimeMillis();
+			//long time = System.currentTimeMillis();
 
 			// generate graph
 			for (int i = 0; i < n; i++) {
 				start = PApplet.max(0, layers[i].onset - 1);
 				end = PApplet.min(m - 1, layers[i].end);
-				pxl = i == lastLayer ? 0 : 1;
+				//pxl = i == lastLayer ? 0 : 1;
 
 				// set fill color of layer
 				buffer.fill(layers[i].rgb);

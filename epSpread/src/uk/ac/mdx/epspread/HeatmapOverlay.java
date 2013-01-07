@@ -103,14 +103,14 @@ class HeatmapOverlay {
 		Arrays.fill(overlay, 0.0f);
 		// float [] masses = new float[tweets.size()];
 		// Arrays.fill(masses, 0.0);
-		int xval, yval;
+		//int xval, yval;
 		max_intensity = 0;
 		for (int i = 0; i < tweets.size(); i++) {
 			if (parent.dateSelection.contains(tweets.get(i).mDate)) {
-				xval = (int) (PApplet.map(tweets.get(i).mLocation.x, 0, w, 0,
-						gridres - 1));
-				yval = (int) (PApplet.map(tweets.get(i).mLocation.y, 0, ht, 0,
-						gridres - 1));
+				//xval = (int) (PApplet.map(tweets.get(i).mLocation.x, 0, w, 0,
+				//		gridres - 1));
+				//yval = (int) (PApplet.map(tweets.get(i).mLocation.y, 0, ht, 0,
+					//	gridres - 1));
 				/*
 				 * //what region is this in? Region r =
 				 * findRegion(tweets.get(i)); if (r==null) {
@@ -208,7 +208,7 @@ class HeatmapOverlay {
 
 		max_intensity = Float.MIN_VALUE;
 		// creates the surface
-		double tweet_density = 100000.0;
+		//double tweet_density = 100000.0;
 		// double cinema_mass=100.0;
 		double r_cloud = boxsize_x;
 		double r_cloud_y = boxsize_y;
@@ -218,7 +218,7 @@ class HeatmapOverlay {
 		double hi21 = hi1 * hi1; // 1/h^2
 		int npixx = gridres - 1;
 		int npixy = gridres - 1;
-		double xmin = 0;
+		//double xmin = 0;
 		double ymin = 0;
 
 		double pixwidth = r_cloud / (float) npixx;
@@ -293,8 +293,8 @@ class HeatmapOverlay {
 				}
 			}
 		}
-		double zmin = 0;
-		double zmax = max_intensity;
+		//double zmin = 0;
+		//double zmax = max_intensity;
 
 		// for better scale: do log of everything!
 		for (int i = 0; i < overlay.length; i++) {
@@ -343,7 +343,7 @@ class HeatmapOverlay {
 
 		max_intensity = Float.MIN_VALUE;
 		// creates the surface
-		double tweet_density = 100000.0;
+		//double tweet_density = 100000.0;
 		// double cinema_mass=100.0;
 		double r_cloud = boxsize_x;
 		double r_cloud_y = boxsize_y;
@@ -353,7 +353,7 @@ class HeatmapOverlay {
 		double hi21 = hi1 * hi1; // 1/h^2
 		int npixx = gridres - 1;
 		int npixy = gridres - 1;
-		double xmin = 0;
+		//double xmin = 0;
 		double ymin = 0;
 
 		double pixwidth = r_cloud / (float) npixx;
@@ -428,8 +428,8 @@ class HeatmapOverlay {
 				}
 			}
 		}
-		double zmin = 0;
-		double zmax = max_intensity;
+		//double zmin = 0;
+		//double zmax = max_intensity;
 
 		// now that we have the grid, generate contours!
 		// mangle array back into 2D

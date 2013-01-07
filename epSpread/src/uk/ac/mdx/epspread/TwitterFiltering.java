@@ -2,15 +2,15 @@ package uk.ac.mdx.epspread;
 
 //import processing.pdf.*;
 import processing.core.PApplet;
-import processing.core.PConstants;
-import processing.opengl.*;
+//import processing.core.PConstants;
+//import processing.opengl.*;
 import processing.core.PFont;
 import processing.core.PImage;
 import geomerative.*;
 
 import controlP5.*;
 
-import java.awt.event.KeyEvent;
+//import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
 import org.joda.time.DateTime;
@@ -19,7 +19,9 @@ import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import codeanticode.glgraphics.GLConstants;
+//import codeanticode.glgraphics.GLConstants;
+
+//import codeanticode.glgraphics.GLConstants;
 
 @SuppressWarnings("serial")
 public class TwitterFiltering extends PApplet {
@@ -45,9 +47,9 @@ public class TwitterFiltering extends PApplet {
 	// ---- Interval Range -----
 
 	// Note : are intervals inclusive or exclusive?
-	DateTime minDate = (new DateTime(2011, 4, 30, 0, 0, 0, 0)).minus(Period
+	public static final DateTime minDate = (new DateTime(2011, 4, 30, 0, 0, 0, 0)).minus(Period
 			.hours(1));
-	DateTime maxDate = (new DateTime(2011, 5, 20, 23, 59, 0, 0)).plus(Period
+	public static final DateTime maxDate = (new DateTime(2011, 5, 20, 23, 59, 0, 0)).plus(Period
 			.hours(1));
 	DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
 	DateTimeFormatter fmt2 = DateTimeFormat
@@ -83,8 +85,8 @@ public class TwitterFiltering extends PApplet {
 	
 	@Override
 	public void setup() {
-		size(screenWidth, 3*screenHeight/4, GLConstants.GLGRAPHICS);
-		//size(screenWidth, 3*screenHeight/4, OPENGL);
+		size(screenWidth, 3*screenHeight/4);//, GLConstants.GLGRAPHICS);
+		//size(screenWidth, 3*screenHeight/4, GLConstants.GLGRAPHICS);
 		// size( 1280, 720, OPENGL);
 		// textMode(SHAPE);
 		smooth();

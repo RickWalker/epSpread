@@ -15,7 +15,7 @@ public class TweetFrequencies {
 	String mName;
 	ArrayList<Integer> mData = new ArrayList<Integer>();
 
-	void TweetFrequencies() {
+	TweetFrequencies() {
 
 		mName = "blank";
 	}
