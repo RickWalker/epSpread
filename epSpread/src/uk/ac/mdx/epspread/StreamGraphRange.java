@@ -10,6 +10,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.joda.time.Days;
+import org.joda.time.Interval;
+
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PGraphics;
@@ -33,7 +36,7 @@ class StreamGraphRange {
 	PImage streamGraphImg;
 
 	int numLayers = 0;
-	int layerSize = 21;
+	int layerSize;
 
 	LayerLayout layout;
 	LayerSort ordering;
@@ -53,6 +56,8 @@ class StreamGraphRange {
 
 		this.parent = _parent;
 		this.gp = gp;
+		this.layerSize = Days.daysIn(
+				new Interval(TwitterFiltering.minDate, TwitterFiltering.maxDate)).getDays();
 		updateScaling();
 		buffer = gp.createGraphics(TwitterFiltering.imgX, sliderSize,
 				PConstants.JAVA2D);
@@ -290,11 +295,13 @@ class StreamGraphRange {
 
 	void drawDayRects() {
 		// Draw day rectangles
+		int dayRange = Days.daysIn(
+				new Interval(TwitterFiltering.minDate, TwitterFiltering.maxDate)).getDays();
 
-		for (int k = 0; k < 20; k++) {
+		for (int k = 0; k < dayRange; k++) {
 
 			buffer.stroke(0, 0, 0, 20);
-			float rectSize = (float) (buffer.width) / 20.0f;
+			float rectSize = (float) (buffer.width) / (float) dayRange;
 
 			if (k % 2 == 0)
 				buffer.fill(0, 0, 0, 10); // even

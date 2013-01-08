@@ -2,13 +2,15 @@ package uk.ac.mdx.epspread;
 
 import org.joda.time.DateTime;
 
-import processing.core.PVector;
+import de.fhpotsdam.unfolding.geo.Location;
+
+//import processing.core.PVector;
 
 public class Tweet {
 
 	String mText;
 
-	PVector mLocation;
+	Location mLocation;
 	DateTime mDate;
 	int userId;
 	boolean b_selected;
@@ -19,7 +21,7 @@ public class Tweet {
 	Tweet() {
 
 		mText = "blah";
-		mLocation = new PVector(0, 0);
+		mLocation = new Location(0, 0);
 		tweetRegion = null;
 		// mDate = 0.0f;
 		userId = -1;
@@ -61,9 +63,9 @@ public class Tweet {
 		// println("mDate is " + mDate);
 	}
 
-	void setLocation(PVector coords) {
-		mLocation.x = coords.x;
-		mLocation.y = coords.y;
+	void setLocation(Location coords) {
+		mLocation.setLat(coords.getLat());
+		mLocation.setLon(coords.getLon());
 		// find out what region it's in!
 		// tweetRegion = findRegion(mLocation);
 	}
@@ -83,7 +85,7 @@ public class Tweet {
 		return userId;
 	}
 
-	PVector getLocation() {
+	Location getLocation() {
 		return mLocation;
 	}
 

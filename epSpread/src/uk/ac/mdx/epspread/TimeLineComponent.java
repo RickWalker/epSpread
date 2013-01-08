@@ -1,4 +1,5 @@
 package uk.ac.mdx.epspread;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,17 +43,20 @@ public class TimeLineComponent {
 		this.width = width;
 		this.height = height;
 		originalSize = new PVector(1280, 720);
-		timelineStartDate = (new DateTime(2011, 4, 29, 0, 0, 0, 0)); // hack for
-																		// screenshots
-																		// for
-																		// now
-		timelineEndDate = (new DateTime(2011, 5, 21, 0, 0, 0, 0));
+		timelineStartDate = TwitterFiltering.minDate.withHourOfDay(0)
+				.withMinuteOfHour(0).withSecondOfMinute(0)
+				.withMillisOfSecond(0);// (new DateTime(2011, 4, 29, 0, 0, 0,
+										// 0)); // hack for
+		// screenshots
+		// for
+		// now
+		timelineEndDate = TwitterFiltering.maxDate;
 		scaleFactorX = width / originalSize.x;
 		scaleFactorY = height / originalSize.y; // change eventually!
 		smallVizSize = new PVector(250 * scaleFactorX, 150 * scaleFactorY);
 
-		lineStart = (int) (x + 150 * scaleFactorX);
-		lineStop = (int) (x + width - 150 * scaleFactorX);
+		lineStart = (int) (x + 50 * scaleFactorX);
+		lineStop = (int) (x + width - 50 * scaleFactorX);
 		lineY = height / 2;
 		fontScale = Math.min(scaleFactorX, scaleFactorY);
 		timePoints = new ArrayList<TwitterFilteringComponent>();
@@ -122,13 +126,14 @@ public class TimeLineComponent {
 
 		for (int a = 0; a < maxHours; a++) {
 			// println(a);
-
+			parent.textAlign(PConstants.CENTER, PConstants.TOP);
 			// draw label
 			parent.textFont(parent.font);
-			parent.textSize(14 * fontScale);
+			parent.textSize(10 * fontScale);
 
 			if (tempdt.dayOfYear().get() != previousDay) {
-				int tx = (int) (PApplet.map(a, 0, maxHours, lineStart, lineStop));
+				int tx = (int) (PApplet
+						.map(a, 0, maxHours, lineStart, lineStop));
 				// draw tick
 				parent.strokeWeight(1);
 				parent.line(tx, lineY, tx, lineY + minorTickHeight);
@@ -136,11 +141,12 @@ public class TimeLineComponent {
 				parent.fill(0);
 				if (tempdt.dayOfMonth().get() == 1) {
 					// special case!
+					parent.textSize(14 * fontScale);
 					parent.text(tempdt.dayOfMonth().getAsString(), tx, lineY
-							+ majorTickHeight);
+							+ majorTickHeight + parent.textDescent());
 				} else {
 					parent.text(tempdt.dayOfMonth().getAsString(), tx, lineY
-							+ minorTickHeight);
+							+ minorTickHeight + parent.textDescent());
 				}
 
 				// check if need to draw monthName
@@ -152,23 +158,29 @@ public class TimeLineComponent {
 					// position halfway between monthStart and tx, draw
 					// monthname
 					parent.textSize(18 * fontScale);
+					// check! do we overlap the next month? if so, change
+					// alignment
+					if (parent.textWidth(previousMonth) / 2 + monthStart > tx) {
+						parent.textAlign(PConstants.RIGHT, PConstants.TOP);
+					}
 					parent.text(previousMonth, (tx + monthStart) / 2, lineY
 							+ minorTickHeight + 2
 							* (parent.textAscent() + parent.textDescent()));
 					previousMonth = tempdt.monthOfYear().getAsText();
+					monthStart = tx;
 				}
 			}
 			tempdt = tempdt.plus(Period.hours(1));
 		}
-		// draw final day!
+		// draw final day
 		parent.line(lineStop, lineY, lineStop, lineY + minorTickHeight);
 		if (tempdt.dayOfMonth().get() == 1) {
 			// special case!
 			parent.text(tempdt.dayOfMonth().getAsString(), lineStop, lineY
-					+ majorTickHeight);
+					+ majorTickHeight + parent.textDescent());
 		} else {
 			parent.text(tempdt.dayOfMonth().getAsString(), lineStop, lineY
-					+ minorTickHeight);
+					+ minorTickHeight + parent.textDescent());
 		}
 		// draw final month!
 		parent.textSize(18 * fontScale);
@@ -185,17 +197,15 @@ public class TimeLineComponent {
 			} else if (parent.key == 'n') {
 				addNew();
 			}
-		}else{
-			/*if(e.getKeyCode()==PConstants.ENTER){
-				//finish annotation!
-			}*/
+		} else {
+			/*
+			 * if(e.getKeyCode()==PConstants.ENTER){ //finish annotation! }
+			 */
 		}
-		/* else
-			if (parent.key == 'S') {
-				parent.saveFrame("VASTMC2-large-####.png");
-				record = true;
-			}
-		}*/
+		/*
+		 * else if (parent.key == 'S') {
+		 * parent.saveFrame("VASTMC2-large-####.png"); record = true; } }
+		 */
 	}
 
 	void moveToPosition(TwitterFilteringComponent t) {
@@ -332,12 +342,12 @@ public class TimeLineComponent {
 	void mouseDragged() {
 		if (currentDragging != null) {
 			PApplet.println("Moving!");
-			// currentDragging.x = mouseX;
-			// currentDragging.y = mouseY;//
-			currentDragging.moveTo(parent.mouseX - draggingOffsetX,
+			// currentDragging.x = parent.mouseX - draggingOffsetX;
+			// currentDragging.y = parent.mouseY - draggingOffsetY;//
+			currentDragging.moveImmediatelyTo(parent.mouseX - draggingOffsetX,
 					parent.mouseY - draggingOffsetY);
-			PApplet.println("x y are " + currentDragging.x + " and "
-					+ currentDragging.y);
+			// PApplet.println("x y are " + currentDragging.x + " and "
+			// + currentDragging.y);
 		}
 	}
 }

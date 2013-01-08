@@ -15,9 +15,11 @@ import java.util.ArrayList;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.joda.time.Period;
+//import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+
+import codeanticode.glgraphics.GLConstants;
 
 //import codeanticode.glgraphics.GLConstants;
 
@@ -38,6 +40,8 @@ public class TwitterFiltering extends PApplet {
 
 	public static final int imgX = 1304; // original image size for scaling
 	public static final int imgY = 663; // image size
+	public static final String databaseTableName = "tweets"; //or "micro2"
+	public static final String databaseMessageColumnName = "text"; //or "message" 
 
 	ArrayList<Integer> colours = new ArrayList<Integer>();
 	int colourTracker = 0; // tracks number of colours
@@ -47,11 +51,11 @@ public class TwitterFiltering extends PApplet {
 	// ---- Interval Range -----
 
 	// Note : are intervals inclusive or exclusive?
-	public static final DateTime minDate = (new DateTime(2011, 4, 30, 0, 0, 0, 0)).minus(Period
-			.hours(1));
-	public static final DateTime maxDate = (new DateTime(2011, 5, 20, 23, 59, 0, 0)).plus(Period
-			.hours(1));
-	DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
+	public static final DateTime minDate = new DateTime(2012,07,16,0,0,0,0);//(new DateTime(2011, 4, 30, 0, 0, 0, 0)).minus(Period
+	//		.hours(1));
+	public static final DateTime maxDate = new DateTime(2012, 10, 26, 0,0,0,0);//(new DateTime(2011, 5, 20, 23, 59, 0, 0)).plus(Period
+	//		.hours(1));
+	DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 	DateTimeFormatter fmt2 = DateTimeFormat
 			.forPattern("MMM dd              HH:mm");
 	Interval fullTimeInterval = new Interval(minDate, maxDate);
@@ -85,8 +89,8 @@ public class TwitterFiltering extends PApplet {
 	
 	@Override
 	public void setup() {
-		size(screenWidth, 3*screenHeight/4);//, GLConstants.GLGRAPHICS);
-		//size(screenWidth, 3*screenHeight/4, GLConstants.GLGRAPHICS);
+		//size(screenWidth, 3*screenHeight/4);//, GLConstants.GLGRAPHICS);
+		size(screenWidth, 3*screenHeight/4, GLConstants.GLGRAPHICS);
 		// size( 1280, 720, OPENGL);
 		// textMode(SHAPE);
 		smooth();
