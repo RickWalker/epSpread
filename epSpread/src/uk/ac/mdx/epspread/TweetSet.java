@@ -5,6 +5,7 @@ import java.util.ArrayList;
 //import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.Interval;
+
 //import org.joda.time.Period;
 
 public class TweetSet {
@@ -26,18 +27,19 @@ public class TweetSet {
 	int crossoverMatches = 0; // How many of these tweets are made by people
 								// currently selected
 
-	//DateTime startDate = (new DateTime(2011, 4, 30, 0, 0, 0, 0)).minus(Period
-	//		.hours(0));
-	//DateTime endDate = (new DateTime(2011, 5, 20, 23, 59, 0, 0)).plus(Period
-	//		.hours(0));
+	// DateTime startDate = (new DateTime(2011, 4, 30, 0, 0, 0, 0)).minus(Period
+	// .hours(0));
+	// DateTime endDate = (new DateTime(2011, 5, 20, 23, 59, 0, 0)).plus(Period
+	// .hours(0));
 
 	TweetSet(String keywords, int colour, String re,
 			TwitterFilteringComponent parent, TwitterFiltering gp) // argh
 	{
 		this.parent = parent;
 		this.gp = gp;
-		tweetDayFrequencies = new int[Days.daysIn(
-				new Interval(TwitterFiltering.minDate, TwitterFiltering.maxDate)).getDays()];
+		tweetDayFrequencies = new int[Days
+				.daysIn(new Interval(TwitterFiltering.minDate,
+						TwitterFiltering.maxDate)).getDays()];
 		setColour = colour;
 		heatmap = new HeatmapOverlay(gp, parent);
 		mSearchTerms = keywords;
@@ -71,11 +73,17 @@ public class TweetSet {
 
 	void addTweet(Tweet theTweet) {
 		tweets.add(theTweet);
+		if(theTweet.getDate().isBefore(TwitterFiltering.minDate)){
+			System.err.println("Date for tweet " + theTweet.getText() + " is" + theTweet.getDate());
+			System.err.println("minDate is " + TwitterFiltering.minDate);
+		}
 
 		// find and increment day of tweet
 		int dayOfTweet = Days.daysIn(
-				new Interval(TwitterFiltering.minDate, theTweet.getDate())).getDays();
-		tweetDayFrequencies[dayOfTweet] = tweetDayFrequencies[dayOfTweet] + 1;
+				new Interval(TwitterFiltering.minDate, theTweet.getDate()))
+				.getDays();
+		if (dayOfTweet < tweetDayFrequencies.length)
+			tweetDayFrequencies[dayOfTweet] = tweetDayFrequencies[dayOfTweet] + 1;
 	}
 
 	int getFrequencyOnDay(int theDay) {

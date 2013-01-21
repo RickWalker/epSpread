@@ -13,6 +13,7 @@ import org.joda.time.Period;
 import controlP5.ControlEvent;
 
 import processing.core.PVector;
+//import processing.pdf.*;
 
 public class TimeLineComponent {
 	// idea is that we can 'stick' other visualisations to this timeline
@@ -29,6 +30,7 @@ public class TimeLineComponent {
 	int lineStart, lineStop, lineY;
 	float scaleFactorX, scaleFactorY;
 	float fontScale;
+
 	int draggingOffsetX, draggingOffsetY;
 
 	boolean record = false; // to try writing to pdf!
@@ -53,7 +55,7 @@ public class TimeLineComponent {
 		timelineEndDate = TwitterFiltering.maxDate;
 		scaleFactorX = width / originalSize.x;
 		scaleFactorY = height / originalSize.y; // change eventually!
-		smallVizSize = new PVector(250 * scaleFactorX, 150 * scaleFactorY);
+		smallVizSize = new PVector(320 * scaleFactorX, 180 * scaleFactorY);
 
 		lineStart = (int) (x + 50 * scaleFactorX);
 		lineStop = (int) (x + width - 50 * scaleFactorX);
@@ -65,7 +67,14 @@ public class TimeLineComponent {
 				(int) (smallVizSize.y)));
 	}
 
-	void arrangeTimePoints() {
+	private void drawFrameRate(int xp, int yp){
+		//draw frame rate!
+		parent.textAlign(PConstants.LEFT, PConstants.TOP);
+		parent.textFont(parent.font);
+		parent.textSize(18);
+		parent.fill(0);
+		parent.text(parent.frametimer.getFrameRateAsText(),xp, yp);
+		//System.out.println(frametimer.getFrameRateAsText());
 	}
 
 	void draw() {
@@ -78,6 +87,7 @@ public class TimeLineComponent {
 			parent.textFont(parent.font);
 		}
 		parent.background(130, 130, 130);
+
 		if (currentLarge == null) {
 			// draw the actual timeline
 			for (TwitterFilteringComponent a : timePoints) {
@@ -97,6 +107,7 @@ public class TimeLineComponent {
 			parent.textMode(PConstants.MODEL);
 			record = false;
 		}
+		drawFrameRate(0,25);
 		// controlP5.draw();
 	}
 
@@ -191,10 +202,10 @@ public class TimeLineComponent {
 
 	public void keyPressed() {
 		if (currentLarge == null) {
-			if (parent.key == 'r') {
+			if (parent.key == '(') {
 				parent.saveFrame("VASTMC2-####.png");
-				record = true;
-			} else if (parent.key == 'n') {
+				record = true; // disable 'cos text should come first
+			} else if (parent.key == ')') {
 				addNew();
 			}
 		} else {
@@ -227,11 +238,8 @@ public class TimeLineComponent {
 		parent.fill(170, 170, 255, 130);
 		int targetY;
 
-		if (t.y < lineY) {
-			targetY = t.y + t.height;
-		} else {
-			targetY = t.y;
-		}
+		targetY = (t.y<lineY ? (t.y+t.height):t.y);
+		
 		// println(t.y + " and " + targetY);
 		// draw links from timeline to this component
 		parent.beginShape(PConstants.POLYGON);
@@ -298,6 +306,7 @@ public class TimeLineComponent {
 				currentLarge.setSize((int) (smallVizSize.x),
 						(int) (smallVizSize.y));
 				moveToPosition(currentLarge);
+				currentLarge.checkComponents(); //work out if we've double-clicked on the map, the cloud or the streamgraph!
 				currentLarge.currentTransitionState = MovementState.SHRINKING;
 				currentLarge = null;
 			} else {
@@ -307,20 +316,31 @@ public class TimeLineComponent {
 			for (TwitterFilteringComponent a : timePoints) {
 				if (parent.mouseEvent.getClickCount() == 2 && a.hasMouseOver()) {
 					PApplet.println("<double click> on " + a);
-					previousPos = new PVector(a.x, a.y);
+					previousPos = new PVector(a.x, a.y);		
 					a.moveTo(0, 0);
 					a.setSize(width, height);
 					currentLarge = a;
 					a.currentTransitionState = MovementState.GROWING;
 					break;
-				} else if (a.hasMouseOver()) {
+				} else if (a.hasMouseOver() && parent.keyPressed
+						&& parent.keyCode == PConstants.SHIFT) {
 					// move middle to where the mouse is?
-					PApplet.println("Dragging " + a);
+					PApplet.println("Dragging start" + a);
 					currentDragging = a;
 					draggingOffsetX = parent.mouseX - a.x;
 					draggingOffsetY = parent.mouseY - a.y;
 					currentDragging.currentTransitionState = MovementState.MOVING;
 					// a.mousePressed();
+				}
+
+				if (parent.mouseButton == PConstants.RIGHT) {
+					// aha! we're doing captioning!
+					if (a.hasMouseOver() && !a.hasCaption()) {
+						a.addCaption();
+					} else if (a.hasCaption() && a.caption.mouseOver()) {
+						PApplet.println("We want to edit the caption!");
+						a.caption.createNote();
+					}
 				}
 			}
 		}
@@ -341,7 +361,7 @@ public class TimeLineComponent {
 
 	void mouseDragged() {
 		if (currentDragging != null) {
-			PApplet.println("Moving!");
+			// PApplet.println("Moving!");
 			// currentDragging.x = parent.mouseX - draggingOffsetX;
 			// currentDragging.y = parent.mouseY - draggingOffsetY;//
 			currentDragging.moveImmediatelyTo(parent.mouseX - draggingOffsetX,

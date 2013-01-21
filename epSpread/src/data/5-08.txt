@@ -1,9 +1,0 @@
-sink 2 15.809
-realizing 2 15.8761
-flashing 2 16.0205
-mw 8 14.0396
-homer 2 16.0985
-float 2 16.0985
-command 2 16.0985
-rub 2 16.1809
-beiber 2 16.1809

@@ -1,15 +1,12 @@
 package uk.ac.mdx.epspread;
+
 import byron.streamgraph.*;
 
 //import java.lang.Math.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.Interval;
 
@@ -30,13 +27,15 @@ class StreamGraphRange {
 	int mHeight = 0;
 	int sliderSize = 100;
 	int gapY = 50;
-	int offsetX = 0;
 	// float DPI = 400;
-	PGraphics buffer;
+	PGraphics smallBuffer;
+	PGraphics variableBuffer;
+	boolean usingVariable;
 	PImage streamGraphImg;
 
 	int numLayers = 0;
 	int layerSize;
+	int startDay, endDay;
 
 	LayerLayout layout;
 	LayerSort ordering;
@@ -56,62 +55,26 @@ class StreamGraphRange {
 
 		this.parent = _parent;
 		this.gp = gp;
-		this.layerSize = Days.daysIn(
-				new Interval(TwitterFiltering.minDate, TwitterFiltering.maxDate)).getDays();
-		updateScaling();
-		buffer = gp.createGraphics(TwitterFiltering.imgX, sliderSize,
+		this.startDay = 0;
+		this.endDay = Days
+				.daysIn(new Interval(TwitterFiltering.minDate,
+						TwitterFiltering.maxDate)).getDays();
+		this.layerSize = endDay;
+
+		smallBuffer = gp.createGraphics(TwitterFiltering.imgX, sliderSize,
 				PConstants.JAVA2D);
-		createStreamGraph();
+
+		updateScaling();
+		createStreamGraph(smallBuffer, startDay, endDay);
+		usingVariable = false;
 		// currDay = 0;
-		loadWeatherData();
-	}
-
-	void loadWeatherData() {
-		// weatherFont = createFont("Arial", 26, true); // name, size,
-		// antialiased?
-		PApplet.println("Grabbing weather data from db");
-		// load the sqlite-JDBC driver using the current class loader
-		try {
-			Class.forName("org.sqlite.JDBC");
-		} catch (ClassNotFoundException e) {
-			PApplet.println("Weather couldn't find database!");
-		}
-		Connection connection = null;
-		try {
-			// create a database connection
-			PApplet.println("Sketch path is " + gp.sketchPath(""));
-			PApplet.println("Data path is " + gp.dataPath(""));
-			connection = DriverManager.getConnection("jdbc:sqlite:"
-					+ gp.sketchPath("VAST2011_MC1.sqlite"));
-			Statement statement = connection.createStatement();
-			statement.setQueryTimeout(30); // set timeout to 30 sec.
-
-			ResultSet rs = statement.executeQuery("SELECT * FROM weather");
-			while (rs.next()) {
-				// read the result set
-				weatherInfo.add(rs.getString("Weather"));
-				windDirection.add(rs.getString("Wind_Direction"));
-				windSpeed.add(rs.getString("Average_Wind_Speed"));
-			}
-		} catch (SQLException e) {
-			// if the error message is "out of memory",
-			// it probably means no database file is found
-			System.err.println(e.getMessage());
-		} finally {
-			try {
-				if (connection != null)
-					connection.close();
-			} catch (SQLException e) {
-				// connection close failed.
-				System.err.println(e);
-			}
-		}
-	}
-
-	void setup() {
 	}
 
 	void createStreamGraph() {
+		createStreamGraph(smallBuffer, startDay, endDay);
+	}
+
+	void createStreamGraph(PGraphics bufferToUse, int start, int end) {
 
 		ArrayList<TweetSet> tweetSets = parent.tweetSetManager
 				.getTweetSetList();
@@ -124,20 +87,20 @@ class StreamGraphRange {
 
 		for (int l = 0; l < numLayers; l++) {
 			String name = tweetSets.get(l).getSearchTerms();
-			float[] size = new float[layerSize];
-			size = new float[layerSize];
+			float[] size = new float[end - start];
+			size = new float[end - start];
 
-			for (int j = 0; j < layerSize; j++) {
+			for (int j = 0; j < (end - start); j++) {
 				float normalized;
-				int freqOnDay = tweetSets.get(l).getFrequencyOnDay(j);
+				int freqOnDay = tweetSets.get(l).getFrequencyOnDay(j + start);
 				PApplet.print(freqOnDay);
 				// Find max and min
 				int[] frequencies = new int[21];
 				frequencies = tweetSets.get(l).getTweetDayFrequencies().clone();
 
 				Arrays.sort(frequencies);
-				//int minDayFreq = frequencies[0];
-				//int maxDayFreq = frequencies[frequencies.length - 1];
+				// int minDayFreq = frequencies[0];
+				// int maxDayFreq = frequencies[frequencies.length - 1];
 
 				// normalize and store data
 				// normalized = float(freqOnDay - minDayFreq ) /
@@ -169,9 +132,9 @@ class StreamGraphRange {
 		// Give each layer a unique colour
 		for (int i = 0; i < numLayers; i++) {
 			int layerColour = tweetSets.get(i).getColour();
-			layers[i].rgb = getRGB((int) gp.red(layerColour),
-					(int) gp.green(layerColour), (int) gp.blue(layerColour),
-					255);
+			layers[i].rgb = layerColour;// getRGB((int) gp.red(layerColour),
+					//(int) gp.green(layerColour), (int) gp.blue(layerColour),
+					//255);
 		}
 
 		// calculate time to generate graph
@@ -183,7 +146,7 @@ class StreamGraphRange {
 			layout.layout(layers);
 			// fit graph to viewport
 
-			scaleLayers(layers, 0, (int) (sliderSize));
+			scaleLayers(layers, 0, (int) (bufferToUse.height));
 
 			// give report
 			PApplet.println();
@@ -191,32 +154,14 @@ class StreamGraphRange {
 			int numLayers = layers.length;
 			int layerSize = layers[0].size.length;
 			PApplet.println("Data has " + numLayers + " layers, each with "
-					+ layerSize + " datapoints.");
+					+ (layerSize) + " datapoints.");
 			PApplet.println("Layout Method: " + layout.getName());
 			PApplet.println("Ordering Method: " + ordering.getName());
 			PApplet.println("Coloring Method: " + layout.getName());
 			PApplet.println("Elapsed Time: " + layoutTime + "ms");
 		}
 
-		drawGraphToBuffer();
-	}
-
-	PImage getWeatherImage(String weatherType) {
-		PImage toReturn = parent.rain;
-		// set correct image
-		if (weatherType.equals("rain"))
-			toReturn = parent.rain;
-
-		if (weatherType.equals("showers"))
-			toReturn = parent.showers;
-		if (weatherType.equals("cloudy"))
-			toReturn = parent.cloudy;
-		if (weatherType.equals("clear"))
-			toReturn = parent.clear;
-		// image(clear, width/2 - imgDim.x/2, height/2 - imgDim.y/2, imgDim.x,
-		// imgDim.y);
-
-		return toReturn;
+		drawGraphToBuffer(bufferToUse, start, end);
 	}
 
 	void scaleLayers(Layer[] layers, int screenTop, int screenBottom) {
@@ -255,12 +200,6 @@ class StreamGraphRange {
 
 	void updateScaling() {
 
-		if (parent.tweetSetManager.isWeatherViewActive()) // cheeky!
-		{
-			sliderSize = 100 - parent.rain.height / 2;
-		} else
-			sliderSize = 100;
-
 		int imageOffsetX = parent.x
 				+ (int) (parent.imgPos.x * parent.scaleFactorX);
 		int imageOffsetY = parent.y
@@ -270,21 +209,19 @@ class StreamGraphRange {
 		y = imageOffsetY;
 
 		mWidth = (int) ((TwitterFiltering.imgX) * parent.scaleFactorX);
-		mHeight = (int) ((sliderSize) * parent.scaleFactorY);
+		mHeight = (int) ((100) * parent.scaleFactorY);
 
-		if (numLayers > 0)
-			scaleLayers(layers, 0, (int) (sliderSize));
+		//if (numLayers > 0)
+			//scaleLayers(layers, 0, (int) (smallBuffer.height));
 	}
 
-	void graphVertex(int point, float[] source, boolean curve, boolean pxl) {
-		float x = PApplet.map(point, 0, layerSize - 1, 0, buffer.width);
+	void graphVertex(PGraphics buffer, int days, int point, float[] source,
+			boolean curve, boolean pxl) {
+		float x = PApplet.map(point, 0, days - 1, 0, buffer.width);
 		float y = source[point] - (pxl ? 1 : 0);
 
 		buffer.beginDraw();
 		if (curve) {
-			// buffer.curveTightness(testVal);
-			// stroke(0);
-			// strokeWeight(3);
 			buffer.curveVertex(x, y);
 		} else {
 			buffer.vertex(x, y);
@@ -293,69 +230,70 @@ class StreamGraphRange {
 		buffer.endDraw();
 	}
 
-	void drawDayRects() {
-		// Draw day rectangles
-		int dayRange = Days.daysIn(
-				new Interval(TwitterFiltering.minDate, TwitterFiltering.maxDate)).getDays();
+	void drawDayRects(PGraphics buffer, int s, int e) {
 
-		for (int k = 0; k < dayRange; k++) {
+		DateTime tempdt = new DateTime(TwitterFiltering.minDate);
+		buffer.textAlign(PConstants.CENTER, PConstants.BOTTOM);
+		buffer.textSize(8);
+		for (int k = 0; k < (e - s); k++) {
 
 			buffer.stroke(0, 0, 0, 20);
-			float rectSize = (float) (buffer.width) / (float) dayRange;
+			float rectSize = (float) (buffer.width) / (float) (e - s);
 
 			if (k % 2 == 0)
 				buffer.fill(0, 0, 0, 10); // even
 			else
 				buffer.fill(0, 0, 0, 5); // even
 
-			buffer.rect((rectSize * k), 0, rectSize, sliderSize);
+			buffer.rect((rectSize * k), 0, rectSize, buffer.height);
+			//put a day number in here!
+			buffer.fill(0);
+			//PApplet.println("Adding day " + tempdt.plusDays(k+s).dayOfMonth().getAsString());
+			buffer.text(tempdt.plusDays(k+s).dayOfMonth().getAsString(), k*rectSize +rectSize/2, buffer.height);
 		}
-	}
-
-	void drawWeatherIcons() {
-		gp.fill(gp.color(115, 162, 192));
-		gp.noStroke();
-		PImage weatherImage = getWeatherImage(weatherInfo.get(0));
-
-		gp.rect(x, y + sliderSize * parent.scaleFactorY, mWidth,
-				weatherImage.height * parent.scaleFactorY * 0.5f);
-		for (int k = 0; k < 20; k++) {
-			// println("Drawing");
-			float rectSize = (float) (buffer.width) / 20.0f;
-			weatherImage = getWeatherImage(weatherInfo.get(k));
-			gp.imageMode(PConstants.CORNER);
-			float imageOffset = (rectSize - (weatherImage.width / 2)) / 2;
-			gp.image(weatherImage, x
-					+ ((rectSize * k + imageOffset) * parent.scaleFactorX)
-					+ (offsetX * parent.scaleFactorX), y
-					+ (sliderSize * parent.scaleFactorY), weatherImage.width
-					* parent.scaleFactorX * 0.5f, weatherImage.height
-					* parent.scaleFactorY * 0.5f);
-		}
-
-		/*
-		 * fill(color(255, 0, 0)); rect(x, y, mWidth, mHeight);
-		 * fill(color(0,255,0)); rect(x, y, sliderSize* parent.scaleFactorY,
-		 * sliderSize* parent.scaleFactorY);
-		 */
 	}
 
 	void draw() {
 		updateScaling();
 
 		// check if a tweet set has recently been removed
-		if (layers.length > parent.tweetSetManager.getTweetSetListSize()) {
-			createStreamGraph();
+		if (layers.length > parent.tweetSetManager.getTweetSetListSize() || usingVariable) {
+			createStreamGraph(smallBuffer, startDay, endDay);
 		}
-
-		gp.image(streamGraphImg, x + (offsetX * parent.scaleFactorX), y,
-				mWidth, mHeight);
-
-		if (parent.tweetSetManager.isWeatherViewActive()) // cheeky!
-			drawWeatherIcons();
+		if (usingVariable) {
+			//createStreamGraph(buffer, startDay, endDay);
+			drawGraphToBuffer(smallBuffer, startDay, endDay);
+			usingVariable = false;
+		}
+		gp.image(streamGraphImg, x, y, mWidth, mHeight);
 	}
 
-	void drawGraphToBuffer() {
+	void draw(int tx, int ty, int w, int h) {
+		// aspect ratio change! redraw the buffer
+		if (!usingVariable) {
+			variableBuffer = gp.createGraphics(w, h, PConstants.JAVA2D);
+			int s = Days.daysIn(
+					new Interval(TwitterFiltering.minDate, parent.dateSelection
+							.getStart())).getDays();
+			int e = Days.daysIn(
+					new Interval(TwitterFiltering.minDate, parent.dateSelection
+							.getEnd())).getDays();
+			PApplet.println("Date range is " + s + " to " + e);
+			createStreamGraph(variableBuffer, s, e);
+			//
+			drawGraphToBuffer(variableBuffer, s, e);
+			PApplet.println("Using buffer!");
+			usingVariable = true;
+		}
+		// draw the image wherever we want!
+		gp.image(streamGraphImg, tx, ty, w, h);
+	}
+
+	boolean hasMouseOver() {
+		return (x < gp.mouseX && (x + mWidth) > gp.mouseX && y < gp.mouseY && (y + mHeight) > gp.mouseY);
+	}
+
+	void drawGraphToBuffer(PGraphics buffer, int s, int e) {
 
 		updateScaling();
 		int n = layers.length;
@@ -369,18 +307,18 @@ class StreamGraphRange {
 			int m = layers[0].size.length;
 			int start;
 			int end;
-			//int lastIndex = m - 1;
+			// int lastIndex = m - 1;
 			int lastLayer = n - 1;
-			//int pxl;
+			// int pxl;
 
 			// calculate time to draw graph
-			//long time = System.currentTimeMillis();
-
+			// long time = System.currentTimeMillis();
+			int days = e - s;
 			// generate graph
 			for (int i = 0; i < n; i++) {
 				start = PApplet.max(0, layers[i].onset - 1);
 				end = PApplet.min(m - 1, layers[i].end);
-				//pxl = i == lastLayer ? 0 : 1;
+				// pxl = i == lastLayer ? 0 : 1;
 
 				// set fill color of layer
 				buffer.fill(layers[i].rgb);
@@ -389,20 +327,24 @@ class StreamGraphRange {
 				buffer.beginShape();
 
 				// draw bottom edge, right to left
-				graphVertex(end, layers[i].yBottom, isGraphCurved, false);
+				graphVertex(buffer, days, end, layers[i].yBottom,
+						isGraphCurved, false);
 				for (int j = end; j >= start; j--) {
-					graphVertex(j, layers[i].yBottom, isGraphCurved, false);
+					graphVertex(buffer, days, j, layers[i].yBottom,
+							isGraphCurved, false);
 				}
-				graphVertex(start, layers[i].yBottom, isGraphCurved, false);
+				graphVertex(buffer, days, start, layers[i].yBottom,
+						isGraphCurved, false);
 
 				// draw top edge, left to right
-				graphVertex(start, layers[i].yTop, isGraphCurved,
+				graphVertex(buffer, days, start, layers[i].yTop, isGraphCurved,
 						i == lastLayer);
 				for (int j = start; j <= end; j++) {
-					graphVertex(j, layers[i].yTop, isGraphCurved,
+					graphVertex(buffer, days, j, layers[i].yTop, isGraphCurved,
 							i == lastLayer);
 				}
-				graphVertex(end, layers[i].yTop, isGraphCurved, i == lastLayer);
+				graphVertex(buffer, days, end, layers[i].yTop, isGraphCurved,
+						i == lastLayer);
 
 				buffer.endShape(PConstants.CLOSE);
 			}
@@ -410,7 +352,7 @@ class StreamGraphRange {
 
 		// rect(x, y, (imgX+6) * parent.scaleFactorX, (sliderSize *
 		// parent.scaleFactorY));
-		drawDayRects();
+		drawDayRects(buffer, s, e);
 		buffer.endDraw();
 
 		// println("Buffer Width : " + buffer.width);

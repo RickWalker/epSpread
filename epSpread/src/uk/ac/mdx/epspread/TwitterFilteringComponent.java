@@ -41,6 +41,8 @@ import org.gicentre.utils.text.*;
 import de.fhpotsdam.unfolding.UnfoldingMap;
 import de.fhpotsdam.unfolding.geo.Location;
 
+//import de.fhpotsdam.unfolding.providers.OpenStreetMap;
+//import de.fhpotsdam.unfolding.providers.StamenMapProvider;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import de.fhpotsdam.unfolding.utils.ScreenPosition;
 
@@ -51,29 +53,28 @@ class TwitterFilteringComponent {
 	TimeLineComponent parent;
 	TwitterFiltering papplet; // PApplet class for methods! eventually just
 								// PApplet
+	String panelFocus = null;
 	int componentID;
 	boolean enableThumbnails = false;
 	// SQLite db;
-
+	PanelCaption caption;
 	TweetSetManager tweetSetManager;
 	WordCloud wordCloud;
+
+	String drawLarge = null;
 
 	Interval dateSelection;
 	Interval previousDateSelection;
 	String previousKeyword = "";
-	int oldWidth, oldHeight;
+	// int oldWidth, oldHeight;
 	MovementState currentTransitionState;
 	MovementState previousTransitionState;
 	PImage thumbnail;
-	PImage windArrow;
 	PGraphics thumbnailBuffer;
 	// boolean doneResize = true;
 
 	ArrayList<TweetNetwork> tweetNetworks = new ArrayList<TweetNetwork>();
 	ArrayList<Integer> selectedTweetUserIds = new ArrayList<Integer>();
-
-	ArrayList<String> windDirection = new ArrayList<String>();
-	ArrayList<String> windSpeed = new ArrayList<String>();
 	ArrayList<Annotation> annotations = new ArrayList<Annotation>();
 
 	// ---- Mouse Drag/Selection ----
@@ -118,7 +119,7 @@ class TwitterFilteringComponent {
 
 	PImage imgMap;
 	RShape shp = new RShape();
-	RFont rfont = new RFont("Verdana.ttf", 18);
+	// RFont rfont = new RFont("Verdana.ttf", 18);
 
 	/*
 	 * -----------------------------
@@ -140,13 +141,14 @@ class TwitterFilteringComponent {
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		oldWidth = width;
-		oldHeight = height;
+		// oldWidth = width;
+		// oldHeight = height;
 		xIntegrator = new Integrator(x);
 		yIntegrator = new Integrator(y);
 		widthIntegrator = new Integrator(width);
 		heightIntegrator = new Integrator(height);
-
+		// PVector newPos = getLocalCoordinate(new PVector(x,y));
+		caption = null;// new PanelCaption(papplet, this);
 		// componentID = papplet.componentCount++;
 
 		calculateScale();
@@ -166,7 +168,8 @@ class TwitterFilteringComponent {
 		imgMap = papplet.loadImage("data/Vastopolis_Map_B&W_2.png");
 		imgPos = new PVector(20, 60);
 		map = new UnfoldingMap(papplet, imgPos.x, imgPos.y,
-				TwitterFiltering.imgX, TwitterFiltering.imgY);
+				TwitterFiltering.imgX, TwitterFiltering.imgY);// , new
+																// StamenMapProvider.TonerLite());
 		// TwitterFiltering.imgX * scaleFactorX, TwitterFiltering.imgY
 		// * scaleFactorY);
 		resizeUnfoldingMap(); // set initial transform
@@ -180,14 +183,6 @@ class TwitterFilteringComponent {
 
 		map.zoomAndPanTo(new Location(51.6f, -0.6f), 10);
 		MapUtils.createDefaultEventDispatcher(papplet, map);
-
-		// Load the weather images
-		rain = papplet.loadImage("data/rain.jpg");
-		showers = papplet.loadImage("data/showers.jpg");
-		cloudy = papplet.loadImage("data/cloudy.jpg");
-		clear = papplet.loadImage("data/clear.jpg");
-
-		windArrow = papplet.loadImage("data/arrow.png");
 
 		// Load font
 		papplet.textFont(papplet.font);
@@ -232,7 +227,6 @@ class TwitterFilteringComponent {
 			generateThumbnail();
 		}
 
-		loadWeatherData();
 		RG.init(parent.parent);
 	}
 
@@ -295,7 +289,7 @@ class TwitterFilteringComponent {
 	}
 
 	void setConstants() {
-		tweetBoxSize = 10 * fontScale;
+		tweetBoxSize = 30 * fontScale;
 		filterTextField_x = (int) (x + scaleFactorX
 				* (TwitterFiltering.imgX + imgPos.x + 50));
 		filterTextField_y = (int) (y + 60 * scaleFactorY);
@@ -304,15 +298,8 @@ class TwitterFilteringComponent {
 
 	void resizeP5Components() {
 		range.setBroadcast(false);
-		papplet.controlP5.setFont(papplet.font, (int) (18.0 * fontScale)); // this
-																			// is
-																			// expensive
-																			// -
-																			// do
-																			// it
-																			// once
-																			// stopped
-																			// moving?
+		papplet.controlP5.setFont(papplet.font, (int) (18.0 * fontScale));
+		// expensive - only do if not moving!
 		range.setPosition((int) (x + ((imgPos.x) * scaleFactorX)),
 				(int) (y + (imgPos.y + TwitterFiltering.imgY + 10)
 						* scaleFactorY));
@@ -331,13 +318,9 @@ class TwitterFilteringComponent {
 		filterTextField.setSize((int) (180 * scaleFactorX),
 				(int) (30 * scaleFactorY));
 		filterTextField.setPosition(filterTextField_x, filterTextField_y);
-		// controlP5.setControlFont(new ControlFont(createFont("FFScala",
-		// int(18.0*fontScale)), int(18.0*fontScale))); //this is expensive - do
-		// it once stopped moving?
 		for (Annotation a : annotations)
 			a.resize();
 		resizeUnfoldingMap();
-		// filterTextField.update();
 
 	}
 
@@ -357,6 +340,25 @@ class TwitterFilteringComponent {
 		resizeUnfoldingMap();
 	}
 
+	public void checkComponents() {
+		// work out which component they double-clicked on!
+		// easiest to do here because we know coords of everything
+		PVector transformedMouse = map.getViewingTransform().mult(
+				new PVector(papplet.mouseX, papplet.mouseY), null);
+		if (map.isHit(transformedMouse.x, transformedMouse.y)) {
+			PApplet.println("Map selected!");
+			drawLarge = "map";
+		} else if (streamGraphRange.hasMouseOver()) {
+			PApplet.println("Stream graph selected!");
+			drawLarge = "streamgraph";
+		} else if (wordCloud.hasMouseOver()) {
+			PApplet.println("Word cloud selected!");
+			drawLarge = "wordcloud";
+		} else {
+			drawLarge = null;
+		}
+	}
+
 	void resizeUnfoldingMap() {
 		// just do the mouse transform!
 		// screen to world space!
@@ -364,20 +366,6 @@ class TwitterFilteringComponent {
 		view.scale(1.0f / scaleFactorX, 1.0f / scaleFactorY);
 		view.translate(-x, -y);
 		map.setViewingTransform(view);
-
-		// AbstractMapDisplay ref = map.mapDisplay;
-		// ref.resize(TwitterFiltering.imgX * scaleFactorX,
-		// TwitterFiltering.imgY * scaleFactorY);
-
-		// ref.getInnerPG().width = (int) (TwitterFiltering.imgX *
-		// scaleFactorX);
-		// ref.offsetX = x + imgPos.x * scaleFactorX;
-		// ref.offsetY = y + imgPos.y * scaleFactorY;
-
-		// map.mapDisplay.getDefaultMarkerManager()..drawOuter();
-
-		// PApplet.println("Map has size " + map.mapDisplay.getInnerPG().width +
-		// " and " + map.mapDisplay.getInnerPG().height);
 	}
 
 	boolean doneMoving() {
@@ -385,45 +373,6 @@ class TwitterFilteringComponent {
 				&& PApplet.abs(height - (int) (heightIntegrator.target)) <= 1
 				&& PApplet.abs(x - (int) (xIntegrator.target)) <= 1
 				&& PApplet.abs(y - (int) (yIntegrator.target)) <= 1;
-	}
-
-	void loadWeatherData() {
-
-		PApplet.println("Loading weather data");
-
-		try {
-			Class.forName("org.sqlite.JDBC");
-		} catch (ClassNotFoundException e) {
-			PApplet.println("Weather couldn't find database!");
-		}
-		Connection connection = null;
-		try {
-			// create a database connection
-			PApplet.println("Sketch path is " + papplet.sketchPath(""));
-			connection = DriverManager.getConnection("jdbc:sqlite:"
-					+ papplet.sketchPath("VAST2011_MC1.sqlite"));
-			Statement statement = connection.createStatement();
-			statement.setQueryTimeout(30); // set timeout to 30 sec.
-
-			ResultSet rs = statement.executeQuery("SELECT * FROM weather");
-			while (rs.next()) {
-				// read the result set
-				windDirection.add(rs.getString("Wind_Direction"));
-				windSpeed.add(rs.getString("Average_Wind_Speed"));
-			}
-		} catch (SQLException e) {
-			// if the error message is "out of memory",
-			// it probably means no database file is found
-			System.err.println(e.getMessage());
-		} finally {
-			try {
-				if (connection != null)
-					connection.close();
-			} catch (SQLException e) {
-				// connection close failed.
-				System.err.println(e);
-			}
-		}
 	}
 
 	/*
@@ -455,7 +404,6 @@ class TwitterFilteringComponent {
 				&& previousTransitionState == MovementState.LARGE) {
 			generateThumbnail();
 		}
-		previousTransitionState = currentTransitionState;
 
 		/*
 		 * if (currentTransitionState == MovementState.SHRINKING) {
@@ -484,19 +432,24 @@ class TwitterFilteringComponent {
 			// re-add p5 components?
 			PApplet.println("New transition state!");
 			removeP5Components();
-			for (Annotation a : annotations) {
+			/*for (Annotation a : annotations) {
 				a.removeNote();
 				a.createNote();
-			}
+			}*/
 			createP5Components();
 			if (currentTransitionState == MovementState.SMALL) {
 				hideP5Components();
 			} else {
+				PApplet.println("Finished transition, showing again!");
 				showP5Components();
 			}
 			previousTransitionState = currentTransitionState;
 		}
-		if (currentTransitionState != MovementState.SMALL || thumbnail == null) {
+		if (currentTransitionState == MovementState.SMALL && drawLarge != null) {
+			drawLargeComponent(drawLarge);
+
+		} else if (currentTransitionState != MovementState.SMALL
+				|| thumbnail == null) {
 			// draw live unless small!
 			drawComponents();// x, y, width, height);
 		} else {
@@ -514,6 +467,35 @@ class TwitterFilteringComponent {
 		papplet.fill(100, 100, 255, 100);
 		papplet.strokeWeight(3);
 		shp.draw();
+	}
+
+	void drawLargeComponent(String dl) {
+		// PApplet.println("Drawing large " + dl);
+		papplet.stroke(0);
+		papplet.rect(x, y, width, height);
+		if (dl.equals("map")) {
+			papplet.pushMatrix();
+			papplet.translate(x, y);
+			papplet.scale(scaleFactorX, scaleFactorY);
+
+			// now work out how much to scale it!
+			float xScale = (float) width
+					/ ((float) map.mapDisplay.getWidth() * scaleFactorX);
+			float yScale = (float) height
+					/ ((float) map.mapDisplay.getHeight() * scaleFactorY);
+			papplet.scale(xScale, yScale);
+			papplet.translate(-map.mapDisplay.offsetX, -map.mapDisplay.offsetY);
+			map.draw();
+			drawTweetsOnce();
+			papplet.popMatrix();
+		} else if (dl.equals("streamgraph")) {
+			streamGraphRange.draw(x, y, width, height);
+			// streamGraphRange.drawLarge();
+		} else if (dl.equals("wordcloud")) {
+			wordCloud.draw(x, y, width, height);
+		}
+		if (caption != null)
+			caption.draw();
 	}
 
 	void drawDateRange() {
@@ -540,35 +522,26 @@ class TwitterFilteringComponent {
 	}
 
 	void drawComponents() {// int x, int y, int width, int height) {
-
+		if (caption != null)
+			caption.draw(); // panel caption! in world coords!
 		// ---- Border + Map ----
 		papplet.stroke(0);
 		papplet.fill(225, 228, 233);
 		papplet.rect(x, y, width, height);
 		// draw date at the top!
 		drawDateRange();
+		// ---- Draw ControlP5 ----
+		papplet.controlP5.draw();
 		//
 		// ----- Draw streamgraph range -------
 		streamGraphRange.draw();
 
 		papplet.strokeWeight(0);
 		papplet.fill(40);
-		// rect(x + (imgPos.x - 3)*scaleFactorX, y+ (imgPos.y - 3)*scaleFactorY,
-		// (imgX+6)*scaleFactorX, (imgY+6)*scaleFactorY);
-		// grandparent.image(imgMap, x + imgPos.x * scaleFactorX, y + imgPos.y
-		// * scaleFactorY, TwitterFiltering.imgX * scaleFactorX,
-		// TwitterFiltering.imgY * scaleFactorY);
 
 		papplet.pushMatrix();
 		papplet.translate(x, y);
 		papplet.scale(scaleFactorX, scaleFactorY);
-		// grandparent.resetMatrix();
-		// AbstractMapDisplay ref = map.mapDisplay;
-		// ref.getInnerPG().background(255,0,0);
-		// PApplet.println("Applet graphics is " + grandparent.g.width +
-		// " and "+grandparent.g.height);
-		// PApplet.println("Map graphics is " + ref.getInnerPG().width + " and "
-		// +ref.getInnerPG().height);
 
 		map.draw();
 
@@ -612,22 +585,22 @@ class TwitterFilteringComponent {
 
 		wordCloud.draw();
 
-		if (tweetSetManager.isWeatherViewActive())
-			drawWindArrows();
-
 		// ---- Draw the tweets on the map ----
-		drawTweetsOnce();
-
-		// ---- Draw ControlP5 ----
-		papplet.controlP5.draw();
-		// draw annotations!
 		papplet.pushMatrix();
 		papplet.translate(x, y);
 		papplet.scale(scaleFactorX, scaleFactorY);
+		drawTweetsOnce();
+		// papplet.popMatrix();
+
+		// draw annotations!
+		// papplet.pushMatrix();
+		// papplet.translate(x, y);
+		// papplet.scale(scaleFactorX, scaleFactorY);
 
 		for (Annotation a : annotations) {
 			a.draw();
 		}
+
 		papplet.popMatrix();
 
 	}
@@ -684,98 +657,6 @@ class TwitterFilteringComponent {
 		dateString.append(PApplet.nf(t.hourOfDay().get(), 2));
 		dateString.append(":00");
 		return dateString.toString();
-	}
-
-	void drawWindArrows() {
-
-		windAngle_integrator.update();
-		windSpeed_integrator.update();
-
-		int dayOfTweet = Days.daysIn(
-				new Interval(TwitterFiltering.minDate, dateSelection.getEnd()))
-				.getDays();
-		dayOfTweet = PApplet.constrain(dayOfTweet, 0, 20);
-
-		String dir = windDirection.get(dayOfTweet);
-		// println(windDirection);
-
-		String speed = windSpeed.get(dayOfTweet);
-		// println(speed);
-		float fSpeed = PApplet.map(Float.valueOf(speed).floatValue(), 4.0f,
-				14.0f, 0.35f, 0.9f);
-
-		int angle = 0;
-
-		if (dir.equals("N"))
-			angle = 180;
-		if (dir.equals("NW"))
-			angle = 135;
-		if (dir.equals("NNW"))
-			angle = 158;
-		if (dir.equals("WNW"))
-			angle = 113;
-		if (dir.equals("W"))
-			angle = 90;
-		if (dir.equals("E"))
-			angle = -90;
-		if (dir.equals("SE"))
-			angle = -45;
-
-		windAngle_integrator.target(angle);
-		windSpeed_integrator.target(fSpeed);
-
-		int gridRes = 10;
-		float cov = 0.95f; // map coverage
-		int counter = 0;
-		int extra = 0;
-
-		for (int i = (int) (TwitterFiltering.imgX * (1.0f - cov)); i < TwitterFiltering.imgX
-				* cov; i += TwitterFiltering.imgX / gridRes) {
-
-			for (int j = (int) (TwitterFiltering.imgY * (1.0f - cov)); j < (TwitterFiltering.imgY * cov); j += TwitterFiltering.imgY
-					/ gridRes) {
-
-				if (counter % 2 != 0) {
-					extra = (TwitterFiltering.imgX / gridRes) / 4;
-				} else {
-					extra = 0;
-				}
-				drawArrow(
-						(int) (x + ((imgPos.x + i - 10) * scaleFactorX))
-								+ extra,
-						(int) (y + ((imgPos.y + j) * scaleFactorY)),
-						(float) 0.8 * scaleFactorX * windSpeed_integrator.value,
-						(float) 0.8 * scaleFactorY * windSpeed_integrator.value,
-						windAngle_integrator.value);
-				counter++;
-			}
-		}
-	}
-
-	void drawArrow(int x, int y, float w, float h, float angle) {
-
-		papplet.pushMatrix();
-		papplet.translate(x, y);
-
-		papplet.fill(255, 0, 0);
-
-		// translate(-26,24);
-		papplet.rotate(PApplet.radians(angle));
-
-		papplet.scale(w, h);
-
-		// rotate(radians(angle));
-		papplet.tint(165, 165, 255, 200);
-		papplet.stroke(0, 0, 0, 50);
-		papplet.strokeWeight(2);
-
-		papplet.imageMode(PConstants.CENTER);
-		papplet.image(windArrow, 0, 0, windArrow.width, windArrow.height);
-		// triangle(0, 40, 25, 0, 50, 40);
-		// quad(12.5, 40, 12.5, 100, 37.5, 100, 37.5, 40);
-		papplet.popMatrix();
-		papplet.imageMode(PConstants.CORNER);
-		papplet.tint(255, 255, 255, 255);
 	}
 
 	/*
@@ -858,9 +739,6 @@ class TwitterFilteringComponent {
 		// TwitterFiltering.imgY * scaleFactorY
 
 		// if (!b_draggingMouse) {
-		papplet.pushMatrix();
-		papplet.translate(x, y);
-		papplet.scale(scaleFactorX, scaleFactorY);
 		// make sure we stay on the map!
 		if ((loc.x + shadowOffset + shadowOffset + headerWidth) > (imgPos.x + TwitterFiltering.imgX)) {
 			// bump it across a bit more!
@@ -869,8 +747,8 @@ class TwitterFilteringComponent {
 			papplet.translate(-(shadowOffset + shadowOffset + headerWidth), 0);
 		}
 		if ((loc.y + info_header_size + textBoxSize) > (imgPos.y + TwitterFiltering.imgY)) {
-			//PApplet.println("Would overhang y - translating back by "
-			//		+ (info_header_size + textBoxSize));
+			// PApplet.println("Would overhang y - translating back by "
+			// + (info_header_size + textBoxSize));
 			papplet.translate(0, -(info_header_size + textBoxSize));
 		}
 
@@ -898,7 +776,6 @@ class TwitterFilteringComponent {
 				headerWidth - gap * 2, 300 - gap * 2);
 
 		papplet.fill(t.getTweetSetColour());
-		papplet.popMatrix();
 		// }
 	}
 
@@ -912,6 +789,7 @@ class TwitterFilteringComponent {
 
 	void drawTweetsOnce()// int mini, int maxi)
 	{
+		// new plan - assume we're in 0,0 coordinate space here!
 		papplet.textFont(papplet.font);
 		papplet.strokeWeight(2 * fontScale);
 		Tweet forMouseOver = null;
@@ -922,11 +800,7 @@ class TwitterFilteringComponent {
 				if (b.isActive()) // if this tweetset is active
 				{
 					if (tweetSetManager.isHeatmapViewActive()) {
-						papplet.pushMatrix();
-						papplet.translate(x, y);
-						papplet.scale(scaleFactorX, scaleFactorY);
 						b.heatmap.draw();
-						papplet.popMatrix();
 					}
 
 					for (Tweet a : b.getTweets()) {
@@ -962,7 +836,14 @@ class TwitterFilteringComponent {
 										papplet.mouseY, x + (loc.x)
 												* scaleFactorX, y + (loc.y)
 												* scaleFactorY) < tweetBoxSize) {
-									forMouseOver = a;
+									// only mouseover if we're over the map!
+									if (loc.x > imgPos.x
+											&& loc.x < (imgPos.x + TwitterFiltering.imgX)) {
+										if (loc.y > imgPos.y
+												&& loc.y < (imgPos.y + TwitterFiltering.imgY)) {
+											forMouseOver = a;
+										}
+									}
 								}
 							}
 
@@ -980,22 +861,23 @@ class TwitterFilteringComponent {
 								 * loc.x) , y + (imgPos.y + loc.y -
 								 * tweetBoxSize) , tweetBoxSize, tweetBoxSize);
 								 */
-								papplet.pushMatrix();
-								papplet.translate(x, y);
-								papplet.scale(scaleFactorX, scaleFactorY);
+								float scaledBoxSize = tweetBoxSize
+										* Math.max(1.0f / scaleFactorX,
+												1.0f / scaleFactorY);
 								// only draw if we're within the map box!
+								// also, tweak
+								loc.x = loc.x - scaledBoxSize / 2;
+								loc.y = loc.y - scaledBoxSize / 2;
 								if (loc.x > imgPos.x
-										&& loc.x < (imgPos.x + TwitterFiltering.imgX)) {
+										&& (loc.x + scaledBoxSize) < (imgPos.x + TwitterFiltering.imgX)) {
 									if (loc.y > imgPos.y
-											&& loc.y < (imgPos.y + TwitterFiltering.imgY)) {
-
-										papplet.rect(loc.x - tweetBoxSize / 2,
-												loc.y - tweetBoxSize / 2,
-												tweetBoxSize, tweetBoxSize);
+											&& (loc.y + scaledBoxSize) < (imgPos.y + TwitterFiltering.imgY)) {
+										// could replace with four calls to
+										// isOverMap, but seems silly to do so
+										papplet.rect(loc.x, loc.y,
+												scaledBoxSize, scaledBoxSize);
 									}
 								}
-								papplet.popMatrix();
-
 							}
 						} else {
 							// tweet not in date range
@@ -1098,7 +980,8 @@ class TwitterFilteringComponent {
 			PApplet.println(filterTerms[i]);
 
 		// Build the query
-		String query_part1 = "SELECT * FROM tweets WHERE ";
+		String query_part1 = "SELECT * FROM tweets WHERE createdAt > \""
+				+ papplet.fmt.print(TwitterFiltering.minDate) + "\" AND ";
 		String query_part2 = "";
 
 		// append all the keywords to search for
@@ -1125,7 +1008,8 @@ class TwitterFilteringComponent {
 		try {
 			// create a database connection
 			connection = DriverManager.getConnection("jdbc:sqlite:"
-					+ papplet.dataPath("tweetsdb.sqlite"));// "+sketchPath("sample.db");
+					+ papplet.dataPath("tweetsdb.sqlite"));// ("tweetsdb.sqlite"));//
+															// "+sketchPath("sample.db");
 			Statement statement = connection.createStatement();
 			ResultSet rs = statement.executeQuery(sqlQuery);
 			Tweet newTweetToAdd;
@@ -1155,8 +1039,55 @@ class TwitterFilteringComponent {
 					newTweetToAdd.setUserId(rs.getInt("ID"));
 
 					// get and set the location of this tweet
-					Location tweetLocation = new Location(
-							rs.getFloat("latitude"), rs.getFloat("longitude"));
+					Location tweetLocation = null;
+					String locationString = rs.getString("location");
+					if (rs.getFloat("latitude") != 9999) {
+						// easiest case - we have location directly
+						tweetLocation = new Location(rs.getFloat("latitude"),
+								rs.getFloat("longitude"));
+					} else if (locationString != null) {
+						if (locationString.startsWith("\u00DCT: ")) {
+
+							// parse blackberry result!
+							// System.err.println("Found umlaut!");
+							// System.err.println("To tokenise" +toTokenise);
+							String[] tokens = PApplet.split(
+									locationString.substring(4), ",");
+							if (tokens.length == 2) {
+								tweetLocation = new Location(
+										PApplet.parseFloat(tokens[0]),
+										PApplet.parseFloat(tokens[1]));
+							} else {
+								System.err
+										.println("Unexpected length for tokens: "
+												+ tokens.length);
+								System.err.println("Location was "
+										+ locationString);
+								tweetLocation = new Location(9999.0, 9999.0);
+							}
+						} else if (locationString.startsWith("iPhone:")) {
+							String[] tokens = PApplet.split(
+									locationString.substring(7), ",");
+							if (tokens.length == 2) {
+								tweetLocation = new Location(
+										PApplet.parseFloat(tokens[0]),
+										PApplet.parseFloat(tokens[1]));
+							} else {
+								System.err
+										.println("Unexpected length for tokens: "
+												+ tokens.length);
+								System.err.println("Location was "
+										+ locationString);
+								tweetLocation = new Location(9999.0, 9999.0);
+							}
+						} else {
+							// location we don't parse yet
+							tweetLocation = new Location(9999.0, 9999.0);
+						}
+					} else {
+						tweetLocation = new Location(9999.0, 9999.0);
+						// System.err.println("No location!");
+					}
 					thisDate = papplet.fmt.parseDateTime(rs
 							.getString("createdAt"));
 
@@ -1657,9 +1588,11 @@ class TwitterFilteringComponent {
 							boolean b_found = false;
 
 							for (Tweet c : d.getTweets()) {
-								if (c.getUserId() == userId)
+								if (c.getUserId() == userId) {
 									b_found = true; // found an id match in this
 													// tweetSet
+									break; // stop looking!
+								}
 							}
 
 							if (b_found)
@@ -1707,7 +1640,7 @@ class TwitterFilteringComponent {
 		// if we're right-clicking, that's annotation
 		if (papplet.mouseButton == PConstants.RIGHT) {
 			PApplet.println("RIGHT BUTTON!");
-			// two cases: over an existing annotation, and over nothing!
+			// three cases: over an existing annotation, and over nothing!
 			boolean editing = false;
 			for (Annotation a : annotations) {
 				if (a.mouseOver()) {
@@ -1720,15 +1653,42 @@ class TwitterFilteringComponent {
 				PApplet.println("Added annotation!");
 				PVector newPos = getLocalCoordinate(new PVector(papplet.mouseX,
 						papplet.mouseY));
-				Annotation a = new Annotation(papplet, this, (int) newPos.x,
-						(int) newPos.y, Annotation.DEFAULT_WIDTH, 100,
-						annotations.size());
+				Annotation a;//
+				if (isOverMap(newPos)) {
+					// it's a map annotation!
+					a = new MapAnnotation(papplet, this, map.getLocation(
+							newPos.x, newPos.y), Annotation.DEFAULT_WIDTH, 100,
+							map);
+					PApplet.println("Added map annotation at " + a);
+				} else {
+					a = new Annotation(papplet, this, (int) newPos.x,
+							(int) newPos.y, Annotation.DEFAULT_WIDTH, 100);
+				}
+				a.createNote();
 				// grandparent.registerKeyEvent(a); //so that we can listen for
 				// Enter
 				annotations.add(a);
 			}
 		}
 
+	}
+
+	boolean isOverMap(PVector tx) {
+		return isOverMap(tx.x, tx.y);
+	}
+
+	boolean isOverMap(float tx, float ty) {
+		// in local coords, is this coordinate over the map?
+		return (tx > imgPos.x && tx < imgPos.x + TwitterFiltering.imgX
+				&& ty > imgPos.y && ty < imgPos.y + TwitterFiltering.imgY);
+	}
+
+	public boolean hasCaption() {
+		return (caption != null);
+	}
+
+	public void addCaption() {
+		caption = new PanelCaption(papplet, this);
 	}
 
 	boolean contains(int tx, int ty) {
