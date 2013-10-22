@@ -560,38 +560,57 @@ class TwitterFilteringComponent {
 					- maptlpt.y);
 			papplet.image(imgMap, tlpt.x, tlpt.y, brpt.x - tlpt.x, brpt.y
 					- tlpt.y);
-			
-			
+
 			// now get the image back and draw it!
 			// papplet.image(mapImageBuffer.get(), imgPos.x,imgPos.y);
 			// papplet.g.noClip();
 		}
 		papplet.popMatrix();
-		//blank off the bits around the map!
-		
-		//papplet.rect(x, y,map.mapDisplay.offsetX*scaleFactorX -x, height);
-		//papplet.rect(x, y,width, height-(map.mapDisplay.offsetY-map.mapDisplay.getHeight()));
-		
-		//manual clip around map
-		papplet.noStroke();
-		papplet.fill(225, 228, 233);
-		papplet.rect(x, y, width, map.mapDisplay.offsetY*scaleFactorY);
-		papplet.rect(x, y,  map.mapDisplay.offsetX*scaleFactorX, height);
-		papplet.rect(x+scaleFactorX*(map.mapDisplay.offsetX + map.mapDisplay.getWidth()), y,  width-scaleFactorX*(map.mapDisplay.offsetX + map.mapDisplay.getWidth()), height);	
-		papplet.rect(x, y+scaleFactorY*(map.mapDisplay.offsetY + map.mapDisplay.getHeight()),  width, height-scaleFactorY*(map.mapDisplay.offsetY + map.mapDisplay.getHeight()));
-		
-		//clip around component (sigh)
-		papplet.fill(130, 130, 130);
-		papplet.rect(0,0,x, papplet.height);
-		papplet.rect(0,0,papplet.width, y);
-		papplet.rect(0, y+height, papplet.width, papplet.height);
-		papplet.rect(x+width, 0, papplet.width, papplet.height);
-		
-		//box up component
+		// blank off the bits around the map!
+
+		// papplet.rect(x, y,map.mapDisplay.offsetX*scaleFactorX -x, height);
+		// papplet.rect(x, y,width,
+		// height-(map.mapDisplay.offsetY-map.mapDisplay.getHeight()));
+
+		if (TwitterFiltering.dataToUse == DataSet.VAST2011MC1) {
+			// manual clip around map
+			papplet.noStroke();
+			papplet.fill(225, 228, 233);
+			papplet.rect(x, y, width, map.mapDisplay.offsetY * scaleFactorY);
+			papplet.rect(x, y, map.mapDisplay.offsetX * scaleFactorX, height);
+			papplet.rect(
+					x
+							+ scaleFactorX
+							* (map.mapDisplay.offsetX + map.mapDisplay
+									.getWidth()),
+					y,
+					width
+							- scaleFactorX
+							* (map.mapDisplay.offsetX + map.mapDisplay
+									.getWidth()), height);
+			papplet.rect(
+					x,
+					y
+							+ scaleFactorY
+							* (map.mapDisplay.offsetY + map.mapDisplay
+									.getHeight()),
+					width,
+					height
+							- scaleFactorY
+							* (map.mapDisplay.offsetY + map.mapDisplay
+									.getHeight()));
+
+			// clip around component (sigh)
+			papplet.fill(130, 130, 130);
+			papplet.rect(0, 0, x, papplet.height);
+			papplet.rect(0, 0, papplet.width, y);
+			papplet.rect(0, y + height, papplet.width, papplet.height);
+			papplet.rect(x + width, 0, papplet.width, papplet.height);
+		}
+		// box up component
 		papplet.stroke(0);
 		papplet.noFill();
 		papplet.rect(x, y, width, height);
-
 
 		if (caption != null)
 			caption.draw(); // panel caption! in world coords!
