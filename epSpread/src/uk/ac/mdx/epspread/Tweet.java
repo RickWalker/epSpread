@@ -16,13 +16,13 @@ public class Tweet {
 	boolean b_selected;
 	int tweetSetColour;
 	Integrator alphaVal;
-	Region tweetRegion;
+	//Region tweetRegion;
 
 	Tweet() {
 
 		mText = "blah";
 		mLocation = new Location(0, 0);
-		tweetRegion = null;
+		//tweetRegion = null;
 		// mDate = 0.0f;
 		userId = -1;
 		b_selected = false;
@@ -103,7 +103,9 @@ public class Tweet {
 
 	public String toString() {
 		// returns nicely formatted tweet representation
-		return mDate + " " + mText + " " + tweetRegion.getName() + " at "
-				+ mLocation;
+		//return mDate + " " + mText + " " + tweetRegion.getName() + " at "
+			//	+ mLocation;
+		return mDate + " " + mText + " at "
+		+ mLocation;
 	}
 }

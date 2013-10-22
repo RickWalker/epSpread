@@ -1,0 +1,10 @@
+radar 2 15.6245
+weekly 2 15.6834
+loool 2 15.8761
+japan 2 15.9465
+reputation 2 16.0205
+recovering 2 16.0985
+inappropriate 2 16.0985
+homer 2 16.0985
+launched 2 16.1809
+airplane 2 16.1809

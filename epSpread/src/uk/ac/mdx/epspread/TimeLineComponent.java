@@ -67,6 +67,7 @@ public class TimeLineComponent {
 				(int) (smallVizSize.y)));
 	}
 
+	@SuppressWarnings("unused")
 	private void drawFrameRate(int xp, int yp){
 		//draw frame rate!
 		parent.textAlign(PConstants.LEFT, PConstants.TOP);
@@ -107,7 +108,7 @@ public class TimeLineComponent {
 			parent.textMode(PConstants.MODEL);
 			record = false;
 		}
-		drawFrameRate(0,25);
+		//drawFrameRate(0,25);
 		// controlP5.draw();
 	}
 

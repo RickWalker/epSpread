@@ -41,6 +41,7 @@ import org.gicentre.utils.text.*;
 import de.fhpotsdam.unfolding.UnfoldingMap;
 import de.fhpotsdam.unfolding.geo.Location;
 
+import de.fhpotsdam.unfolding.providers.StamenMapProvider;
 //import de.fhpotsdam.unfolding.providers.OpenStreetMap;
 //import de.fhpotsdam.unfolding.providers.StamenMapProvider;
 import de.fhpotsdam.unfolding.utils.MapUtils;
@@ -168,8 +169,8 @@ class TwitterFilteringComponent {
 		imgMap = papplet.loadImage("data/Vastopolis_Map_B&W_2.png");
 		imgPos = new PVector(20, 60);
 		map = new UnfoldingMap(papplet, imgPos.x, imgPos.y,
-				TwitterFiltering.imgX, TwitterFiltering.imgY);// , new
-																// StamenMapProvider.TonerLite());
+				TwitterFiltering.imgX, TwitterFiltering.imgY , new
+																 StamenMapProvider.TonerLite());
 		// TwitterFiltering.imgX * scaleFactorX, TwitterFiltering.imgY
 		// * scaleFactorY);
 		resizeUnfoldingMap(); // set initial transform
@@ -289,7 +290,7 @@ class TwitterFilteringComponent {
 	}
 
 	void setConstants() {
-		tweetBoxSize = 30 * fontScale;
+		tweetBoxSize = 10 * fontScale;
 		filterTextField_x = (int) (x + scaleFactorX
 				* (TwitterFiltering.imgX + imgPos.x + 50));
 		filterTextField_y = (int) (y + 60 * scaleFactorY);
@@ -821,6 +822,11 @@ class TwitterFilteringComponent {
 							ScreenPosition loc = map.getScreenPosition(a
 									.getLocation());
 							// offset and scale this position?
+							float scaledBoxSize = tweetBoxSize
+									* Math.max(1.0f / scaleFactorX,
+											1.0f / scaleFactorY);
+							// only draw if we're within the map box!
+							// also, tweak
 
 							// if there is a drag-select happening
 							if (b_draggingMouse) {
@@ -835,7 +841,7 @@ class TwitterFilteringComponent {
 								if (PApplet.dist(papplet.mouseX,
 										papplet.mouseY, x + (loc.x)
 												* scaleFactorX, y + (loc.y)
-												* scaleFactorY) < tweetBoxSize) {
+												* scaleFactorY) < scaledBoxSize) {
 									// only mouseover if we're over the map!
 									if (loc.x > imgPos.x
 											&& loc.x < (imgPos.x + TwitterFiltering.imgX)) {
@@ -861,11 +867,6 @@ class TwitterFilteringComponent {
 								 * loc.x) , y + (imgPos.y + loc.y -
 								 * tweetBoxSize) , tweetBoxSize, tweetBoxSize);
 								 */
-								float scaledBoxSize = tweetBoxSize
-										* Math.max(1.0f / scaleFactorX,
-												1.0f / scaleFactorY);
-								// only draw if we're within the map box!
-								// also, tweak
 								loc.x = loc.x - scaledBoxSize / 2;
 								loc.y = loc.y - scaledBoxSize / 2;
 								if (loc.x > imgPos.x

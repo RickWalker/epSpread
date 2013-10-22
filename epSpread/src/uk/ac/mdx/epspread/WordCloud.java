@@ -67,7 +67,7 @@ public class WordCloud {
 	//PGraphics variableBuffer;
 	//PImage varImg;
 	HashMap<Integer, PImage> imageCache = null;
-	HashMap<Integer, ArrayList<WordCount>> wordCounts = new HashMap<Integer, ArrayList<WordCount>>();
+	HashMap<Integer, ArrayList<WordCount>> wordCounts;
 	ArrayList<WordCount> oneDayCount;
 	int pStart, pStop;
 	ColourTable cTable;
@@ -82,6 +82,8 @@ public class WordCloud {
 		this.height = height;
 		this.parent = parent;
 		this.gp = gp;
+		
+		this.wordCounts = new HashMap<Integer, ArrayList<WordCount>>();
 
 		cTable = ColourTable.getPresetColourTable(ColourTable.YL_OR_RD);
 
@@ -294,13 +296,6 @@ public class WordCloud {
 		}
 
 		return false;
-	}
-
-	void setRange(int start) {
-		// just do just day for now!
-		PApplet.println("Asking for day " + start + " from cache!");
-		start = PApplet.constrain(start, 0, TwitterFiltering.TOTALDAYS);
-		// img = imageCache.get(start);
 	}
 
 	void setRange(int start, int stop) {

@@ -1,0 +1,7 @@
+"jag" 2 NA
+"alert" 1 NA
+"chang" 1 NA
+"crumpet" 1 NA
+"london" 1 3.45733721462917
+"name" 1 11.0119260663068
+"spoiler" 1 NA

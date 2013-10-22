@@ -1,0 +1,15 @@
+accident 183 15.681
+cherry 1 14.5655
+tmrw 1 14.8065
+personally 1 14.944
+liquor 1 14.944
+icecream 1 15.096
+gd 1 15.096
+wardrobe 1 15.266
+waffles 1 15.266
+slap 1 15.266
+sighs 1 15.266
+rocky 1 15.266
+laps 1 15.266
+cameron 1 15.266
+advent 1 15.266

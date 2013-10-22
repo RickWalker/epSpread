@@ -96,8 +96,8 @@ public class TwitterFiltering extends PApplet {
 	@Override
 	public void setup() {
 		//size(screenWidth, screenHeight);//, GLConstants.GLGRAPHICS);
-		size(screenWidth, 3*screenHeight/4, GLConstants.GLGRAPHICS);
-		//size(screenWidth, screenHeight, GLConstants.GLGRAPHICS);
+		//size(screenWidth, 3*screenHeight/4, GLConstants.GLGRAPHICS);
+		size(screenWidth, screenHeight-60, GLConstants.GLGRAPHICS);
 		frametimer = new FrameTimer();
 		//fs = new SoftFullScreen(this); //breaks with opengl!
 		// size( 1280, 720, OPENGL);

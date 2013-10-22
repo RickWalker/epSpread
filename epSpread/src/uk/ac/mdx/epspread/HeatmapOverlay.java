@@ -135,25 +135,6 @@ class HeatmapOverlay {
 		}
 	}
 
-	void updateTweetCounts(Tweet t, HashMap<Region, Integer> daytimeTweets,
-			HashMap<Region, Integer> nighttimeTweets, boolean nighttime) {
-		if (nighttime) {
-			if (nighttimeTweets.containsKey(t.tweetRegion)) {
-				nighttimeTweets.put(t.tweetRegion,
-						nighttimeTweets.get(t.tweetRegion) + 1);
-			} else {
-				nighttimeTweets.put(t.tweetRegion, 1);
-			}
-		} else {
-			if (daytimeTweets.containsKey(t.tweetRegion)) {
-				daytimeTweets.put(t.tweetRegion,
-						daytimeTweets.get(t.tweetRegion) + 1);
-			} else {
-				daytimeTweets.put(t.tweetRegion, 1);
-			}
-		}
-	}
-
 	void createWeightedSurface(int w, int ht, ArrayList<Tweet> tweets) {
 		// clear old surface
 		// gridres= 50;
@@ -175,7 +156,7 @@ class HeatmapOverlay {
 			xpos[i] = tweets.get(i).mLocation.x;
 
 			// float weighting=0.0;
-			if (tweets.get(i).tweetRegion != null) { // do we have a region? if
+			/*if (tweets.get(i).tweetRegion != null) { // do we have a region? if
 														// not, default weight
 				boolean nighttime;
 				if (tweets.get(i).mDate.getHourOfDay() < 8
@@ -199,9 +180,9 @@ class HeatmapOverlay {
 							nighttimeTweets, nighttime);
 					// println(tweets.get(i));
 				}
-			} else {
+			} else {*/
 				masses[i] = 1.0f / 50000000.0f; // very low!
-			}
+			//}
 		}
 		PApplet.println("Day time tweet counts: " + daytimeTweets);
 		PApplet.println("Night time tweet counts: " + nighttimeTweets);
