@@ -32,6 +32,7 @@ import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PMatrix3D;
 import processing.core.PVector;
+import uk.ac.mdx.epspread.TwitterFiltering.DataSet;
 
 import geomerative.*;
 import org.gicentre.utils.text.*;
@@ -166,11 +167,11 @@ class TwitterFilteringComponent {
 		// file
 
 		// Load the map
-		imgMap = papplet.loadImage("data/Vastopolis_Map_B&W_2.png");
+		imgMap = papplet.loadImage("data/VAST/Vastopolis_Map_B&W_2.png");
 		imgPos = new PVector(20, 60);
 		map = new UnfoldingMap(papplet, imgPos.x, imgPos.y,
-				TwitterFiltering.imgX, TwitterFiltering.imgY , new
-																 StamenMapProvider.TonerLite());
+				TwitterFiltering.imgX, TwitterFiltering.imgY,
+				new StamenMapProvider.TonerLite());
 		// TwitterFiltering.imgX * scaleFactorX, TwitterFiltering.imgY
 		// * scaleFactorY);
 		resizeUnfoldingMap(); // set initial transform
@@ -433,10 +434,10 @@ class TwitterFilteringComponent {
 			// re-add p5 components?
 			PApplet.println("New transition state!");
 			removeP5Components();
-			/*for (Annotation a : annotations) {
-				a.removeNote();
-				a.createNote();
-			}*/
+			/*
+			 * for (Annotation a : annotations) { a.removeNote();
+			 * a.createNote(); }
+			 */
 			createP5Components();
 			if (currentTransitionState == MovementState.SMALL) {
 				hideP5Components();
@@ -1139,11 +1140,11 @@ class TwitterFilteringComponent {
 	/*
 	 * -----------------------------------------------
 	 * 
-	 * Generates a tweet set based on filter term (* for RE)
+	 * Generates a tweet set based on filter term (* for RE) for the VAST 2011
+	 * set
 	 * 
 	 * -----------------------------------------------
 	 */
-	@Deprecated
 	void generateTweetSet(String keywords) {
 		// Get a fresh and exciting colour for this set
 		int setColour = papplet.colours.get(papplet.colourTracker);
@@ -1349,9 +1350,13 @@ class TwitterFilteringComponent {
 			String keywords = theControlEvent.getController().getStringValue();
 			if (!keywords.equals(previousKeyword)) {
 				if (tweetSetManager.getTweetSetListSize() < tweetSetManager
-						.getMaxTweetSets())
-					generateRealTweetSet(keywords);
-				else
+						.getMaxTweetSets()) {
+					if (TwitterFiltering.dataToUse == DataSet.OLYMPICTWITTER) {
+						generateRealTweetSet(keywords);
+					} else {
+						generateTweetSet(keywords);
+					}
+				} else
 					PApplet.println("**** Too many tweetSets! Please remove before requesting another ***");
 			}
 			previousKeyword = new String(keywords);

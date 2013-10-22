@@ -7,11 +7,17 @@ import processing.core.PApplet;
 //import processing.opengl.*;
 import processing.core.PFont;
 import processing.core.PImage;
+import processing.core.PVector;
 
 import controlP5.*;
 
 import geomerative.RG;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 //import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
@@ -22,6 +28,7 @@ import org.joda.time.Interval;
 //import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.sqlite.SQLiteJDBCLoader;
 
 import codeanticode.glgraphics.GLConstants;
 
@@ -42,25 +49,48 @@ public class TwitterFiltering extends PApplet {
 	ControlFont cFont = new ControlFont(font, 18);
 	PApplet mainApplet;
 
+	enum DataSet {
+		VAST2011MC1, OLYMPICTWITTER
+	};
+
+	static DataSet dataToUse;
+
 	public static final int imgX = 1304; // original image size for scaling
 	public static final int imgY = 663; // image size
-	public static final String databaseTableName = "tweets"; //or "micro2"
-	public static final String databaseMessageColumnName = "text"; //or "message" 
+	public static String databaseTableName = "tweets"; // or "micro2"
+	public static String databaseMessageColumnName = "text"; // or "message"
+	public static String path = "";
+	public static String databaseName = "tweetsdb.sqlite";
 
 	ArrayList<Integer> colours = new ArrayList<Integer>();
 	int colourTracker = 0; // tracks number of colours
 	public FrameTimer frametimer;
-	
+
 	boolean b_generateNetwork = false; // Generate network for selected tweets?
 
 	// ---- Interval Range -----
 
 	// Note : are intervals inclusive or exclusive?
-	public static final DateTime minDate = new DateTime(2012,07,16,0,0,0,0);//(new DateTime(2011, 4, 30, 0, 0, 0, 0)).minus(Period
-	//		.hours(1));
-	public static final DateTime maxDate = new DateTime(2012, 8, 18, 0,0,0,0);//(new DateTime(2011, 5, 20, 23, 59, 0, 0)).plus(Period
-	//		.hours(1));
-	public static final int TOTALDAYS = Days.daysIn(new Interval(minDate, maxDate)).getDays();
+	public static DateTime minDate = new DateTime(2012, 07, 16, 0, 0, 0, 0);// (new
+																			// DateTime(2011,
+																			// 4,
+																			// 30,
+																			// 0,
+																			// 0,
+																			// 0,
+																			// 0)).minus(Period
+	// .hours(1));
+	public static DateTime maxDate = new DateTime(2012, 8, 18, 0, 0, 0, 0);// (new
+																			// DateTime(2011,
+																			// 5,
+																			// 20,
+																			// 23,
+																			// 59,
+																			// 0,
+																			// 0)).plus(Period
+	// .hours(1));
+	public static final int TOTALDAYS = Days.daysIn(
+			new Interval(minDate, maxDate)).getDays();
 	DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 	DateTimeFormatter fmt2 = DateTimeFormat
 			.forPattern("MMM dd              HH:mm");
@@ -89,17 +119,81 @@ public class TwitterFiltering extends PApplet {
 	public static void main(String[] args) {
 		// Replace the contents of the string below with the fully specified
 		// name of this class.
-		PApplet.main(new String[] { "--present",  "uk.ac.mdx.epspread.TwitterFiltering" });
-		//PApplet.main(new String[] {"uk.ac.mdx.epspread.TwitterFiltering" });
+
+		println(args);
+		if (args.length == 0 || args[0].toUpperCase().equals("OLYMPICTWITTER")) {
+			dataToUse = DataSet.OLYMPICTWITTER;
+			databaseTableName = "tweets";
+			databaseMessageColumnName = "text";
+			databaseName = "tweetsdb.sqlite";
+			path = "data/";
+		} else if (args[0].equals("VAST2011MC1")) {
+			databaseTableName = "micro2"; // or "micro2"
+			databaseMessageColumnName = "message";
+			dataToUse = DataSet.VAST2011MC1;
+			databaseName = "VAST2011_MC1.sqlite";
+			path = "data/VAST/";
+			if (args.length > 1) {
+				// dataFilename = args[1];
+			} else {
+				// dataFilename = "vast2011mc1_29851.xml";
+			}
+		}
+		setMinMaxDates();
+		PApplet.main(new String[] { "--present",
+				"uk.ac.mdx.epspread.TwitterFiltering" });
+		// PApplet.main(new String[] {"uk.ac.mdx.epspread.TwitterFiltering" });
 	}
-	
+
+	public static void setMinMaxDates() {
+		// run a quick query to get min and max dates before we create the
+		// timeline!
+		System.out.println(String.format("running in %s mode",
+				SQLiteJDBCLoader.isNativeMode() ? "native" : "pure-java"));
+
+		String sqlQuery = "SELECT min(date), max(date) FROM "
+				+ databaseTableName;
+
+		// use new sqlite driver for query!
+		try {
+			Class.forName("org.sqlite.JDBC");
+		} catch (ClassNotFoundException e) {
+			PApplet.println("Argh can't find db class");
+		}
+		Connection connection = null;
+		try {
+			// create a database connection
+			connection = DriverManager.getConnection("jdbc:sqlite:" + path
+					+ databaseName);// "+sketchPath("sample.db");
+			Statement statement = connection.createStatement();
+			ResultSet rs = statement.executeQuery(sqlQuery);
+			while (rs.next()) {
+				println("Min date = " + rs.getDate("min(date)"));
+				println("Max date = " + rs.getDate("max(date)"));
+			}
+		} catch (SQLException e) {
+			// if the error message is "out of memory",
+			// it probably means no database file is found
+			System.err.println(e.getMessage());
+		} finally {
+			try {
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				// connection close failed.
+				System.err.println(e);
+			}
+		}
+
+	}
+
 	@Override
 	public void setup() {
-		//size(screenWidth, screenHeight);//, GLConstants.GLGRAPHICS);
-		//size(screenWidth, 3*screenHeight/4, GLConstants.GLGRAPHICS);
-		size(screenWidth, screenHeight-60, GLConstants.GLGRAPHICS);
+		// size(screenWidth, screenHeight);//, GLConstants.GLGRAPHICS);
+		// size(screenWidth, 3*screenHeight/4, GLConstants.GLGRAPHICS);
+		size(screenWidth, screenHeight - 60, GLConstants.GLGRAPHICS);
 		frametimer = new FrameTimer();
-		//fs = new SoftFullScreen(this); //breaks with opengl!
+		// fs = new SoftFullScreen(this); //breaks with opengl!
 		// size( 1280, 720, OPENGL);
 		// textMode(SHAPE);
 		smooth();
@@ -111,7 +205,7 @@ public class TwitterFiltering extends PApplet {
 		// db = new de.bezier.data.sql.SQLite( this, "VAST2011_MC1.sqlite" ); //
 		// open database file
 		storyboard = new TimeLineComponent(this, 0, 0, width, height);
-		//init Geomerative
+		// init Geomerative
 		RG.init(this);
 		// timePoints.add(new TwitterFilteringComponent(this, 0, height/2,
 		// width/2, height/2));
@@ -119,7 +213,7 @@ public class TwitterFiltering extends PApplet {
 		// width/2, height/2));
 		// timePoints.add(new TwitterFilteringComponent(this, width/2, 0,
 		// width/2, height/2));
-		//fs.enter();
+		// fs.enter();
 	}
 
 	@Override
@@ -143,13 +237,12 @@ public class TwitterFiltering extends PApplet {
 	@Override
 	public void draw() {
 		background(225, 228, 233);
-		/*textAlign(PConstants.LEFT, PConstants.TOP);
-		textFont(font);
-		textSize(18);
-		fill(0);
-		text(frametimer.getFrameRateAsText(),0,100);*/
-		//System.out.println(frametimer.getFrameRateAsText());
-		//frametimer.displayFrameRate();
+		/*
+		 * textAlign(PConstants.LEFT, PConstants.TOP); textFont(font);
+		 * textSize(18); fill(0); text(frametimer.getFrameRateAsText(),0,100);
+		 */
+		// System.out.println(frametimer.getFrameRateAsText());
+		// frametimer.displayFrameRate();
 		storyboard.draw();
 	}
 

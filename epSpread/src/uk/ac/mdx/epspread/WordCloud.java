@@ -88,7 +88,8 @@ public class WordCloud {
 		cTable = ColourTable.getPresetColourTable(ColourTable.YL_OR_RD);
 
 		// load total day counts
-		String[] tempC = gp.loadStrings(gp.dataPath("counts.txt"));
+		PApplet.println("Loading "+TwitterFiltering.path+"counts.txt");
+		String[] tempC = gp.loadStrings(TwitterFiltering.path+"counts.txt");
 		PApplet.println("Days count is " + tempC.length);
 		totalDayCounts = new Integer[tempC.length];
 		for (int i = 0; i < tempC.length; i++) {
@@ -112,7 +113,7 @@ public class WordCloud {
 
 			String lines[];
 			lines = gp
-					.loadStrings(gp.dataPath("5-" + PApplet.nf(k, 2) + ".txt"));
+					.loadStrings(TwitterFiltering.path+("5-" + PApplet.nf(k, 2) + ".txt"));
 			Set<String> wordsToIgnore = new HashSet<String>();
 			wordsToIgnore.add("olymp");
 			wordsToIgnore.add("2012");
@@ -272,19 +273,19 @@ public class WordCloud {
 		// println("days in range : " + daysInRange);
 
 		// check if we've done this before:
-		File f = new File(gp.dataPath(start + "-" + end + ".png"));
+		File f = new File(TwitterFiltering.path+(start + "-" + end + ".png"));
 		PApplet.println("looking for "
-				+ gp.dataPath(start + "-" + end + ".png"));
+				+ TwitterFiltering.path+(start + "-" + end + ".png"));
 		if (!f.exists() || !ENABLEIMAGECACHING) {
 			createNewCloud(buffer, start, end);
 			// take the buffer as an image
 			img = buffer.get(0, 0, buffer.width, buffer.height);
 			// write image to cache
 			if (ENABLEIMAGECACHING)
-				img.save(gp.dataPath(start + "-" + end + ".png"));
+				img.save(TwitterFiltering.path+(start + "-" + end + ".png"));
 
 		} else {
-			img = gp.loadImage(gp.dataPath(start + "-" + end + ".png"));
+			img = gp.loadImage(TwitterFiltering.path+(start + "-" + end + ".png"));
 		}
 	}
 
