@@ -73,6 +73,8 @@ class TwitterFilteringComponent {
 	MovementState previousTransitionState;
 	PImage thumbnail;
 	PGraphics thumbnailBuffer;
+
+	PGraphics mapImageBuffer;
 	// boolean doneResize = true;
 
 	ArrayList<TweetNetwork> tweetNetworks = new ArrayList<TweetNetwork>();
@@ -143,6 +145,7 @@ class TwitterFilteringComponent {
 		this.y = y;
 		this.width = width;
 		this.height = height;
+
 		// oldWidth = width;
 		// oldHeight = height;
 		xIntegrator = new Integrator(x);
@@ -169,6 +172,8 @@ class TwitterFilteringComponent {
 		// Load the map
 		imgMap = papplet.loadImage("data/VAST/VastopolisVectorMap.png");
 		imgPos = new PVector(20, 60);
+		mapImageBuffer = papplet.createGraphics(TwitterFiltering.imgX,
+				TwitterFiltering.imgY, PConstants.JAVA2D);
 		map = new UnfoldingMap(papplet, imgPos.x, imgPos.y,
 				TwitterFiltering.imgX, TwitterFiltering.imgY,
 				new StamenMapProvider.TonerLite());
@@ -527,12 +532,69 @@ class TwitterFilteringComponent {
 	}
 
 	void drawComponents() {// int x, int y, int width, int height) {
-		if (caption != null)
-			caption.draw(); // panel caption! in world coords!
+
 		// ---- Border + Map ----
 		papplet.stroke(0);
 		papplet.fill(225, 228, 233);
 		papplet.rect(x, y, width, height);
+
+		papplet.pushMatrix();
+		papplet.translate(x, y);
+		papplet.scale(scaleFactorX, scaleFactorY);
+
+		if (TwitterFiltering.dataToUse == DataSet.OLYMPICTWITTER) {
+			map.draw();
+		} else {
+			// papplet.g.clip();
+			ScreenPosition tlpt = map.getScreenPosition(new Location(42.3017f,
+					-93.5673f));
+			ScreenPosition brpt = map.getScreenPosition(new Location(42.1609f,
+					-93.1923f));
+			ScreenPosition maptlpt = map.getScreenPosition(map
+					.getTopLeftBorder());
+			ScreenPosition mapbrpt = map.getScreenPosition(map
+					.getBottomRightBorder());
+			papplet.fill(255);
+			papplet.noStroke();
+			papplet.rect(maptlpt.x, maptlpt.y, mapbrpt.x - maptlpt.x, mapbrpt.y
+					- maptlpt.y);
+			papplet.image(imgMap, tlpt.x, tlpt.y, brpt.x - tlpt.x, brpt.y
+					- tlpt.y);
+			
+			
+			// now get the image back and draw it!
+			// papplet.image(mapImageBuffer.get(), imgPos.x,imgPos.y);
+			// papplet.g.noClip();
+		}
+		papplet.popMatrix();
+		//blank off the bits around the map!
+		
+		//papplet.rect(x, y,map.mapDisplay.offsetX*scaleFactorX -x, height);
+		//papplet.rect(x, y,width, height-(map.mapDisplay.offsetY-map.mapDisplay.getHeight()));
+		
+		//manual clip around map
+		papplet.noStroke();
+		papplet.fill(225, 228, 233);
+		papplet.rect(x, y, width, map.mapDisplay.offsetY*scaleFactorY);
+		papplet.rect(x, y,  map.mapDisplay.offsetX*scaleFactorX, height);
+		papplet.rect(x+scaleFactorX*(map.mapDisplay.offsetX + map.mapDisplay.getWidth()), y,  width-scaleFactorX*(map.mapDisplay.offsetX + map.mapDisplay.getWidth()), height);	
+		papplet.rect(x, y+scaleFactorY*(map.mapDisplay.offsetY + map.mapDisplay.getHeight()),  width, height-scaleFactorY*(map.mapDisplay.offsetY + map.mapDisplay.getHeight()));
+		
+		//clip around component (sigh)
+		papplet.fill(130, 130, 130);
+		papplet.rect(0,0,x, papplet.height);
+		papplet.rect(0,0,papplet.width, y);
+		papplet.rect(0, y+height, papplet.width, papplet.height);
+		papplet.rect(x+width, 0, papplet.width, papplet.height);
+		
+		//box up component
+		papplet.stroke(0);
+		papplet.noFill();
+		papplet.rect(x, y, width, height);
+
+
+		if (caption != null)
+			caption.draw(); // panel caption! in world coords!
 		// draw date at the top!
 		drawDateRange();
 		// ---- Draw ControlP5 ----
@@ -543,41 +605,6 @@ class TwitterFilteringComponent {
 
 		papplet.strokeWeight(0);
 		papplet.fill(40);
-
-		papplet.pushMatrix();
-		papplet.translate(x, y);
-		papplet.scale(scaleFactorX, scaleFactorY);
-		
-		if (TwitterFiltering.dataToUse == DataSet.OLYMPICTWITTER) {
-			map.draw();	
-		} else {
-			//papplet.g.clip();
-			ScreenPosition tlpt = map.getScreenPosition(new Location(42.3017f,
-					-93.5673f));
-			ScreenPosition brpt = map.getScreenPosition(new Location(42.1609f,
-					-93.1923f));
-			// App.sketch.image(App.sketch.vast2011MC1Map, tlpt.x, tlpt.y,
-			// brpt.x
-			// - tlpt.x, brpt.y - tlpt.y);
-			PApplet.println("Coords are " + tlpt + " and " + brpt);
-			PApplet.print("Map coords are " + map.getTopLeftBorder() + map.getBottomRightBorder());
-			ScreenPosition maptlpt = map.getScreenPosition(map.getTopLeftBorder());
-			ScreenPosition mapbrpt = map.getScreenPosition(map.getBottomRightBorder());
-			papplet.fill(255);
-			papplet.rect(maptlpt.x, maptlpt.y,mapbrpt.x - maptlpt.x, mapbrpt.y - maptlpt.y);
-			papplet.image(imgMap, tlpt.x, tlpt.y, brpt.x
-                    - tlpt.x, brpt.y - tlpt.y);
-			//papplet.g.noClip();
-		}
-
-		/*
-		 * papplet.stroke(0); grandparent.fill(0, 100);
-		 * grandparent.rect(ref.offsetX, ref.offsetY, ref.getWidth(),
-		 * ref.getHeight()); ref.getInnerPG().fill(255,0,0,255);
-		 * ref.getInnerPG().rect(ref.offsetX, ref.offsetY, ref.getWidth(),
-		 * ref.getHeight());
-		 */
-		papplet.popMatrix();
 
 		// ---- Filter terms text ----
 		papplet.textSize(18 * fontScale);
