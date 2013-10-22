@@ -17,22 +17,22 @@
 	<classpathentry kind="lib" path="lib/glgraphics.jar"/>
 	<classpathentry kind="lib" path="lib/gluegen-rt.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/Users/Rick/Documents/workspace/epSpread/lib/libNative/macosx"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="epSpread/lib/libNative/macosx"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/jogl.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/Users/Rick/Documents/workspace/epSpread/lib/libNative/macosx"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="epSpread/lib/libNative/macosx"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/opengl.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/Users/Rick/Documents/workspace/epSpread/lib/libNative/macosx"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="epSpread/lib/libNative/macosx"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/guicomponents.jar"/>
-	<classpathentry kind="lib" path="lib/unfolding.0.9.beta.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/rick_unfolding_branch.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/Java SE 6"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
