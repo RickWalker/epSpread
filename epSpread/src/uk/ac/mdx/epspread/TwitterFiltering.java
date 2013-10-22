@@ -25,6 +25,7 @@ import org.gicentre.utils.FrameTimer;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.Interval;
+import org.joda.time.Period;
 //import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -60,6 +61,7 @@ public class TwitterFiltering extends PApplet {
 	public static String databaseTableName = "tweets"; // or "micro2"
 	public static String databaseMessageColumnName = "text"; // or "message"
 	public static String path = "";
+	public static String dateColumnName = "createdAt";
 	public static String databaseName = "tweetsdb.sqlite";
 
 	ArrayList<Integer> colours = new ArrayList<Integer>();
@@ -130,12 +132,14 @@ public class TwitterFiltering extends PApplet {
 			databaseMessageColumnName = "text";
 			databaseName = "tweetsdb.sqlite";
 			path = "data/";
+			dateColumnName = "createdAt";
 		} else if (args[0].equals("VAST2011MC1")) {
 			databaseTableName = "micro2"; // or "micro2"
 			databaseMessageColumnName = "message";
 			dataToUse = DataSet.VAST2011MC1;
 			databaseName = "VAST2011_MC1.sqlite";
 			path = "data/VAST/";
+			dateColumnName = "date";
 			if (args.length > 1) {
 				// dataFilename = args[1];
 			} else {
@@ -154,8 +158,8 @@ public class TwitterFiltering extends PApplet {
 		System.out.println(String.format("running in %s mode",
 				SQLiteJDBCLoader.isNativeMode() ? "native" : "pure-java"));
 
-		String sqlQuery = "SELECT min(date), max(date) FROM "
-				+ databaseTableName;
+		String sqlQuery = "SELECT min(" + dateColumnName + "), max("
+				+ dateColumnName + ") FROM " + databaseTableName;
 
 		println("Query is " + sqlQuery);
 
@@ -174,14 +178,15 @@ public class TwitterFiltering extends PApplet {
 			ResultSet rs = statement.executeQuery(sqlQuery);
 			while (rs.next()) {
 				if (dataToUse == DataSet.OLYMPICTWITTER) {
-					minDate = fmt.parseDateTime(rs.getString("min(date)"));
-					maxDate = fmt.parseDateTime(rs.getString("max(date)"));
+					minDate = fmt.parseDateTime(rs.getString("min(" + dateColumnName + ")")).minus(Period.hours(1));
+					maxDate = fmt.parseDateTime(rs.getString("max(" + dateColumnName + ")")).plus(Period.hours(1));
 				} else {
-					minDate = vastfmt.parseDateTime(rs.getString("min(date)"));
-					maxDate = vastfmt.parseDateTime(rs.getString("max(date)"));
+					minDate = vastfmt.parseDateTime(rs.getString("min(" + dateColumnName + ")")).minus(Period.hours(1));
+					maxDate = vastfmt.parseDateTime(rs.getString("max(" + dateColumnName + ")")).plus(Period.hours(1));
 				}
-				println("Min date = " + rs.getString("min(date)"));
-				println("Max date = " + rs.getString("max(date)"));
+				println("Min date = " + rs.getString("min(" + dateColumnName + ")"));
+				println("Max date = " + rs.getString("max(" + dateColumnName + ")"));
+				//System.exit(0);
 			}
 		} catch (SQLException e) {
 			// if the error message is "out of memory",
@@ -196,7 +201,7 @@ public class TwitterFiltering extends PApplet {
 				System.err.println(e);
 			}
 		}
-
+		//System.exit(0);
 	}
 
 	@Override
