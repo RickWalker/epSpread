@@ -47,7 +47,7 @@ public class TweetSet {
 		b_active = true;
 		regularExpression = re;
 
-		for (int i = 0; i < 21; i++)
+		for (int i = 0; i < tweetDayFrequencies.length; i++)
 			tweetDayFrequencies[i] = 0;
 	}
 

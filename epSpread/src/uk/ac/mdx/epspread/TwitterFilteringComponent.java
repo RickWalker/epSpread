@@ -167,7 +167,7 @@ class TwitterFilteringComponent {
 		// file
 
 		// Load the map
-		imgMap = papplet.loadImage("data/VAST/Vastopolis_Map_B&W_2.png");
+		imgMap = papplet.loadImage("data/VAST/VastopolisVectorMap.png");
 		imgPos = new PVector(20, 60);
 		map = new UnfoldingMap(papplet, imgPos.x, imgPos.y,
 				TwitterFiltering.imgX, TwitterFiltering.imgY,
@@ -182,8 +182,11 @@ class TwitterFilteringComponent {
 		PApplet.println("Graphics size for map is  "
 				+ map.mapDisplay.getInnerPG().width + " and "
 				+ map.mapDisplay.getInnerPG().height);
-
-		map.zoomAndPanTo(new Location(51.6f, -0.6f), 10);
+		if (TwitterFiltering.dataToUse == DataSet.OLYMPICTWITTER) {
+			map.zoomAndPanTo(new Location(51.6f, -0.6f), 10);
+		} else {
+			map.zoomAndPanTo(new Location(42.23172f, -93.378985f), 12);
+		}
 		MapUtils.createDefaultEventDispatcher(papplet, map);
 
 		// Load font
@@ -544,8 +547,28 @@ class TwitterFilteringComponent {
 		papplet.pushMatrix();
 		papplet.translate(x, y);
 		papplet.scale(scaleFactorX, scaleFactorY);
-
-		map.draw();
+		
+		if (TwitterFiltering.dataToUse == DataSet.OLYMPICTWITTER) {
+			map.draw();	
+		} else {
+			//papplet.g.clip();
+			ScreenPosition tlpt = map.getScreenPosition(new Location(42.3017f,
+					-93.5673f));
+			ScreenPosition brpt = map.getScreenPosition(new Location(42.1609f,
+					-93.1923f));
+			// App.sketch.image(App.sketch.vast2011MC1Map, tlpt.x, tlpt.y,
+			// brpt.x
+			// - tlpt.x, brpt.y - tlpt.y);
+			PApplet.println("Coords are " + tlpt + " and " + brpt);
+			PApplet.print("Map coords are " + map.getTopLeftBorder() + map.getBottomRightBorder());
+			ScreenPosition maptlpt = map.getScreenPosition(map.getTopLeftBorder());
+			ScreenPosition mapbrpt = map.getScreenPosition(map.getBottomRightBorder());
+			papplet.fill(255);
+			papplet.rect(maptlpt.x, maptlpt.y,mapbrpt.x - maptlpt.x, mapbrpt.y - maptlpt.y);
+			papplet.image(imgMap, tlpt.x, tlpt.y, brpt.x
+                    - tlpt.x, brpt.y - tlpt.y);
+			//papplet.g.noClip();
+		}
 
 		/*
 		 * papplet.stroke(0); grandparent.fill(0, 100);
@@ -983,7 +1006,8 @@ class TwitterFilteringComponent {
 
 		// Build the query
 		String query_part1 = "SELECT * FROM tweets WHERE createdAt > \""
-				+ papplet.fmt.print(TwitterFiltering.minDate) + "\" AND ";
+				+ TwitterFiltering.fmt.print(TwitterFiltering.minDate)
+				+ "\" AND ";
 		String query_part2 = "";
 
 		// append all the keywords to search for
@@ -1090,7 +1114,7 @@ class TwitterFilteringComponent {
 						tweetLocation = new Location(9999.0, 9999.0);
 						// System.err.println("No location!");
 					}
-					thisDate = papplet.fmt.parseDateTime(rs
+					thisDate = TwitterFiltering.fmt.parseDateTime(rs
 							.getString("createdAt"));
 
 					newTweetToAdd.setTweetSetColour(setColour);
@@ -1217,7 +1241,7 @@ class TwitterFilteringComponent {
 		try {
 			// create a database connection
 			connection = DriverManager.getConnection("jdbc:sqlite:"
-					+ papplet.sketchPath("VAST2011_MC1.sqlite"));// "+sketchPath("sample.db");
+					+ TwitterFiltering.path + ("VAST2011_MC1.sqlite"));// "+sketchPath("sample.db");
 			Statement statement = connection.createStatement();
 			ResultSet rs = statement.executeQuery(sqlQuery);
 			Tweet newTweetToAdd;
@@ -1247,10 +1271,13 @@ class TwitterFilteringComponent {
 					newTweetToAdd.setUserId(rs.getInt("ID"));
 
 					// get and set the location of this tweet
-					PVector tweetLocation = new PVector(0, 0);
-					tweetLocation.x = rs.getFloat("lon");
-					tweetLocation.y = rs.getFloat("lat");
-					thisDate = papplet.fmt.parseDateTime(rs.getString("date"));
+					// PVector tweetLocation = new PVector(0, 0);
+					// tweetLocation.x = rs.getFloat("lon");
+					// tweetLocation.y = rs.getFloat("lat");
+					newTweetToAdd.setLocation(new Location(rs.getFloat("lat"),
+							-rs.getFloat("lon")));
+					thisDate = TwitterFiltering.vastfmt.parseDateTime(rs
+							.getString("date"));
 
 					newTweetToAdd.setTweetSetColour(setColour);
 					newTweetToAdd.setDate(thisDate);

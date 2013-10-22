@@ -91,7 +91,10 @@ public class TwitterFiltering extends PApplet {
 	// .hours(1));
 	public static final int TOTALDAYS = Days.daysIn(
 			new Interval(minDate, maxDate)).getDays();
-	DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+	static DateTimeFormatter fmt = DateTimeFormat
+			.forPattern("yyyy-MM-dd HH:mm:ss");
+	static DateTimeFormatter vastfmt = DateTimeFormat
+			.forPattern("yyyy-MM-dd HH:mm");
 	DateTimeFormatter fmt2 = DateTimeFormat
 			.forPattern("MMM dd              HH:mm");
 	Interval fullTimeInterval = new Interval(minDate, maxDate);
@@ -154,6 +157,8 @@ public class TwitterFiltering extends PApplet {
 		String sqlQuery = "SELECT min(date), max(date) FROM "
 				+ databaseTableName;
 
+		println("Query is " + sqlQuery);
+
 		// use new sqlite driver for query!
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -168,8 +173,15 @@ public class TwitterFiltering extends PApplet {
 			Statement statement = connection.createStatement();
 			ResultSet rs = statement.executeQuery(sqlQuery);
 			while (rs.next()) {
-				println("Min date = " + rs.getDate("min(date)"));
-				println("Max date = " + rs.getDate("max(date)"));
+				if (dataToUse == DataSet.OLYMPICTWITTER) {
+					minDate = fmt.parseDateTime(rs.getString("min(date)"));
+					maxDate = fmt.parseDateTime(rs.getString("max(date)"));
+				} else {
+					minDate = vastfmt.parseDateTime(rs.getString("min(date)"));
+					maxDate = vastfmt.parseDateTime(rs.getString("max(date)"));
+				}
+				println("Min date = " + rs.getString("min(date)"));
+				println("Max date = " + rs.getString("max(date)"));
 			}
 		} catch (SQLException e) {
 			// if the error message is "out of memory",
