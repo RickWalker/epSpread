@@ -37,6 +37,8 @@ import uk.ac.mdx.epspread.TwitterFiltering.DataSet;
 import geomerative.*;
 import org.gicentre.utils.text.*;
 
+import codeanticode.glgraphics.GLGraphicsOffScreen;
+
 //import codeanticode.glgraphics.GLConstants;
 
 import de.fhpotsdam.unfolding.UnfoldingMap;
@@ -74,7 +76,7 @@ class TwitterFilteringComponent {
 	PImage thumbnail;
 	PGraphics thumbnailBuffer;
 
-	PGraphics mapImageBuffer;
+	GLGraphicsOffScreen mapImageBuffer;
 	// boolean doneResize = true;
 
 	ArrayList<TweetNetwork> tweetNetworks = new ArrayList<TweetNetwork>();
@@ -172,8 +174,8 @@ class TwitterFilteringComponent {
 		// Load the map
 		imgMap = papplet.loadImage("data/VAST/VastopolisVectorMap.png");
 		imgPos = new PVector(20, 60);
-		mapImageBuffer = papplet.createGraphics(TwitterFiltering.imgX,
-				TwitterFiltering.imgY, PConstants.JAVA2D);
+		mapImageBuffer = new GLGraphicsOffScreen(papplet, TwitterFiltering.imgX,
+				TwitterFiltering.imgY);
 		map = new UnfoldingMap(papplet, imgPos.x, imgPos.y,
 				TwitterFiltering.imgX, TwitterFiltering.imgY,
 				new StamenMapProvider.TonerLite());
@@ -554,12 +556,15 @@ class TwitterFilteringComponent {
 					.getTopLeftBorder());
 			ScreenPosition mapbrpt = map.getScreenPosition(map
 					.getBottomRightBorder());
-			papplet.fill(255);
-			papplet.noStroke();
-			papplet.rect(maptlpt.x, maptlpt.y, mapbrpt.x - maptlpt.x, mapbrpt.y
+			mapImageBuffer.beginDraw();
+			mapImageBuffer.background(255);
+			mapImageBuffer.fill(255,0,0);
+			mapImageBuffer.noStroke();
+			mapImageBuffer.rect(maptlpt.x, maptlpt.y, mapbrpt.x - maptlpt.x, mapbrpt.y
 					- maptlpt.y);
-			papplet.image(imgMap, tlpt.x, tlpt.y, brpt.x - tlpt.x, brpt.y
-					- tlpt.y);
+			mapImageBuffer.image(imgMap, tlpt.x, tlpt.y, brpt.x - tlpt.x, brpt.y- tlpt.y);
+			mapImageBuffer.endDraw();
+			papplet.image(mapImageBuffer.getTexture(), map.mapDisplay.offsetX * scaleFactorX, map.mapDisplay.offsetY * scaleFactorY);
 
 			// now get the image back and draw it!
 			// papplet.image(mapImageBuffer.get(), imgPos.x,imgPos.y);
@@ -572,41 +577,24 @@ class TwitterFilteringComponent {
 		// papplet.rect(x, y,width,
 		// height-(map.mapDisplay.offsetY-map.mapDisplay.getHeight()));
 
-		if (TwitterFiltering.dataToUse == DataSet.VAST2011MC1) {
-			// manual clip around map
-			papplet.noStroke();
-			papplet.fill(225, 228, 233);
-			papplet.rect(x, y, width, map.mapDisplay.offsetY * scaleFactorY);
-			papplet.rect(x, y, map.mapDisplay.offsetX * scaleFactorX, height);
-			papplet.rect(
-					x
-							+ scaleFactorX
-							* (map.mapDisplay.offsetX + map.mapDisplay
-									.getWidth()),
-					y,
-					width
-							- scaleFactorX
-							* (map.mapDisplay.offsetX + map.mapDisplay
-									.getWidth()), height);
-			papplet.rect(
-					x,
-					y
-							+ scaleFactorY
-							* (map.mapDisplay.offsetY + map.mapDisplay
-									.getHeight()),
-					width,
-					height
-							- scaleFactorY
-							* (map.mapDisplay.offsetY + map.mapDisplay
-									.getHeight()));
-
-			// clip around component (sigh)
-			papplet.fill(130, 130, 130);
-			papplet.rect(0, 0, x, papplet.height);
-			papplet.rect(0, 0, papplet.width, y);
-			papplet.rect(0, y + height, papplet.width, papplet.height);
-			papplet.rect(x + width, 0, papplet.width, papplet.height);
-		}
+		/*
+		 * if (TwitterFiltering.dataToUse == DataSet.VAST2011MC1) { // manual
+		 * clip around map papplet.noStroke(); papplet.fill(225, 228, 233);
+		 * papplet.rect(x, y, width, map.mapDisplay.offsetY * scaleFactorY);
+		 * papplet.rect(x, y, map.mapDisplay.offsetX * scaleFactorX, height);
+		 * papplet.rect( x + scaleFactorX (map.mapDisplay.offsetX +
+		 * map.mapDisplay .getWidth()), y, width - scaleFactorX
+		 * (map.mapDisplay.offsetX + map.mapDisplay .getWidth()), height);
+		 * papplet.rect( x, y + scaleFactorY (map.mapDisplay.offsetY +
+		 * map.mapDisplay .getHeight()), width, height - scaleFactorY
+		 * (map.mapDisplay.offsetY + map.mapDisplay .getHeight()));
+		 * 
+		 * // clip around component (sigh) papplet.fill(130, 130, 130);
+		 * papplet.rect(0, 0, x, papplet.height); papplet.rect(0, 0,
+		 * papplet.width, y); papplet.rect(0, y + height, papplet.width,
+		 * papplet.height); papplet.rect(x + width, 0, papplet.width,
+		 * papplet.height); }
+		 */
 		// box up component
 		papplet.stroke(0);
 		papplet.noFill();
